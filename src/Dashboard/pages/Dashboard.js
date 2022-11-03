@@ -8,24 +8,40 @@ function Dashboard() {
             <div className='col-span-1 md:col-span-2 lg:col-span-3 row-span-1 bg-orange-200 '>
                 Header
             </div>
-            <div className='col-span-1 md:col-span-2 lg:col-span-3 row-span-9 bg-orange-200' >
-                <table>
-                <tr>
-                    <th>Company</th>
-                    <th>Contact</th>
-                    <th>Country</th>
-                </tr>
-                <tr>
-                    <td>Alfreds Futterkiste</td>
-                    <td>Maria Anders</td>
-                    <td>Germany</td>
-                </tr>
-                <tr>
-                    <td>Centro comercial Moctezuma</td>
-                    <td>Francisco Chang</td>
-                    <td>Mexico</td>
-                </tr>
+            <div className='col-span-1 md:col-span-2 lg:col-span-2 row-span-9 bg-orange-300 p-2 rounded-lg' >
+                <table className='table-fixed w-full text-sm md:text-base'>
+                    <thead className='bg-green-100'>
+                        <tr className=''>
+                            <th>Job Number#</th>
+                            <th>Tests</th>                            
+                            <th>Client</th>
+                            <th>Status</th>
+                            <th>Submission Date</th>
+                            <th>Complete Date</th>
+
+                        </tr>
+                    </thead>
+                    <tbody className='text-xs md:text-base text-center'>
+                        <tr>
+                            <td>Alfreds Futterkiste</td>
+                            <td>Alfreds Futterkiste</td>
+                            <td>Alfreds Futterkiste</td>
+                            <td>Maria Anders</td>
+                            <td>Germany</td>
+                        </tr>
+                        <tr>
+                            <td>Centro comercial Moctezuma</td>
+                            <td>Francisco Chang</td>
+                            <td>Mexico</td>
+                            <td>Alfreds Futterkiste</td>
+                            <td>Alfreds Futterkiste</td>
+                        </tr>                    
+                    </tbody>
                 </table> 
+            </div>
+
+            <div className='bg-orange-200 col-span-1 md:col-span-2 lg:col-span-1 row-span-9 rounded-lg p-2'>
+                <p>Overview</p>
             </div>
         </div>
   )

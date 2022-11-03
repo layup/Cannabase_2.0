@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import Dashboard from './Dashboard/pages/Dashboard';
+import Dashboard from './dashboard/pages/Dashboard';
 import Sidebar from './shared/components/Sidebar';
 
 
@@ -10,7 +10,6 @@ function App() {
       <Sidebar />    
       <Dashboard /> 
     </div>
-
   )
 }
 
