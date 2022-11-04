@@ -1,8 +1,8 @@
 {
-  "name": "electron-tutorial",
-  "version": "0.1.0",
+  "name": "cannabase",
+  "version": "2.0.0",
   "private": true,
-  "prductName": "Test",
+  "prductName": "cannbase",
   "main": "public/electron.js",
   "homepage": "./",
   "dependencies": {

@@ -7,22 +7,22 @@ import WorkIcon from '@mui/icons-material/Work';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import StorageIcon from '@mui/icons-material/Storage';
 
+
+import logo from '../../../assets/logo.png'
+import NewButton from './NewButton';
+
 function Sidebar() {
     return (
         <div className='fixed top-0 left-0 w-full h-16 md:w-16 lg:w-56 md:h-full'>
             <div className='bg-white h-full lg:py-4 flex flex-row justify-around md:justify-start md:flex-col items-center md:items-stretch drop-shadow-md'>
                 <div className='hidden lg:flex justify-center pt-2 pb-10 items-center'>
-                    <StorageIcon className='text-emerald-700 '/>
+                    <img src={logo} className="w-12 h-12" alt="logo" /> 
                     <p className=' text-2xl text-center font-medium text-emerald-700' >Cannabase</p>
                 
                 </div>
-                <div className='md:pt-10 py-2 lg:py-4 grid place-items-center '>
-                    <button className='bg-emerald-700 text-white rounded-md p-1 md:p-2 lg:px-8 bg-emeral-700' >
-                        <div className='flex '>
-                            <p className='pr-8 hidden lg:block'>New Job</p>
-                            <AddIcon />
-                        </div>
-                    </button>
+                <div className='md:pt-10 py-2 lg:py-4 grid place-items-center m-2 gap-2 '>
+                    <NewButton text="New Job"/> 
+                    <NewButton text="New Client"/> 
                 </div>
 
                 <div className='flex md:flex-col justify-between '>

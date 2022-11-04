@@ -1,7 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import Dashboard from './dashboard/pages/Dashboard';
-import Sidebar from './shared/components/Sidebar';
+import Sidebar from './shared/components/Navigation/Sidebar';
 
 
 function App() {
