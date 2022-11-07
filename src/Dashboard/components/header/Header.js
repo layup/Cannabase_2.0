@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import Search from './Search'
 
 import DownloadButton from './DownloadButton'
 
 function Header() {
+
+    
+    //let names = window.parseInt.getNames(); 
+
     return (
         <div className='w-full h-full '>
             <div className='flex justify-between items-center '> 
@@ -19,6 +23,7 @@ function Header() {
                 <Search />
                 <div>
                     <p className='p-2'>Filters</p>
+
                 </div>                
 
             </div>

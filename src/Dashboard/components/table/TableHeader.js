@@ -18,9 +18,19 @@ const TableHeader = () => {
                 <th className='rounded-tl-lg w-1/12 '>Job Number</th>
                 <th className='w-3/12'>Tests</th>                            
                 <th className='w-1/12'>Client</th>
-                <th className='w-1/12'>Status</th>
-                <th className='w-1/12'>Submission Date</th>
-                <th className='w-1/12'>Complete Date</th>
+                <th className='w-1/12'>
+                    Status
+                    <UnfoldMoreIcon/>  
+                </th>
+                <th className='w-1/12'>
+                    Submission Date
+                    <UnfoldMoreIcon/>  
+                </th>
+                
+                <th className='w-1/12'>
+                    Complete Date
+                    <UnfoldMoreIcon/>  
+                </th>
             </tr>
         </thead>
     )
