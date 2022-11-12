@@ -1,5 +1,5 @@
 import React from 'react'
-
+import {Link} from 'react-router-dom'
 import SettingsIcon from '@mui/icons-material/Settings';
 import AddIcon from '@mui/icons-material/Add';
 import WindowIcon from '@mui/icons-material/Window';
@@ -26,20 +26,20 @@ function Sidebar() {
                 </div>
 
                 <div className='flex md:flex-col justify-between '>
-                    <div className=' flex p-4 text-emerald-600 md:bg-gray-200 pl-4 md:border-r-4 border-emerald-600'>
+                    <Link className=' flex p-4 text-emerald-600 md:bg-gray-200 pl-4 md:border-r-4 border-emerald-600' to="/">
                         <WindowIcon className=''/>
                         <p className='px-3 hidden lg:block'>Dashboard</p>
-                    </div>
+                    </Link>
 
                     <div className=' flex p-4 text-zinc-600'>
                         <WorkIcon className=''/>
                         <p className='px-3 hidden lg:block'>Clients</p>
                     </div>
 
-                    <div className=' flex p-4 text-zinc-600'>
+                    <Link className=' flex p-4 text-zinc-600' to="/jobs">
                         <WorkIcon className=''/>
                         <p className='px-3 hidden lg:block'>Jobs</p>
-                    </div>
+                    </Link>
 
                     <div className=' flex p-4 text-zinc-600'>
                         <ArchiveIcon className=''/>
@@ -52,6 +52,10 @@ function Sidebar() {
                     </div>
                     
                 </div>
+
+
+
+
                 
             </div>
         </div>

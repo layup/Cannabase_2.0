@@ -11,13 +11,12 @@ const TableHeader = () => {
     const [SubmissionDateSort, SetSubmissionDateSort] = useState(0)
     const [CompleteDateSort, SetCompleteDateSort] = useState(0)
 
-
     return (
-        <thead className='bg-emerald-700'>
-            <tr className='text-white [&>th]:font-normal [&>th]:p-2'>
+        <thead className='bg-emerald-700 sticky top-0'>
+            <tr className='text-white [&>th]:font-normal [&>th]:p-2 '>
                 <th className='rounded-tl-lg w-1/12 '>Job Number</th>
                 <th className='w-3/12'>Tests</th>                            
-                <th className='w-1/12'>Client</th>
+                <th className='w-2/12'>Client</th>
                 <th className='w-1/12'>
                     Status
                     <UnfoldMoreIcon/>  
@@ -27,7 +26,7 @@ const TableHeader = () => {
                     <UnfoldMoreIcon/>  
                 </th>
                 
-                <th className='w-1/12'>
+                <th className='rounded-tr-lg w-1/12'>
                     Complete Date
                     <UnfoldMoreIcon/>  
                 </th>

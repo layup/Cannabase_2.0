@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from 'react'
 
+import {Link} from 'react-router-dom';
+
+import { testToString } from '../../../utils/testToString'
 
 const TableContent = (props) => {
-
-
     return (
-        <tr className='border-b-1 border-zinc-200 [&>td]:p-2 hover:bg-gray-100  '>
+        <tr className='border-b-1 border-zinc-200 [&>td]:p-2 hover:bg-yellow-100 overflow-x-auto ' key={props.key}>
             <td>
-                <a href='/' className='text-blue-500 hover:underline'>{props.jobNum}</a>
+                <Link to={`/jobs/${props.jobNum}`} className='text-blue-500 hover:underline'>{props.jobNum}</Link>
             </td>
             <td className='text-left'>
-                {props.test}
+                {testToString(props.test)}
             </td>
-            <td>
+            <td className='text-left'>
                 {props.company}
             </td>
             <td className='flex justify-center items-center '>
                 {props.status === 0 && 
-                    <div className='w-32 px-3  bg-red-200 rounded-lg '>
-                        <p className=' rounded-lg text-red-800 font-medium uppercase text-sm'>Incomplete</p>
+                    <div className='w-32 md:px-3  bg-red-200 rounded-lg '>
+                        <p className=' rounded-lg text-red-800 font-medium uppercase text-xs md:text-sm'>Incomplete</p>
                     </div>
-
                 }
                 {props.status === 1 && 
                     <div className='w-32 px-3  bg-emerald-200 rounded-lg '>
@@ -34,10 +34,10 @@ const TableContent = (props) => {
                 }
             </td>
             <td>
-                {props.subDate}
+                {props.receive_date}
             </td>
             <td>
-                {props.comDate ? (props.comDate): ("N/A") }
+                {props.complete_date ? (props.complete_date): ("N/A") }
             </td>
         </tr>
     )

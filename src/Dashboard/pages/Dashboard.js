@@ -8,8 +8,37 @@ async function test(database) {
     console.log('test', database())
 }
 
+const sendMessage = () => {
+    let customMessage = "Hello World "
+    window.api.sendMessage(customMessage)
+    customMessage = ""
+}
+
+const tester =  async () => {    
+    //let message = await window.api.getNoComplete
+    let test =  window.api.test(); 
+    console.log(await test);
+}
+
+const openFile = async (callpack) => {
+    let path = await window.api.openFile()
+    console.log(path)
+    callpack(path)
+}
+
+const loadingTest = async () => {
+    
+    let querry = []
+
+    let temp = await window.api.getNotComplete().then((value) => {
+        querry.push(value)
+    }); 
+    console.log('attemping to print')
+    console.log(querry)
+}
 function Dashboard() {
 
+    //const [filePath, setFilePath] = useState()
 
     return (
         <div 
@@ -19,11 +48,10 @@ function Dashboard() {
                 <Header /> 
             </div>
 
-            <div className=' bg-white rounded-lg h-5/6 mt-2 overflow-x-auto overflow-y-auto' >
+            <div className=' bg-white rounded-lg h-5/6 mt-2 overflow-auto ' >
                 <MainTable />
             </div>
 
-           {window.api.getNoComplete}
 
         </div>
   )
