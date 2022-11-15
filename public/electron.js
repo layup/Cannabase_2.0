@@ -3,14 +3,12 @@ const path = require('path');
 const url = require('url');
 const isDev = require('electron-is-dev');
 
-
-
-
 function createWindow() {   
+
     const win = new BrowserWindow({        
         width: 800,        
         height: 800,        
-        autoHideMenuBar: true,
+        //autoHideMenuBar: true,
         webPreferences: {            
             nodeIntegration: true,
             contextIsolation: true, 
@@ -19,7 +17,6 @@ function createWindow() {
     });
 
 
-    
     win.maximize();    
 
     // and load the index.html of the app.

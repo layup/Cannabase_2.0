@@ -3,10 +3,7 @@ import React, {useEffect, useState} from 'react'
 import Header from '../components/header/Header'
 import MainTable from '../components/table/MainTable'
 
-async function test(database) {
-    console.log("running test")
-    console.log('test', database())
-}
+
 
 const sendMessage = () => {
     let customMessage = "Hello World "

@@ -12,6 +12,10 @@ const getJobInfo = async (jobNum) => {
     return CannabaseMgr.getJobInfo(jobNum); 
 }
 
+const getAllClients = async () => {
+    return CannabaseMgr.getAllClients();
+}
+
 //works 
 const test = () => {
     return ipcRenderer.invoke('hello-world').then((result) => {
@@ -35,6 +39,7 @@ const onCount = (callback) => {
 contextBridge.exposeInMainWorld("api", {
     getNotComplete: getNotComplete, 
     getJobInfo: getJobInfo, 
+    getAllClients: getAllClients,
     sendMessage: sendMessage,
     onCount: onCount,
     test: test,

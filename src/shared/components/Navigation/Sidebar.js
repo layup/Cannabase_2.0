@@ -31,15 +31,20 @@ function Sidebar() {
                         <p className='px-3 hidden lg:block'>Dashboard</p>
                     </Link>
 
-                    <div className=' flex p-4 text-zinc-600'>
+                    <Link className=' flex p-4 text-zinc-600' to="/clients">
                         <WorkIcon className=''/>
                         <p className='px-3 hidden lg:block'>Clients</p>
-                    </div>
+                    </Link>
 
                     <Link className=' flex p-4 text-zinc-600' to="/jobs">
                         <WorkIcon className=''/>
                         <p className='px-3 hidden lg:block'>Jobs</p>
                     </Link>
+
+                    <div className=' flex p-4 text-zinc-600' to="/jobs">
+                        <WorkIcon className=''/>
+                        <p className='px-3 hidden lg:block'>Reports</p>
+                    </div>
 
                     <div className=' flex p-4 text-zinc-600'>
                         <ArchiveIcon className=''/>
