@@ -1,6 +1,6 @@
 
 
-export function testToString(test_values){
+function testToString(test_values){
 
     //make customizeable with JSON so users can change it 
     //have a database change option 
@@ -30,4 +30,27 @@ export function testToString(test_values){
     return tests_results.join(", ")
 }
 
+function matchString(test_value) {
+    let tests = {
+        "2": "Metal", 
+        "3": "Potency", 
+        "33": "dPotency",
+        "4": "Toxins",
+        "5": "Pests",
+        "7": "Terps",
+        "8": "Solv",
+        "9": "Oth",
+        "1": "M.A",
+        "6": "M.B",
+        "10": "F.ID",
+        "11": "Mushrooms"
+    } 
+    return tests[test_value]
+
+}
+
+export {
+    testToString,
+    matchString
+}
 

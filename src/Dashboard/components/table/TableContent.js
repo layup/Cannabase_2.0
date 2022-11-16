@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 
 import {Link} from 'react-router-dom';
 
-import { testToString } from '../../../utils/testToString'
+import { testToString } from '../../../utils/utils'
 
 const TableContent = (props) => {
     return (

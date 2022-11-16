@@ -1,55 +1,101 @@
 import React, { useEffect, useState } from 'react'
 import {useParams} from 'react-router-dom'
 
+import JobItem from '../components/JobItem'
 import test_image from '../../assets/test_image.jpg'
+import JobTests from '../components/JobTests'
+import SearchIcon from '@mui/icons-material/Search';
 
 const Job = () => {
 
     let id = useParams()
 
-    const [loading, setLoading] = useState(true)
-    const [jobData, setJobData] = useState(); 
+    //const [loading, setLoading] = useState(true)
+    const [jobStatus, setJobStatus] = useState(); 
+    const [jobInfo, setJobInfo] = useState(); 
+    const [testInfo, setTestInfo] = useState(); 
 
     useEffect(() => {
-        async function getJobData(){
+        async function getJobInfoData(){
             await window.api.getJobInfo(id.jobNum).then((value) => {
-                setJobData(value);
-                console.log(jobData)
-            }); 
+                setJobInfo(value);
 
+            }); 
         }
-        getJobData()
+        async function getTestData(){
+            await window.api.getTests(id.jobNum).then((value) =>{
+                setTestInfo(value)
+                
+            })
+        }
+
+        getJobInfoData()
+        getTestData();
     }, [])
 
 
     return (
         <div 
-            className='bg-zinc-300 flex flex-col h-screen max-w-screen p-4 lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
+            className='bg-white flex flex-col h-screen max-w-screen lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
         >     
-            {<div className='h-1/6 bg-red-100 flex justify-between items-center'>
-                <div className='bg-red-200'>
-                    <h1>Job Id: {id.jobNum} </h1>
-                    <p>Recieve Date: {jobData && jobData.receive_date}</p>
-                    <p>Complete Date: N/A</p>
-                    <p>Client: {jobData && jobData.client_name} </p>
-                    <p>Status: 0</p>
-                </div>
+            {<div className=' bg-red-100 flex flex-col'>
 
-                <div className='mx-2 bg-white'>
-                    <button className='border-black border-1 p-2 rounded-md'>Generate Word</button>
-                </div>
+                    <div className='bg-emerald-700 p-4 flex'>
+                        <div className='p-2 bg-emerald-800'>
+                            <SearchIcon className='text-white bg-emerald-800'/>
+                        </div>
+
+                        <input 
+                            type='search' 
+                            placeholder='Search Job Number' 
+                            className='w-full p-1 bg-emerald-800 text-white border-transparent focus:border-transparent focus:ring-0 outline-none'
+                        />
+                    </div>
+                    
+
+                    <div className='flex bg-zinc-100 p-2 justify-between items-center'>
+                        <div className='flex space-x-2'>
+                            <div className='p-2'>
+                                <p><span className=''>Job ID:</span> W{id.jobNum} </p>
+                                <p className=''>Client: {jobInfo && <span className='text-blue-500'>{jobInfo.client_name}</span>} </p>
+                            </div>
+
+                            <div className='p-2'>
+                                <p>Recieve Date: {jobInfo && jobInfo.receive_date}</p>
+                                <p>Complete Date: N/A</p>
+                            </div> 
+                            
+                            <p className='p-2'>Status: Incomplete</p>         
+                        
+                        </div>
+                        
+                        <div className='space-x-2 p-2'>
+                            <button className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-emerald-800 hover:text-white'>Complete Job</button>
+                            <button className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white uppercase text-sm hover:bg-emerald-800 hover:text-white'>Delete Job</button>
+                        </div>
     
+                    </div>
+                
+                   
+
+
+
             </div>} 
 
-            <div className='h-5/6 grid grid-rows-3 grid-cols-3 gap-2'>
-                <div className='row-span-2 col-span-2 bg-orange-200'>
-                    Notes
-
+            <div className='h-5/6 grid grid-rows-3 grid-cols-6 gap-1 p-2'>
+                <div className='row-span-2 col-span-4 p-2 border-b-2'>
+                    <h2 className='py-2'>Comments</h2>
+                    <textarea 
+                        className='p-2 w-full h-5/6 resize-none bg-zinc-100 border-2 '
+                        placeholder='Enter Comments' 
+                    />
                     
                 </div>
-                <div className='row-span-3 col-span-1 bg-orange-100 flex flex-col items-center overflow-y-auto'>
-                    <h1 className='images bg-red-200 w-full text-center'>Images</h1> 
-                    <div className='bg-white my-2 '>
+                <div className='row-span-3 col-span-2 bg-zinc-100 flex flex-col items-center overflow-y-auto '>
+                    <h1 className='images w-full text-center sticky top-0 p-3 bg-white'>
+                        Images
+                    </h1> 
+                    <div className='bg-white my-2'>
                         <img src={test_image} classname='' alt='weed'/>
                        <p className='text-center py-2'>W12913</p>
                     </div>
@@ -63,8 +109,25 @@ const Job = () => {
                     </div>
                     
                 </div>
-                <div className=' row-span-1 col-span-2 bg-orange-200 '>
-                    Results 
+                <div className='row-span-1 col-span-2 border-2 overflow-y-auto'>
+                    {testInfo && 
+                        <JobTests
+                            testInfo={testInfo}
+                            jobId={id.jobNum}
+                        />
+                    }
+                </div>
+                <div className='row-span-1 col-span-2 grid space-y-2 text-center'>
+                    <div className='[&>*]:p-1 border-1' >
+                        <h1 className='text-lg bg-emerald-700 text-white'>Bench Sheets & COCs</h1>
+                        <p>No scanned bench sheets found.</p>
+                    </div>
+
+                    <div className='[&>*]:p-1 border-1 content-center'>
+                        <h1 className='text-lg bg-emerald-700 text-white'>Client Good Copies</h1>
+                        <p>No scanned copies found.</p>
+                    </div>
+
                 </div>
 
 

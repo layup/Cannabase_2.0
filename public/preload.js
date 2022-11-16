@@ -12,9 +12,21 @@ const getJobInfo = async (jobNum) => {
     return CannabaseMgr.getJobInfo(jobNum); 
 }
 
+const getTests = async (jobNum) => {
+    return CannabaseMgr.getTests(jobNum)
+}
+const getTestStatus = async (jobNum, testNum) => {
+    return CannabaseMgr.getTestStatus(jobNum, testNum)
+}
+
 const getAllClients = async () => {
     return CannabaseMgr.getAllClients();
 }
+
+const setTestsStatus = async (jobNum, testNum, status) => {
+    return CannabaseMgr.setTestsStatus(jobNum, testNum, status)
+}
+
 
 //works 
 const test = () => {
@@ -39,9 +51,8 @@ const onCount = (callback) => {
 contextBridge.exposeInMainWorld("api", {
     getNotComplete: getNotComplete, 
     getJobInfo: getJobInfo, 
+    getTests: getTests,
+    setTestsStatus: setTestsStatus, 
+    getTestStatus: getTestStatus,
     getAllClients: getAllClients,
-    sendMessage: sendMessage,
-    onCount: onCount,
-    test: test,
-    openFile: openFile
 })
