@@ -4,7 +4,10 @@ import {useParams} from 'react-router-dom'
 import JobItem from '../components/JobItem'
 import test_image from '../../assets/test_image.jpg'
 import JobTests from '../components/JobTests'
+import Search from '../components/Search'
+
 import SearchIcon from '@mui/icons-material/Search';
+
 
 const Job = () => {
 
@@ -14,25 +17,23 @@ const Job = () => {
     const [jobStatus, setJobStatus] = useState(); 
     const [jobInfo, setJobInfo] = useState(); 
     const [testInfo, setTestInfo] = useState(); 
+    const [searchInput, setSearchInput] = useState(''); 
 
     useEffect(() => {
         async function getJobInfoData(){
             await window.api.getJobInfo(id.jobNum).then((value) => {
                 setJobInfo(value);
-
             }); 
         }
         async function getTestData(){
             await window.api.getTests(id.jobNum).then((value) =>{
-                setTestInfo(value)
-                
+                setTestInfo(value)       
             })
         }
 
         getJobInfoData()
         getTestData();
-    }, [])
-
+    }, [id])
 
     return (
         <div 
@@ -40,17 +41,7 @@ const Job = () => {
         >     
             {<div className=' bg-red-100 flex flex-col'>
 
-                    <div className='bg-emerald-700 p-4 flex'>
-                        <div className='p-2 bg-emerald-800'>
-                            <SearchIcon className='text-white bg-emerald-800'/>
-                        </div>
-
-                        <input 
-                            type='search' 
-                            placeholder='Search Job Number' 
-                            className='w-full p-1 bg-emerald-800 text-white border-transparent focus:border-transparent focus:ring-0 outline-none'
-                        />
-                    </div>
+                    <Search />
                     
 
                     <div className='flex bg-zinc-100 p-2 justify-between items-center'>
@@ -65,21 +56,19 @@ const Job = () => {
                                 <p>Complete Date: N/A</p>
                             </div> 
                             
-                            <p className='p-2'>Status: Incomplete</p>         
+                            <p className='p-2'>Status: 
+                                <span className='text-red-400 uppercase'> Incomplete</span>
+                            </p>         
                         
                         </div>
                         
                         <div className='space-x-2 p-2'>
                             <button className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-emerald-800 hover:text-white'>Complete Job</button>
-                            <button className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white uppercase text-sm hover:bg-emerald-800 hover:text-white'>Delete Job</button>
+                            <button className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white uppercase text-sm hover:bg-red-800 hover:text-white'>Delete Job</button>
                         </div>
     
                     </div>
                 
-                   
-
-
-
             </div>} 
 
             <div className='h-5/6 grid grid-rows-3 grid-cols-6 gap-1 p-2'>

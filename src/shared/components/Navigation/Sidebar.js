@@ -29,8 +29,12 @@ function Sidebar() {
                 
                 </div>
                 <div className='md:pt-10 py-2 lg:py-4 hidden lg:flex lg:flex-col  place-items-center m-2 gap-2'>
-                    <NewButton text="New Job"/> 
-                    <NewButton text="New Client"/> 
+                    <Link to={"/newjob"} className="w-full">
+                        <NewButton text="New Job"/> 
+                    </Link>
+                    <Link to={"/newjob"} className="w-full">
+                        <NewButton text="New Client"/> 
+                    </Link>
                 </div>
 
                 <div className={`flex md:flex-col justify-between`}>

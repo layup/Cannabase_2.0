@@ -39,13 +39,13 @@ function Dashboard() {
 
     return (
         <div 
-            className='bg-zinc-300 flex flex-col h-screen max-w-screen p-4 lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
+            className=' flex flex-col h-screen max-w-screen lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
         >     
             <div className='rounded-lg mb-2' >
                 <Header /> 
             </div>
 
-            <div className=' bg-white rounded-lg h-screen mt-2 overflow-auto ' >
+            <div className=' bg-white rounded-lg h-screen mt-2 overflow-auto px-2 ' >
                 <MainTable />
             </div>
 

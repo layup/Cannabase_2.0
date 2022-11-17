@@ -8,7 +8,7 @@ const TableContent = (props) => {
     return (
         <tr className='border-b-1 border-zinc-200 [&>td]:p-2 hover:bg-yellow-100 overflow-x-auto ' key={props.key}>
             <td>
-                <Link to={`/jobs/${props.jobNum}`} className='text-blue-500 hover:underline'>{props.jobNum}</Link>
+                <Link to={`/jobs/${props.jobNum}`} className='text-blue-500 hover:underline'>W{props.jobNum}</Link>
             </td>
             <td className='text-left'>
                 {testToString(props.test)}
