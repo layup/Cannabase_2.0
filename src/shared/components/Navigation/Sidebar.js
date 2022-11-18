@@ -33,7 +33,7 @@ function Sidebar() {
                         <NewButton text="New Job"/> 
                     </Link>
                     <Link to={"/newjob"} className="w-full">
-                        <NewButton text="New Client"/> 
+                        <NewButton text="New Report"/> 
                     </Link>
                 </div>
 

@@ -31,7 +31,7 @@ const Clients = () => {
         <div 
             className=' flex flex-col h-screen max-w-screen  lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
         >  
-            <div className='bg-emerald-700 p-4 flex mb-2'>
+            <div className='bg-emerald-700 p-4 flex'>
                 <div className='p-2 bg-emerald-800'>
                     <SearchIcon className='text-white bg-emerald-800'/>
                 </div>
@@ -42,7 +42,13 @@ const Clients = () => {
                     className='w-full p-1 bg-emerald-800 text-white border-transparent focus:border-transparent focus:ring-0 outline-none'
                 />
             </div>
-            <div className='w-full h-full bg-white overflow-y-auto px-2'>
+
+            <div className='bg-zinc-200 p-2 py-10'>
+                <p>total clients: {clientData.length}</p>
+            
+            </div>
+
+            <div className='w-full h-full bg-white overflow-y-auto '>
                 <table className='table-auto md:table-fixed w-full text-sm md:text-base h-full'> 
                     <thead className='bg-emerald-700 sticky top-0'>
                         <tr className='text-white [&>th]:font-normal [&>th]:p-2 '>

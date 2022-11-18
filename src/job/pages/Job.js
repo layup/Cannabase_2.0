@@ -4,9 +4,7 @@ import {useParams} from 'react-router-dom'
 import JobItem from '../components/JobItem'
 import test_image from '../../assets/test_image.jpg'
 import JobTests from '../components/JobTests'
-import Search from '../components/Search'
-
-import SearchIcon from '@mui/icons-material/Search';
+import Search from '../../shared/components/Navigation/Search'
 
 
 const Job = () => {

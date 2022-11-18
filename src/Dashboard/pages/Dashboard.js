@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
+import Search from '../../shared/components/Navigation/Search'
 
-import Header from '../components/header/Header'
 import MainTable from '../components/table/MainTable'
 
 
@@ -41,11 +41,13 @@ function Dashboard() {
         <div 
             className=' flex flex-col h-screen max-w-screen lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
         >     
-            <div className='rounded-lg mb-2' >
-                <Header /> 
+            
+            <Search /> 
+            <div className='p-4 bg-zinc-200'>
+                <p>Active Jobs: {}</p>
             </div>
 
-            <div className=' bg-white rounded-lg h-screen mt-2 overflow-auto px-2 ' >
+            <div className=' bg-white h-screen overflow-auto ' >
                 <MainTable />
             </div>
 

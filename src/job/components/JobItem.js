@@ -6,7 +6,6 @@ const JobItem = (props) => {
     const [JobComplete, setJobComplete] = useState(); 
     const [CompleteDate, setCompleteDate] = useState()
     
-
     useEffect(() => {
         if(props.testStatus === 1){
             setJobComplete(true)
@@ -27,12 +26,10 @@ const JobItem = (props) => {
 
 
         await window.api.setTestsStatus(props.jobId, props.testType, 1).then(() => {
-        
             setCompleteDate(today)
             setJobComplete(true)
             console.log("ran completeTest")
         })
-
     }
 
     const resetTests = async () => {
@@ -61,7 +58,6 @@ const JobItem = (props) => {
                     >
                         Complete
                     </button>
-
                 } 
             </td>
             <td className='p-2'>{matchString(props.testType)}</td>
