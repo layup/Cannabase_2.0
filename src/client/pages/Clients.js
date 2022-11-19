@@ -71,6 +71,13 @@ const Clients = () => {
                 </table>
             </div>
 
+            <div className='bg-emerald-700 p-2 text-white flex space-x-2'>
+                <p>All</p>
+                <p>#</p>
+                <p>A</p>
+                <p>B</p>
+            </div>
+
         </div>
     )
 }

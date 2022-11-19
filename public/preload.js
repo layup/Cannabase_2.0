@@ -1,8 +1,7 @@
-const CannabaseMgr = require('../database/CannabaseMgr')
-
 const {contextBridge, ipcRenderer, ipcMain} = require('electron')
+const CannabaseMgr = require('./database/CannabaseMgr')
 
-
+console.log('Preload Scripts Loaded');
 
 const getNotComplete = async () => {
     return  CannabaseMgr.getNotComplete(); 
@@ -60,7 +59,9 @@ const onCount = (callback) => {
     })
 }
 
+
 contextBridge.exposeInMainWorld("api", {
+    
     getNotComplete: getNotComplete, 
     getJobInfo: getJobInfo, 
     getTotalJobs: getTotalJobs, 
@@ -69,5 +70,6 @@ contextBridge.exposeInMainWorld("api", {
     getTests: getTests,
     setTestsStatus: setTestsStatus, 
     getTestStatus: getTestStatus,
-    getAllClients: getAllClients,
+    getAllClients: getAllClients, 
+   
 })

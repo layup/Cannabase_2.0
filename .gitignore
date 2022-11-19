@@ -7,6 +7,8 @@
 /build 
 /dist
 /database
+/src/database/Cannabase.db
+/public/database/Cannabase.db
 
 # testing
 /coverage

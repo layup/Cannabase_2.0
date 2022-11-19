@@ -3,9 +3,6 @@ import React from 'react'
 import JobItem from './JobItem'
 
 const JobTests = (props) => {
-
-    console.log(props.testInfo)
-
     return (
         <table className='w-full'> 
             <thead className='table-auto md:table-fixed bg-emerald-700 w-full sticky top-0'>

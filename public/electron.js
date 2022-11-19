@@ -16,6 +16,7 @@ function createWindow() {
         }    
     });
 
+    console.log("dirname: ", __dirname); 
 
     win.maximize();    
 

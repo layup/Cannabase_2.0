@@ -95,7 +95,7 @@ const Jobs = () => {
             </div>
         
             {filters && 
-                <div className='px-4 py-2 bg-zinc-200 flex space-x-4'>
+                <div className='px-4 py-2 bg-zinc-200 flex space-x-4 border-t-1 border-zinc-400'>
                     <p className='space-x-2'>
                         <span className='uppercase'>Tests:</span> 
                         <span className='font-medium'>Metals</span>

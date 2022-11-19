@@ -24,8 +24,7 @@ function App() {
           <Route path="/clients" element={<Clients />} />
           <Route path="/clients/:clientName" element={<Client />} />
           <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:jobNum" element={<Job />} /> 
-          <Route path="/newjob" element={<NewJob />} />
+            <Route path="/jobs/:jobNum" element={<Job />} />
         </Routes>
       </div>
     </HashRouter>
