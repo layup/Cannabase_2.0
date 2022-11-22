@@ -11,7 +11,7 @@ const SearchResults = ({results,clear}) => {
     return (
         
         <ul 
-        className='absolute top-32 lg:top-16 w-fit  h-64 overflow-y-scroll overflow-x-hidden bg-white drop-shadow-md z-10 hover:cursor-pointer'
+        className='absolute top-32 lg:top-16 w-10/12  h-64 overflow-y-scroll overflow-x-hidden bg-white drop-shadow-md z-10 hover:cursor-pointer'
         >
             <p className='sticky top-0 bg-white text-xs p-2'>Job Numver
             

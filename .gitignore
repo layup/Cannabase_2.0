@@ -8,7 +8,7 @@
 /dist
 /database
 /src/database/Cannabase.db
-/public/database/Cannabase.db
+/public/database/Cannabase.dbho
 
 # testing
 /coverage

@@ -11,7 +11,7 @@ import Jobs from './job/pages/Jobs';
 import Job from './job/pages/Job';
 import Clients from './client/pages/Clients';
 import Client from './client/pages/Client';
-import NewJob from './job/pages/NewJob';
+
 
 
 function App() {

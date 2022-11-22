@@ -41,7 +41,7 @@ const Modal = props => {
             mountOnEnter
             unmountOnExit 
             timeout={100}
-            classNames="z-50 fixed bg-white w-fit top-20"
+            classNames={`z-50 fixed bg-white w-fit top-24 ${props.className}`}
         >
             <ModalOverlay {...props} /> 
         </CSSTransition>
