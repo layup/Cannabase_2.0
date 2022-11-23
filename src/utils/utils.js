@@ -6,16 +6,16 @@ function testToString(test_values){
     //have a database change option 
     let tests = {
         "2": "Metal", 
-        "3": "Potency", 
-        "33": "dPotency",
+        "3": "Basic Potency", 
+        "33": "Deluxe Potency",
         "4": "Toxins",
-        "5": "Pests",
-        "7": "Terps",
-        "8": "Solv",
-        "9": "Oth",
-        "1": "M.A",
-        "6": "M.B",
-        "10": "F.ID",
+        "5": "Pesticides",
+        "7": "Terpenes",
+        "8": "Solvents",
+        "9": "Other",
+        "1": "Micro A",
+        "6": "Micro B",
+        "10": "Fungal ID",
         "11": "Mushrooms"
     }
 
@@ -33,24 +33,56 @@ function testToString(test_values){
 function matchString(test_value) {
     let tests = {
         "2": "Metal", 
-        "3": "Potency", 
-        "33": "dPotency",
+        "3": "Basic Potency", 
+        "33": "Deluxe Potency",
         "4": "Toxins",
-        "5": "Pests",
-        "7": "Terps",
-        "8": "Solv",
-        "9": "Oth",
-        "1": "M.A",
-        "6": "M.B",
-        "10": "F.ID",
+        "5": "Pesticides",
+        "7": "Terpenes",
+        "8": "Solvents",
+        "9": "Other",
+        "1": "Micro A",
+        "6": "Micro B",
+        "10": "Fungal ID",
         "11": "Mushrooms"
     } 
     return tests[test_value]
+}
+
+function convertForDatabase(arr){
+
+    const convertDatabase = {
+        0:1,
+        1:2, 
+        2:3, 
+        3:33, 
+        4:4,
+        5:5,
+        6:6,
+        7:7,
+        8:8,
+        9:9, 
+        10:10,
+        11:11
+    }
+
+    console.log(arr)
+    console.log(arr.indexOf(true));
+
+    var index = []; 
+    for(var i = 0; i < arr.length; i++ ){
+        if(arr[i] === true){
+            index.push(convertDatabase[i])
+        }
+    }
+   
+    return index; 
 
 }
 
+
 export {
     testToString,
-    matchString
+    matchString,
+    convertForDatabase
 }
 

@@ -26,6 +26,10 @@ const getTests = async (jobNum) => {
     return CannabaseMgr.getTests(jobNum)
 }
 
+const createNewJob = async (jobNum, clientName, tests, notes) => {
+    return CannabaseMgr.createNewJob(jobNum, clientName, tests, notes);
+}
+
 const getTestStatus = async (jobNum, testNum) => {
     return CannabaseMgr.getTestStatus(jobNum, testNum)
 }
@@ -61,7 +65,7 @@ const onCount = (callback) => {
 
 
 contextBridge.exposeInMainWorld("api", {
-    
+    createNewJob: createNewJob,  
     getNotComplete: getNotComplete, 
     getJobInfo: getJobInfo, 
     getTotalJobs: getTotalJobs, 

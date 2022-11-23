@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useLocation} from 'react-router-dom'
 
 import Modal from '../UIElements/Modal'
+import { convertForDatabase } from '../../../utils/utils';
 
 import Close from '@mui/icons-material/Close';
 
@@ -28,11 +29,12 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
     const [clientName, setClientName] = useState("")
     const [jobNotes, setJobNotes] = useState("") 
     const [displayError, setDisplayError] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const [errors, setErrors] = useState({
-      jobNumber: '', 
-      clientName: '', 
-      tests: ''
+    //const [loading, setLoading] = useState(false)
+
+    const errors = useRef({
+      jobNumber:'', 
+      clientName:'', 
+      tests:''
     })
 
     const handleJobNumber = event => {
@@ -54,52 +56,52 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
       setTestOptions(updatedTestsOptions)
     }
 
-    const handleSubmit = () => {
-      //not sure what this does 
-     
+    const HandleSubmit = async () => {
       //deal with jobnumber validation 
       //check if the job exists already 
-      
-      
       if(jobNumber.length !== 7 ){
-        
-        setErrors((prevState) => ({...prevState, jobNumber:'Please enter a valid Job Number'}))
+        errors.current.jobNumber = "Please Enter a valid Job Number "
+         
       }else {
-        setErrors((prevState) => ({...prevState, jobNumber:''}))
+        errors.current.jobNumber = ""
       }
 
       //deal with clientName validation 
       if(clientName.length < 5){
-        setErrors((prevState) => ({...prevState, clientName:'Please enter a valid client name'}))
-
+        errors.current.clientName = "Please Enter a valid Job Number "
+         
       }else {
-        setErrors((prevState) => ({...prevState, clientName:''})) 
+        errors.current.clientName = ""
       }
-
 
       //deal with tests validation 
       if(testOptions.includes(true)){
-        setErrors((prevState) => ({...prevState, tests:''})) 
+        errors.current.tests = ""
       }else{
-        setErrors((prevState) => ({...prevState, tests:'Please select a tests'}))
+        console.log(testOptions)
+        errors.current.tests = "Please Enter a valid Job Number "
       }
 
-      //there exists an error   
-      if(errors.jobNumber || errors.clientName || errors.tests){
-        //console.log("Errors")
+      if(errors.current.jobNumber || errors.current.clientName || errors.current.tests){
         setDisplayError(true)
-        //console.log(errors)
+        console.log(errors.current)
         return; 
-      }
-      //create the job 
-      console.log('running')
+      }      
+
       setDisplayError(false)
 
-      //reset the states 
-      console.log(errors)
-      cancelCreateNewJob()
-      
+      let tests = convertForDatabase(testOptions)
+
+
+      await window.api.createNewJob(jobNumber, clientName, tests, jobNotes).then(() => {
+        console.log("Submitted")
+        handleCancel()
+        //should take us to the newly created item 
+        
+      })
+
     }
+
 
     const handleCancel = () => {
       setTestOptions(new Array(12).fill(false))
@@ -107,11 +109,12 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
       setClientName("")
       setJobNotes("")
       setDisplayError(false)
-      setErrors({
+
+      errors.current = {
         jobNumber: '', 
         clientName: '', 
-        tests:'' 
-      })
+        tests: ''
+      }
 
       cancelCreateNewJob() 
     }
@@ -121,7 +124,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
       <Modal
         show={createNewJob}
         onCancel={handleCancel}
-        className="w-2/4 left-1/4"
+        className="w-1/2 left-1/4"
         header={
             <div className='flex justify-between px-4 border-b-1 border-zinc-200 p-2'>
                 <h2 className='text-lg font-semibold'>Create New Job</h2>
@@ -139,12 +142,9 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
                 >
                     Cancel
                 </button>
-                <button 
-                  className="bg-blue-600 text-white p-2 rounded-md " 
-                  onClick={handleSubmit}
-                >
+                <button className="bg-blue-600 text-white p-2 rounded-md " onClick={HandleSubmit} >
                   Create New Job
-                </button>
+                </button>  
             </div>
         }
     >
@@ -168,7 +168,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
                 value={jobNumber}
                 onChange={handleJobNumber}
               />
-              {errors.jobNumber && <p className='text-xs text-red-400'>Please enter a job number</p>} 
+              {errors.current.jobNumber && <p className='text-xs text-red-400'>Please enter a job number</p>} 
 
               <h2>Client</h2>
               <input 
@@ -178,7 +178,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
                 value={clientName}
                 onChange={handleClientName}
               />
-              {errors.clientName && <p className='text-xs text-red-400'>Please enter a client Name</p>} 
+              {errors.current.clientName && <p className='text-xs text-red-400'>Please enter a client Name</p>} 
 
               <h2>Requested Tests</h2>
               <div className='flex space-x-10'>
@@ -225,7 +225,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
                       </ul>
                   </div>
               </div>
-              {errors.tests && <p className='text-xs text-red-400'>Please select a tests</p>} 
+              {errors.current.tests && <p className='text-xs text-red-400'>Please select a tests</p>} 
 
           </div>
           <div className=' w-full p-2'>

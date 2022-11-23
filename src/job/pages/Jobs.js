@@ -14,11 +14,11 @@ const Jobs = () => {
     const [totalJobs, setTotalJobs] = useState(); 
     const [Jobs, setJobs] = useState([]); 
     const [rowShow, setrowShow] = useState(25);
-    const [page, setPage] = useState(1); 
+    //const [page, setPage] = useState(1); 
     const [totalPages, setTotalPages] = useState(); 
     const [filters, setFilters] = useState(true);
-    
-    
+    const [testOptions, setTestOptions] = useState(Array(12).fill(false))
+    const [showTest, setShowTest] = useState(false); 
 
     useEffect(() => {
         async function getTotalJobs(){
@@ -70,12 +70,24 @@ const Jobs = () => {
             <div className='bg-zinc-200 p-4 flex space-x-3'>
                 <div className='flex space-x-2 px-1 justify-center items-center text-emerald-600'>
                     <FilterListIcon />
+
                 </div>
 
-                <button className='bg-zinc-300 px-2 rounded-md flex justify-center uppercase text-sm items-center space-x-2 text-zinc-500 hover:border-emerald-600 hover:border-1 ' >
+                <button 
+                    className='bg-zinc-300 px-2 rounded-md flex justify-center uppercase text-sm items-center space-x-2 text-zinc-500 hover:border-emerald-600 border-1 border-zinc-500'
+                    onClick={() => setShowTest(!showTest)}
+                >
                     <p className=''>Tests</p>
                     <ArrowDropDownIcon  className=''/>
                 </button>
+
+                {showTest && 
+                    <div className="absolute top-32 left-72 bg-zinc-300 w-20 h-52 z-10 p-2 ">
+                        <ul>
+                            <li>List</li>
+                        </ul>
+                    </div>
+                }
 
                 <button className='bg-zinc-300 px-2 rounded-md flex justify-center uppercase text-sm items-center space-x-2 text-zinc-500' >
                     <p className=''>Client</p>

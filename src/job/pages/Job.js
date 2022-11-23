@@ -49,7 +49,7 @@ const Job = () => {
                 show={deleteJob}
                 onCancel={cancelDeleteJob}
                 header="Delete Job?"
-                className='w-1/4 left-1/3'
+                className='w-1/3 left-1/3'
                 footer={
                     <div className='bg-zinc-200 p-2 rounded-b-md space-x-4 text-right w-full' >
                         <button onClick={cancelDeleteJob}>cancel</button>
@@ -57,7 +57,7 @@ const Job = () => {
                     </div>
                 }
             > 
-                <div className='text-center p-4 text-xl'>
+                <div className='text-center p-4 text-lg'>
                     <p>Are you sure you want to delete job?</p>
                     <p>You cannot undo this action</p>
                 </div>
@@ -71,7 +71,7 @@ const Job = () => {
                         <Search />
                         
 
-                        <div className='flex bg-zinc-100 p-2 justify-between items-center'>
+                        <div className='flex bg-zinc-100 p-2 justify-between items-center flex-col xl:flex-row'>
                             <div className='flex space-x-2'>
                                 <div className='p-2'>
                                     <p><span className=''>Job ID:</span> W{id.jobNum} </p>
@@ -91,11 +91,18 @@ const Job = () => {
                             
                             <div className='space-x-2 p-2'>
                                 <button 
-                                    className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-emerald-400 hover:text-white'
-                                    
+                                    className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-emerald-500 hover:text-white' 
                                 >
                                     Complete Job
                                 </button>
+
+                                <button 
+                                    className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-blue-400 hover:text-white'
+                                >
+                                    Edit Job
+                                </button>
+
+
                                 <button 
                                     className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white uppercase text-sm hover:bg-red-400 hover:text-white'
                                     onClick={() => {setDeleteJob(true)}}

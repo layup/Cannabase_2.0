@@ -1,6 +1,6 @@
 const { app, ipcMain, BrowserWindow, dialog, ipcRenderer } = require('electron');
 const path = require('path');
-const url = require('url');
+//const url = require('url');
 const isDev = require('electron-is-dev');
 
 function createWindow() {   
