@@ -51,26 +51,9 @@ const setTestsStatus = async (jobNum, testNum, status) => {
 }
 
 
-//works 
-const test = () => {
-    return ipcRenderer.invoke('hello-world').then((result) => {
-        return result
-    })
-}
-
 const openFile = () => {
     return ipcRenderer.invoke('dialog:openFile')
 } 
-const sendMessage = (msg) => {
-    ipcRenderer.send('hello-message', msg)
-}
-
-const onCount = (callback) => {
-    ipcRenderer.on('count', (event, args) => {
-        callback(args); 
-    })
-}
-
 
 contextBridge.exposeInMainWorld("api", {
     createNewJob: createNewJob,  
@@ -84,6 +67,8 @@ contextBridge.exposeInMainWorld("api", {
     getTestStatus: getTestStatus,
     getAllClients: getAllClients, 
     getNumberClients: getNumberClients, 
-    clientSearch: clientSearch
+    clientSearch: clientSearch,
+
+    openFile: openFile
    
 })

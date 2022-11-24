@@ -1,38 +1,8 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import Search from '../../shared/components/Navigation/Search'
 
-import MainTable from '../components/table/MainTable'
+import MainTable from '../components/MainTable'
 
-
-
-const sendMessage = () => {
-    let customMessage = "Hello World "
-    window.api.sendMessage(customMessage)
-    customMessage = ""
-}
-
-const tester =  async () => {    
-    //let message = await window.api.getNoComplete
-    let test =  window.api.test(); 
-    console.log(await test);
-}
-
-const openFile = async (callpack) => {
-    let path = await window.api.openFile()
-    console.log(path)
-    callpack(path)
-}
-
-const loadingTest = async () => {
-    
-    let querry = []
-
-    let temp = await window.api.getNotComplete().then((value) => {
-        querry.push(value)
-    }); 
-    console.log('attemping to print')
-    console.log(querry)
-}
 function Dashboard() {
 
     //const [filePath, setFilePath] = useState()

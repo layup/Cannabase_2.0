@@ -3,18 +3,20 @@ import React, {useEffect, useState} from 'react'
 import SearchIcon from '@mui/icons-material/Search';
 
 const Clients = () => {
+    const alphabet = ['All', "#","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
     const [clientData, setClient] = useState([]); 
     const [totalClients, setTotalClients] = useState()
     const [filter, setFilters] = useState('All')
-    const alphabet = ['All', "#","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+    
 
-    const [bestMatches, setBestMatches] = useState([])
+    //const [bestMatches, setBestMatches] = useState([])
 
+    /* 
     const clear = () => {
         setClient(""); 
         setBestMatches([]); 
-    }
+    } */ 
 
     useEffect(() => {
         async function getClientData(){
@@ -103,7 +105,7 @@ const Clients = () => {
                             return (
                                 <li >
                                     <button 
-                                        className={`p-2 ${item === filter ? "underline": null }`}
+                                        className={`p-2 ${item === filter ? "underline text-bold": null }`}
                                         onClick={() => {selectFilter(item)}}
                                     >
                                         {item}

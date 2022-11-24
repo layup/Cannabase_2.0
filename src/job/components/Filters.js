@@ -22,9 +22,9 @@ const Filters = () => {
         "Psilocybin"
     ]
 
-    const [filters, setFilters] = useState(true);
+    //const [filters, setFilters] = useState(true);
     const [showTest, setShowTest] = useState(false); 
-    const [showStatus, setShowStatus] = useState(false); 
+    //const [showStatus, setShowStatus] = useState(false); 
     const [testFiltersOptions, setTestFiltersOptions] = useState(Array(12).fill(false))
 
     const handleTestFiltersOptions = (postion) => {
@@ -66,7 +66,6 @@ const Filters = () => {
                                             value={test}
                                             checked={testFiltersOptions[index]}
                                             onChange={() =>handleTestFiltersOptions(index)}
-
                                         />
                                         <p>{test}</p>
                                     

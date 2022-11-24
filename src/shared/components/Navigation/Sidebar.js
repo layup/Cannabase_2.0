@@ -73,10 +73,12 @@ function Sidebar() {
                             <p className='px-3 hidden lg:block'>Archives</p>
                         </div>
 
-                        <div className=' flex p-4 text-zinc-600'>
-                            <SettingsIcon className=''/>
-                            <p className='px-3 hidden lg:block'>Settings</p>
-                        </div>
+                        <SidebarLink
+                            name="Settings"
+                            location={"/settings"}
+                            subLocation={"/settings"}
+                            icon={<SettingsIcon />}
+                        />
                         
                     </div>
                 </div>

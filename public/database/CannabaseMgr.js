@@ -1,6 +1,8 @@
 const { useDebugValue } = require('react');
+const Store = require('electron-store')
 var dbmanager = require('./dbmanager')
 var db = dbmanager.db 
+
 
 
 exports.getNotComplete = () => {

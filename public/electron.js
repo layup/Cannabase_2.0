@@ -1,7 +1,11 @@
 const { app, ipcMain, BrowserWindow, dialog, ipcRenderer } = require('electron');
 const path = require('path');
 //const url = require('url');
+const Store = require('electron-store');
 const isDev = require('electron-is-dev');
+
+
+const store = new Store()
 
 function createWindow() {   
 
@@ -16,7 +20,7 @@ function createWindow() {
         }    
     });
 
-    console.log("dirname: ", __dirname); 
+    //console.log("dirname: ", __dirname); 
 
     win.maximize();    
 
@@ -50,25 +54,41 @@ function createWindow() {
 
 async function handleFileOpen() {
     const { canceled, filePaths } = await dialog.showOpenDialog()
-    console.log(filePaths[0])
+    console.log('running')
+
     if (canceled) {
       return
     } else {
+      store.set('databaseLocation', filePaths[0])
+      console.log("New Database Path: ", store.get('databaseLocation'))
+     
       return filePaths[0]
+      
     }
   }
   
 
 app.whenReady().then(() => {
-    ipcMain.on('hello-messsage', (event, args) => {
-        console.log(args); 
-    })
     ipcMain.handle('dialog:openFile', handleFileOpen)
 
-    ipcMain.handle('hello-world', () => {
-        return "Hello World"
-    })
+    const schema = {
+        databaseLocation: {
+            type: 'string',
+            description: 'Path for SQL database'
+        },
+        BenchLocation: {
+            type: 'string',
+            description:'Path for benchsheets and COCs'
+        }, 
+        clientCopiesLocaton: {
+            type:'string', 
+            description: 'Path for the Good Copies and COCs'
+        }
+    };
 
+    
+    console.log("Stored SQL Database Path: ", store.get('databaseLocation'))
+    
     createWindow()
 });
 
