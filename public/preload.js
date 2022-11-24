@@ -38,6 +38,14 @@ const getAllClients = async () => {
     return CannabaseMgr.getAllClients();
 }
 
+const getNumberClients = async () => {
+    return CannabaseMgr.getNumberClients(); 
+}
+
+const clientSearch = async (clientName) => {
+    return CannabaseMgr.clientSearch(clientName)
+}
+
 const setTestsStatus = async (jobNum, testNum, status) => {
     return CannabaseMgr.setTestsStatus(jobNum, testNum, status)
 }
@@ -75,5 +83,7 @@ contextBridge.exposeInMainWorld("api", {
     setTestsStatus: setTestsStatus, 
     getTestStatus: getTestStatus,
     getAllClients: getAllClients, 
+    getNumberClients: getNumberClients, 
+    clientSearch: clientSearch
    
 })

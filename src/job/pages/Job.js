@@ -17,8 +17,8 @@ const Job = () => {
     const [jobInfo, setJobInfo] = useState(); 
     const [testInfo, setTestInfo] = useState(); 
     const [searchInput, setSearchInput] = useState(''); 
-    const [deleteJob, setDeleteJob] = useState(false); 
-    const [completeJob, setCompleteJob] = useState(false); 
+    const [deleteJobModal, setDeleteJobModal] = useState(false); 
+    const [completeJobModal, setCompleteJobModal] = useState(false); 
 
 
     //TODO set the job status 
@@ -39,14 +39,17 @@ const Job = () => {
     }, [id])
 
 
-    const cancelDeleteJob = () => setDeleteJob(false); 
-    const confirmDeleteJob = () => setDeleteJob(false); 
+    const cancelDeleteJob = () => setDeleteJobModal(false); 
+    const confirmDeleteJob = () => setDeleteJobModal(false); 
+
+    const cancelCompleteJob = () => setCompleteJobModal(false);
+    const confirmCompleteJob = () => setCompleteJobModal(false); 
 
     return (
         <React.Fragment> 
 
             <Modal 
-                show={deleteJob}
+                show={deleteJobModal}
                 onCancel={cancelDeleteJob}
                 header="Delete Job?"
                 className='w-1/3 left-1/3'
@@ -57,9 +60,27 @@ const Job = () => {
                     </div>
                 }
             > 
-                <div className='text-center p-4 text-lg'>
+                <div className='text-center p-4 text-lg w-full '>
                     <p>Are you sure you want to delete job?</p>
                     <p>You cannot undo this action</p>
+                </div>
+            </Modal>
+
+            <Modal 
+                show={completeJobModal}
+                onCancel={cancelCompleteJob}
+                header="Delete Job?"
+                className='w-1/3 left-1/3'
+                footer={
+                    <div className='bg-zinc-200 p-2 rounded-b-md space-x-4 text-right w-full' >
+                        <button onClick={confirmCompleteJob}>cancel</button>
+                        <button className='bg-emerald-600 text-white p-1 px-2 rounded-md'onClick={confirmDeleteJob}>Confirm</button>
+                    </div>
+                }
+            > 
+                <div className='text-center p-4 text-lg w-full'>
+                    <p>Are you sure you want to mark the job as complete?</p>
+                    <p></p>
                 </div>
             </Modal>
 
@@ -92,6 +113,7 @@ const Job = () => {
                             <div className='space-x-2 p-2'>
                                 <button 
                                     className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-emerald-500 hover:text-white' 
+                                    onClick={() => {setCompleteJobModal((true))}}
                                 >
                                     Complete Job
                                 </button>
@@ -105,7 +127,7 @@ const Job = () => {
 
                                 <button 
                                     className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white uppercase text-sm hover:bg-red-400 hover:text-white'
-                                    onClick={() => {setDeleteJob(true)}}
+                                    onClick={() => {setDeleteJobModal(true)}}
                                 >
                                     Delete Job
                                 </button>

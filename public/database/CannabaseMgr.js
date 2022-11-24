@@ -216,7 +216,7 @@ exports.setTestsStatus = (jobNum, testNum, status) => {
 
 exports.getAllClients = () => {
     return new Promise((resolve, reject) => {
-        const sql = `SELECT DISTINCT client_name FROM canna_customers ORDER BY client_name ASC`  
+        const sql = `SELECT DISTINCT client_name FROM canna_customers ORDER BY client_name COLLATE NOCASE ASC`  
         console.log('Running getAllClients(): ', sql);
         
          db.all(sql, (err,row) => {
@@ -228,4 +228,37 @@ exports.getAllClients = () => {
             }
         })
     })  
+}
+
+exports.clientSearch = (clientName) => {
+
+    return new Promise((resolve, reject) => {
+        const SQL = `SELECT DISTINCT  client_name FROM canna_customers WHERE client_name LIKE '${clientName}%' ORDER BY client_name COLLATE NOCASE ASC`
+
+
+        db.all(SQL, (err,row) => {
+            if(err) {
+                console.error(err.message)
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
+exports.getNumberClients = () => {
+    return new Promise((resolve, reject) => {
+        const SQL = `SELECT DISTINCT  client_name FROM canna_customers WHERE client_name GLOB '[0-9]*'`
+
+
+        db.all(SQL, (err,row) => {
+            if(err) {
+                console.error(err.message)
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
 }

@@ -49,9 +49,12 @@ function Dashboard() {
 
             <div className=' bg-white h-screen overflow-auto ' >
                 <MainTable />
+
             </div>
 
-
+            <div className='bg-emerald-700 p-2 text-white space-x-2'>
+                <p className='px-10'>Active Jobs: 20</p>
+            </div> 
         </div>
   )
 }

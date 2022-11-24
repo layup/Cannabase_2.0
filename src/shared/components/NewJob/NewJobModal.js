@@ -5,6 +5,7 @@ import Modal from '../UIElements/Modal'
 import { convertForDatabase } from '../../../utils/utils';
 
 import Close from '@mui/icons-material/Close';
+import SelectClient from './SelectClient';
 
 const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirmCreateNewJob}) => {
     const tests = [
@@ -29,6 +30,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
     const [clientName, setClientName] = useState("")
     const [jobNotes, setJobNotes] = useState("") 
     const [displayError, setDisplayError] = useState(false)
+    const [showClientList, setShowClientList] = useState(false); 
     //const [loading, setLoading] = useState(false)
 
     const errors = useRef({
@@ -43,7 +45,19 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
 
     const handleClientName = event => {
       setClientName(event.target.value);
+      setShowClientList(true)
     };
+    const handleClientNameList = name => {
+      if(name){
+        setClientName(name)
+      }
+      setShowClientList(false)
+    }
+
+    const handleClientList = () => {
+      setShowClientList(true)
+    }
+
     const handleJobNote = event => {
       setJobNotes(event.target.value)
     }
@@ -102,13 +116,13 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
 
     }
 
-
     const handleCancel = () => {
       setTestOptions(new Array(12).fill(false))
       setJobNumber("")
       setClientName("")
       setJobNotes("")
       setDisplayError(false)
+      setShowClientList(false)
 
       errors.current = {
         jobNumber: '', 
@@ -124,7 +138,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
       <Modal
         show={createNewJob}
         onCancel={handleCancel}
-        className="w-1/2 left-1/4"
+        className="w-7/12 left-1/4"
         header={
             <div className='flex justify-between px-4 border-b-1 border-zinc-200 p-2'>
                 <h2 className='text-lg font-semibold'>Create New Job</h2>
@@ -156,7 +170,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
           </button>
         </div> 
       } 
-      <div className='p-4 flex w-full '>
+      <div className='p-4 flex w-full'>
 
           <div className='w-full p-2 space-y-1 [&>h2]:font-medium'>
               <h2>Job Number</h2>
@@ -177,7 +191,9 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
                 placeholder="Select Client"
                 value={clientName}
                 onChange={handleClientName}
+                onClick={handleClientList}
               />
+              {showClientList && <SelectClient clientName={clientName} handleClientNameList={handleClientNameList} />}
               {errors.current.clientName && <p className='text-xs text-red-400'>Please enter a client Name</p>} 
 
               <h2>Requested Tests</h2>

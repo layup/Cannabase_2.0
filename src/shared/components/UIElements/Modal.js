@@ -3,12 +3,11 @@ import React from 'react'
 import ReactDOM  from 'react-dom'
 import { CSSTransition } from 'react-transition-group'
 
-import './Modal.css'
 
 const ModalOverlay = props => {
     const content = (
-        <div className={`z-50 fixed bg-white top-24 rounded-md shadow-xl ${props.className}`}>
-            <header className={` w-full p-2 m-1 `}>
+        <div className={`${props.className} fixed bg-white top-24 rounded-md shadow-xl z-50`}>
+            <header className={`w-full p-2 m-1 `}>
                     {props.header}
             </header>
 
@@ -41,7 +40,7 @@ const Modal = props => {
             mountOnEnter
             unmountOnExit 
             timeout={100}
-            classNames={`z-50 fixed bg-white w-fit top-24 ${props.className}`}
+            classNames={`z-50 fixed bg-white top-24 ${props.className}`}
         >
             <ModalOverlay {...props} /> 
         </CSSTransition>

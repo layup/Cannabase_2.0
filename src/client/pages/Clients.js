@@ -5,6 +5,9 @@ import SearchIcon from '@mui/icons-material/Search';
 const Clients = () => {
 
     const [clientData, setClient] = useState([]); 
+    const [totalClients, setTotalClients] = useState()
+    const [filter, setFilters] = useState('All')
+    const alphabet = ['All', "#","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
     const [bestMatches, setBestMatches] = useState([])
 
@@ -17,14 +20,35 @@ const Clients = () => {
         async function getClientData(){
             await window.api.getAllClients().then((value) => {
                 setClient(value);
-    
-  
+                setTotalClients(value)  
             }); 
 
         }
         getClientData()
-        console.log(clientData)
+        
     }, [])
+
+    const selectFilter = async (letter) => {
+        //console.log(letter)
+        setFilters(letter)
+
+        if(letter === 'All'){
+            setClient(totalClients)
+            return; 
+        }
+
+        if(letter === '#'){
+            await window.api.getNumberClients().then((value) => {
+                setClient(value);
+            }) 
+            return;
+        }
+
+        await window.api.clientSearch(letter).then((value) => {
+            setClient(value);
+        })
+
+    }
 
 
     return (
@@ -38,18 +62,19 @@ const Clients = () => {
 
                 <input 
                     type='search' 
-                    placeholder='Search Job Number' 
+                    placeholder='Search Client Name' 
                     className='w-full p-1 bg-emerald-800 text-white border-transparent focus:border-transparent focus:ring-0 outline-none'
                 />
             </div>
 
-            <div className='bg-zinc-200 p-2 py-10'>
-                <p>total clients: {clientData.length}</p>
+            <div className='bg-zinc-200 p-2 py-5 capitalize flex space-x-2'>
+                <p>total clients: { totalClients && totalClients.length} </p>
+                <p>Filter: {filter === "All" ? "None": filter}</p>
             
             </div>
 
             <div className='w-full h-full bg-white overflow-y-auto '>
-                <table className='table-auto md:table-fixed w-full text-sm md:text-base h-full'> 
+                <table className='table-auto md:table-fixed w-full text-sm md:text-base h-full max-h-10'> 
                     <thead className='bg-emerald-700 sticky top-0'>
                         <tr className='text-white [&>th]:font-normal [&>th]:p-2 '>
                             <th className='w-10/12 '>Client Names</th>
@@ -60,8 +85,8 @@ const Clients = () => {
                     <tbody className='text-xs md:text-base text-center overflow-y-auto '>
                         {clientData && clientData.map((item) => {
                             return (
-                                <tr className='border-1 hover:bg-yellow-200'>
-                                    <td className='py-2 px-3 text-left '>{item.client_name}</td>
+                                <tr className='border-1 hover:bg-yellow-200 '>
+                                    <td className='py-2 px-3 text-left'>{item.client_name}</td>
                                     <td>N/A</td>
                                     <td>N/A</td>
                                 </tr>
@@ -71,11 +96,26 @@ const Clients = () => {
                 </table>
             </div>
 
-            <div className='bg-emerald-700 p-2 text-white flex space-x-2'>
-                <p>All</p>
-                <p>#</p>
-                <p>A</p>
-                <p>B</p>
+            <div className='bg-emerald-700 p-2 text-white space-x-2'>
+                <ul className='flex w-full [&>li]:grow'>
+                    {
+                        alphabet.map((item) =>{
+                            return (
+                                <li >
+                                    <button 
+                                        className={`p-2 ${item === filter ? "underline": null }`}
+                                        onClick={() => {selectFilter(item)}}
+                                    >
+                                        {item}
+                                    </button>
+                                    {item === filter && <span>({clientData.length})</span>}
+                                </li>
+                            )
+                        })
+                    }
+                </ul>
+
+                
             </div>
 
         </div>

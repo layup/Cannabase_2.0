@@ -33,12 +33,13 @@ const MainTable = () => {
                                 test={item.tests}
                                 company={item.client_name}
                                 receive_date={item.receive_date}
-                                status={0}
+                                status={item.status}
                             /> 
                         )
                     })}
                 </tbody>
             </table> 
+           
         </div>
     )
 }

@@ -3,11 +3,10 @@ import Search from '../../shared/components/Navigation/Search';
 import TableHeader from '../../shared/components/Table/TableHeader';
 import TableContent from '../../shared/components/Table/TableContent';
 
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import CloseIcon from '@mui/icons-material/Close';
+//import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+//import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+
+import Filters from '../components/Filters';
 
 const Jobs = () => {
 
@@ -16,10 +15,7 @@ const Jobs = () => {
     const [rowShow, setrowShow] = useState(25);
     //const [page, setPage] = useState(1); 
     const [totalPages, setTotalPages] = useState(); 
-    const [filters, setFilters] = useState(true);
-    const [testOptions, setTestOptions] = useState(Array(12).fill(false))
-    const [showTest, setShowTest] = useState(false); 
-
+ 
     useEffect(() => {
         async function getTotalJobs(){
             await window.api.getTotalJobs().then((value) => {
@@ -53,9 +49,8 @@ const Jobs = () => {
 
         }
 
-
-        console.log(totalJobs)
-        console.log("total jobss", Jobs)
+        //console.log(totalJobs)
+        //console.log("total jobss", Jobs)
 
     }, [totalJobs])
 
@@ -67,63 +62,12 @@ const Jobs = () => {
         >     
           
             <Search />
-            <div className='bg-zinc-200 p-4 flex space-x-3'>
-                <div className='flex space-x-2 px-1 justify-center items-center text-emerald-600'>
-                    <FilterListIcon />
 
-                </div>
-
-                <button 
-                    className='bg-zinc-300 px-2 rounded-md flex justify-center uppercase text-sm items-center space-x-2 text-zinc-500 hover:border-emerald-600 border-1 border-zinc-500'
-                    onClick={() => setShowTest(!showTest)}
-                >
-                    <p className=''>Tests</p>
-                    <ArrowDropDownIcon  className=''/>
-                </button>
-
-                {showTest && 
-                    <div className="absolute top-32 left-72 bg-zinc-300 w-20 h-52 z-10 p-2 ">
-                        <ul>
-                            <li>List</li>
-                        </ul>
-                    </div>
-                }
-
-                <button className='bg-zinc-300 px-2 rounded-md flex justify-center uppercase text-sm items-center space-x-2 text-zinc-500' >
-                    <p className=''>Client</p>
-                    <ArrowDropDownIcon  className=''/>
-                </button>
-
-                <button className='bg-zinc-300 px-2 rounded-md flex justify-center uppercase text-sm items-center space-x-2 text-zinc-500' >
-                    <p className=''>Status</p>
-                    <ArrowDropDownIcon  className=''/>
-                </button>
-
-                <button className='bg-zinc-300 px-2 p-1 rounded-md flex justify-center uppercase text-sm items-center space-x-2 text-zinc-500' >
-                    <p className=''>Date Created</p>
-                    <ArrowDropDownIcon  className=''/>
-                </button>
-
-            </div>
-        
-            {filters && 
-                <div className='px-4 py-2 bg-zinc-200 flex space-x-4 border-t-1 border-zinc-400'>
-                    <p className='space-x-2'>
-                        <span className='uppercase'>Tests:</span> 
-                        <span className='font-medium'>Metals</span>
-                        <CloseIcon className='text-emerald-600'/>
-                    </p>
-
-                    <p className='text-emerald-600'>Clear</p>
-                
-                </div>
-            
-            }
+            <Filters />
 
             <div className='overflow-auto h-screen'>
                 <table className='table-auto md:table-fixed w-full text-sm md:text-base'>
                     <TableHeader />
-                
     
                     <tbody className='text-xs md:text-base text-center overflow-y-auto '>
                         {Jobs && Jobs.map((item) => {
@@ -135,7 +79,7 @@ const Jobs = () => {
                                     company={item.client_name}
                                     receive_date={item.receive_date}
                                     complete_date={item.complete_date}
-                                    status={0}
+                                    status={item.status}
                                 /> 
                             )
                         })}

@@ -8,7 +8,15 @@ module.exports = {
       borderWidth: {
         1: '1px',
       },
-
+      width: {
+        '92': '22rem',
+        '94': '23.5rem',
+        '128': '32rem'
+        
+      }, 
+      left:{
+        '70':'17.5rem'
+      },
       gridTemplateRows: {
         7: "repeat(7, minmax(0, 1fr))",
         8: "repeat(8, minmax(0, 1fr))",
