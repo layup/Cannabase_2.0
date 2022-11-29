@@ -1,9 +1,7 @@
-const { useDebugValue } = require('react');
+//const { useDebugValue } = require('react');
 const Store = require('electron-store')
 var dbmanager = require('./dbmanager')
 var db = dbmanager.db 
-
-
 
 exports.getNotComplete = () => {
 
@@ -263,4 +261,14 @@ exports.getNumberClients = () => {
             }
         })
     })
+}
+
+exports.getStorePathLocations = () => {
+    const store = new Store(); 
+
+    var dbPath = store.get('databaseLocation');
+    var reportsPath = store.get('reportsPath');
+
+    return {dbPath, reportsPath}
+
 }

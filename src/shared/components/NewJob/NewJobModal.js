@@ -149,7 +149,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
         }
 
         footer={
-            <div className='p-2 bg-zinc-200 space-x-2 rounded-b-md w-full text-right px'>
+            <div className='p-2 bg-zinc-200 space-x-2 rounded-b-md w-full text-right'>
                 <button 
                     className='rounded-md border-1 border-zinc-400 p-2'
                     onClick={handleCancel}

@@ -66,10 +66,34 @@ async function handleFileOpen() {
       
     }
   }
+
+  async function handleSetFilePath(setFile) {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+        properties: ['openDirectory']
+    })
+    console.log(setFile)
+
+    if (canceled) {
+      return
+    } else {
+      store.set(setFile, filePaths[0])
+      console.log(`New ${setFile} Path`, store.get(setFile))
+     
+      return filePaths[0]
+      
+    }
+  }
+
+
   
 
 app.whenReady().then(() => {
     ipcMain.handle('dialog:openFile', handleFileOpen)
+    ipcMain.handle('dialog:setPath',  async (event, ...args) => {
+        const results = await handleSetFilePath(...args)
+        return results 
+    })
+    ipcMain.handle('dia')
 
     const schema = {
         databaseLocation: {
@@ -88,6 +112,7 @@ app.whenReady().then(() => {
 
     
     console.log("Stored SQL Database Path: ", store.get('databaseLocation'))
+    console.log("Stored Reports Path: ", store.get('reportsPath'))
     
     createWindow()
 });

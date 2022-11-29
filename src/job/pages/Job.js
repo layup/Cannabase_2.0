@@ -5,6 +5,9 @@ import JobItem from '../components/JobItem'
 import test_image from '../../assets/test_image.jpg'
 import JobTests from '../components/JobTests'
 import Search from '../../shared/components/Navigation/Search'
+import DescriptionIcon from '@mui/icons-material/Description';
+import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import Modal from '../../shared/components/UIElements/Modal'
 
@@ -19,6 +22,7 @@ const Job = () => {
     const [searchInput, setSearchInput] = useState(''); 
     const [deleteJobModal, setDeleteJobModal] = useState(false); 
     const [completeJobModal, setCompleteJobModal] = useState(false); 
+    const [report, setReport] = useState() 
 
 
     //TODO set the job status 
@@ -34,10 +38,20 @@ const Job = () => {
             })
         }
 
+        async function scanReportsFolder(){
+            await window.api.scanReportsFolder(id.jobNum).then((value) => {
+                setReport(value)
+            })
+        }
+
         getJobInfoData()
         getTestData();
+        scanReportsFolder(); 
     }, [id])
 
+    const openPDF = async () => {
+        await window.api.openPDF(id.jobNum)
+    }
 
     const cancelDeleteJob = () => setDeleteJobModal(false); 
     const confirmDeleteJob = () => setDeleteJobModal(false); 
@@ -174,13 +188,34 @@ const Job = () => {
                     </div>
                     <div className='row-span-1 col-span-2 grid space-y-2 text-center'>
                         <div className='[&>*]:p-1 border-1' >
-                            <h1 className='text-lg bg-emerald-700 text-white'>Bench Sheets & COCs</h1>
-                            <p>No scanned bench sheets found.</p>
+                            <h1 className='text-lg bg-emerald-700 text-white'>Reports</h1>
+                            {report ? 
+                                <div className='flex justify-center  items-center space-x-2'>
+                                    <div className='text-blue-500 flex space-x-1'>
+                                        <DescriptionIcon />
+                                        <p className='font-2xl'>{report}</p> 
+                                    </div>
+                                    <button className='text-sm text-gray-500 border-1  rounded-md flex px-2 items-center' onClick={openPDF}>
+                                        <VisibilityIcon className='p-1' /> 
+                                        <p>View</p> 
+                                    </button>
+                                    <button className='text-sm text-gray-500 border-1 rounded-md flex px-2 items-center'>
+                                        <EditIcon className='p-1' /> 
+                                        <p>Edit</p> 
+                                    </button>
+
+
+                                </div>
+                                : <p>No scanned reports found.</p>
+                            }
+                            
                         </div>
 
                         <div className='[&>*]:p-1 border-1 content-center'>
                             <h1 className='text-lg bg-emerald-700 text-white'>Client Good Copies</h1>
+                            <p>(Complete Jobs Only)</p>
                             <p>No scanned copies found.</p>
+                            {/*.*1384.pdf regex example */}
                         </div>
 
                     </div>
