@@ -17,6 +17,7 @@ const JobTests = (props) => {
                 {props.testInfo.map((test) => {
                     return (
                         <JobItem
+                            key={test.jobId}
                             testType={test.test_type}
                             testStatus={test.status}
                             completeDate={test.complete_date}

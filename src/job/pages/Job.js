@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {useParams} from 'react-router-dom'
+import {useParams, useNavigate} from 'react-router-dom'
 
 import JobItem from '../components/JobItem'
 import test_image from '../../assets/test_image.jpg'
@@ -15,46 +15,71 @@ const Job = () => {
 
     let id = useParams()
 
+    const navigate = useNavigate(); 
+
     //const [loading, setLoading] = useState(true)
     const [jobStatus, setJobStatus] = useState(); 
     const [jobInfo, setJobInfo] = useState(); 
+    const [jobNotes, setJobNotes] = useState(); 
     const [testInfo, setTestInfo] = useState(); 
     const [searchInput, setSearchInput] = useState(''); 
     const [deleteJobModal, setDeleteJobModal] = useState(false); 
     const [completeJobModal, setCompleteJobModal] = useState(false); 
-    const [report, setReport] = useState() 
-
+    const [reports, setReports] = useState([]) //edit so can map multiple reports 
 
     //TODO set the job status 
     useEffect(() => {
         async function getJobInfoData(){
-            await window.api.getJobInfo(id.jobNum).then((value) => {
-                setJobInfo(value);
+            await window.api.getJobInfo(id.jobNum).then((data) => {
+                setJobInfo(data);
             }); 
         }
         async function getTestData(){
-            await window.api.getTests(id.jobNum).then((value) =>{
-                setTestInfo(value)       
+            await window.api.getTests(id.jobNum).then((tests) =>{
+                setTestInfo(tests)       
             })
         }
 
         async function scanReportsFolder(){
-            await window.api.scanReportsFolder(id.jobNum).then((value) => {
-                setReport(value)
+            await window.api.scanReportsFolder(id.jobNum).then((reports) => {
+                setReports(reports)
+                //console.log({reports})
+               
+            })
+        }
+        async function getJobNotes(){
+            await window.api.getJobNotes(id.jobNum).then((notes) => {
+                if(notes){
+                    setJobNotes(notes.note)
+                }
+               
             })
         }
 
         getJobInfoData()
         getTestData();
         scanReportsFolder(); 
+        getJobNotes();
     }, [id])
 
-    const openPDF = async () => {
-        await window.api.openPDF(id.jobNum)
+    const openPDF = async (report) => {
+        //console.log('report:', report)
+        await window.api.openPDF(id.jobNum, report)
+    }
+
+    const updateNotes = async (event) => {
+        setJobNotes(event.target.value)
+        //console.log(jobNotes)
+        await window.api.updateNotes(id.jobNum, jobNotes)
     }
 
     const cancelDeleteJob = () => setDeleteJobModal(false); 
-    const confirmDeleteJob = () => setDeleteJobModal(false); 
+    const confirmDeleteJob = async () => {
+        await window.api.deleteJob(id.jobNum).then(() => {
+            setDeleteJobModal(false); 
+            navigate('/')
+        })
+    }
 
     const cancelCompleteJob = () => setCompleteJobModal(false);
     const confirmCompleteJob = () => setCompleteJobModal(false); 
@@ -105,7 +130,6 @@ const Job = () => {
 
                         <Search />
                         
-
                         <div className='flex bg-zinc-100 p-2 justify-between items-center flex-col xl:flex-row'>
                             <div className='flex space-x-2'>
                                 <div className='p-2'>
@@ -157,6 +181,8 @@ const Job = () => {
                         <textarea 
                             className='p-2 w-full h-5/6 resize-none bg-zinc-100 border-2 '
                             placeholder='Enter Comments' 
+                            value={jobNotes}
+                            onChange={updateNotes}
                         />
                         
                     </div>
@@ -189,24 +215,28 @@ const Job = () => {
                     <div className='row-span-1 col-span-2 grid space-y-2 text-center'>
                         <div className='[&>*]:p-1 border-1' >
                             <h1 className='text-lg bg-emerald-700 text-white'>Reports</h1>
-                            {report ? 
-                                <div className='flex justify-center  items-center space-x-2'>
-                                    <div className='text-blue-500 flex space-x-1'>
-                                        <DescriptionIcon />
-                                        <p className='font-2xl'>{report}</p> 
-                                    </div>
-                                    <button className='text-sm text-gray-500 border-1  rounded-md flex px-2 items-center' onClick={openPDF}>
-                                        <VisibilityIcon className='p-1' /> 
-                                        <p>View</p> 
-                                    </button>
-                                    <button className='text-sm text-gray-500 border-1 rounded-md flex px-2 items-center'>
-                                        <EditIcon className='p-1' /> 
-                                        <p>Edit</p> 
-                                    </button>
-
-
-                                </div>
-                                : <p>No scanned reports found.</p>
+                            {reports ? 
+                                reports.map((report) => {
+                                    return (
+                                        <div className='flex justify-between space-x-2 hover:bg-gray-200'>
+                                            <div className='text-blue-500 flex space-x-1'>
+                                                <DescriptionIcon />
+                                                <p className='font-2xl'>{report}</p> 
+                                            </div>
+                                            <div className='flex'>
+                                                <button className='text-sm text-gray-500 border-1  rounded-md flex px-2 items-center' onClick={() => openPDF(report)}>
+                                                    <VisibilityIcon className='p-1' /> 
+                                                    <p>View</p> 
+                                                </button>
+                                                <button className='text-sm text-gray-500 border-1 rounded-md flex px-2 items-center'>
+                                                    <EditIcon className='p-1' /> 
+                                                    <p>Edit</p> 
+                                                </button>    
+                                            </div>
+                                        </div>
+                                        
+                                    )
+                                }): <p>No scanned reports found.</p>
                             }
                             
                         </div>

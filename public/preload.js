@@ -27,8 +27,18 @@ const getTests = async (jobNum) => {
     return CannabaseMgr.getTests(jobNum)
 }
 
+const getJobNotes = async(jobNum) => {
+    return CannabaseMgr.getJobNotes(jobNum);
+}
+const updateNotes = async(jobNum, note) => {
+    return CannabaseMgr.updateNotes(jobNum, note )
+}
+
 const createNewJob = async (jobNum, clientName, tests, notes) => {
     return CannabaseMgr.createNewJob(jobNum, clientName, tests, notes);
+}
+const deleteJob = async(jobNum) => {
+    return CannabaseMgr.deleteJob(jobNum);
 }
 
 const getTestStatus = async (jobNum, testNum) => {
@@ -64,8 +74,8 @@ const scanReportsFolder = (jobNum) => {
     return latexManger.scanReportsFolder(jobNum)
 }
 
-const openPDF = (jobNum) => {
-    return latexManger.openPDF(jobNum);
+const openPDF = (jobNum, report ) => {
+    return latexManger.openPDF(jobNum, report);
 }
 
 const getStorePathLocations = () => {
@@ -77,6 +87,7 @@ const getStorePathLocations = () => {
 
 contextBridge.exposeInMainWorld("api", {
     createNewJob: createNewJob,  
+    deleteJob: deleteJob, 
     getNotComplete: getNotComplete, 
     getJobInfo: getJobInfo, 
     getTotalJobs: getTotalJobs, 
@@ -87,6 +98,8 @@ contextBridge.exposeInMainWorld("api", {
     getTestStatus: getTestStatus,
     getAllClients: getAllClients, 
     getNumberClients: getNumberClients, 
+    getJobNotes: getJobNotes, 
+    updateNotes: updateNotes, 
     clientSearch: clientSearch,
     
     getStorePathLocations: getStorePathLocations, 

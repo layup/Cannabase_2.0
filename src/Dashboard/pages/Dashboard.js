@@ -1,11 +1,12 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Search from '../../shared/components/Navigation/Search'
 
 import MainTable from '../components/MainTable'
 
 function Dashboard() {
 
-    //const [filePath, setFilePath] = useState()
+    const [activeJobs, setActiveJobs] = useState()
+
 
     return (
         <div 
@@ -14,16 +15,16 @@ function Dashboard() {
             
             <Search /> 
             <div className='p-4 bg-zinc-200'>
-                <p>Active Jobs: {}</p>
+                <p>Active Jobs: {activeJobs}</p>
             </div>
 
             <div className=' bg-white h-screen overflow-auto ' >
-                <MainTable />
+                <MainTable setActiveJobs={setActiveJobs} />
 
             </div>
 
             <div className='bg-emerald-700 p-2 text-white space-x-2'>
-                <p className='px-10'>Active Jobs: 20</p>
+                <p className='px-10'>Active Jobs: {activeJobs}</p>
             </div> 
         </div>
   )

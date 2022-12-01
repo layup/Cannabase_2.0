@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react'
 import TableHeader from './TableHeader'
 import TableContent from './TableContent'
 
-const MainTable = () => {
+const MainTable = (props) => {
 
     const [data, setData] = useState([])
 
@@ -11,6 +11,9 @@ const MainTable = () => {
         async function getData(){
             await window.api.getNotComplete().then((value) => {
                 setData(value)
+                console.log(value.length)
+                props.setActiveJobs(value.length)
+                
             });
 
         }
@@ -27,8 +30,9 @@ const MainTable = () => {
                 <tbody className='text-xs md:text-base text-center overflow-y-auto '>
                     {data && data.map((item) => {
                         return (
+                            
                             <TableContent 
-                                key={item.id}
+                                key={item.id + "_" + item.job_number}
                                 jobNum={item.job_number}
                                 test={item.tests}
                                 company={item.client_name}

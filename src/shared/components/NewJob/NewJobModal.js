@@ -1,7 +1,10 @@
 import React, {  useState, useRef } from 'react'
+import {useNavigate, redirect} from 'react-router-dom';
+
 
 
 import Modal from '../UIElements/Modal'
+import Job from '../../../job/pages/Job';
 import { convertForDatabase } from '../../../utils/utils';
 
 import Close from '@mui/icons-material/Close';
@@ -24,6 +27,10 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
       "Fungal ID",
       "Psilocybin"
     ]
+
+
+    const navigate = useNavigate();
+
 
     const [testOptions, setTestOptions] = useState(Array(12).fill(false)); 
     const [jobNumber, setJobNumber] = useState("")
@@ -106,12 +113,12 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
 
       let tests = convertForDatabase(testOptions)
 
-
       await window.api.createNewJob(jobNumber, clientName, tests, jobNotes).then(() => {
         console.log("Submitted")
         handleCancel()
-        //should take us to the newly created item 
-        
+        //should take us to the newly created item \
+
+        navigate(`/jobs/:${jobNumber}`);
       })
 
     }

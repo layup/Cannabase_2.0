@@ -12,32 +12,36 @@ exports.scanReportsFolder = (jobNum) => {
     const regex = /.*.pdf/
 
     return new Promise((resolve, reject) => {
-        fs.readdir(currentPath, (err, files) => {
-            files.forEach(file => {
-            //console.log(file)
-            if(regex.test(file)){
-                resolve(file)
-            }
-            
+
+        let scanned_files = [] 
+
+        if(fs.existsSync(currentPath)){
+            fs.readdir(currentPath, (err, files) => {
+                files.forEach(file => {
+                
+                    if(scanned_files.includes(file) === false){
+                        if(regex.test(file)){
+                            scanned_files.push(file)
+                            //console.log('hello')
+                            resolve(scanned_files)
+                            //console.log(scanned_files)
+                        } 
+                    }
+
+                
+                });
             });
-        });
+        }
+
+        //console.log('scanned files: ', scanned_files)
+        //resolve(scanned_files)
     })
 }
 
 //read local dir and find the files that we need 
-exports.openPDF = (jobNum) => {
+exports.openPDF = (jobNum, report) => {
     var reportsDir = store.get('reportsPath')
     var currentPath = path.join(reportsDir, jobNum)
-    const regex = /.*.pdf/ 
 
-    fs.readdir(currentPath, (err, files) => {
-        files.forEach(file => {
-        //console.log(file)
-        
-        if(regex.test(file)){
-            //console.log(__dirname)
-            //console.log(path.join(currentPath, file))
-            shell.openExternal('file://' + path.join(currentPath,file))
-        }});
-    });
+    shell.openExternal('file://' + path.join(currentPath, report))
 } 
