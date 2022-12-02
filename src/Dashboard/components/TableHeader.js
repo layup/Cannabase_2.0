@@ -4,10 +4,7 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 //import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 //import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-
-const TableHeader = () => {
-
-    
+const TableHeader = () => { 
     /*
     const [StatusSort, SetStatusSort] = useState(0)
     const [SubmissionDateSort, SetSubmissionDateSort] = useState(0)

@@ -3,7 +3,7 @@ const Store = require('electron-store')
 var dbmanager = require('./dbmanager')
 var db = dbmanager.db 
 
-exports.getNotComplete = () => {
+exports.getNotCompleteJobs = () => {
 
     return new Promise((resolve, reject) => {
         //const sql = 'SELECT * FROM cannajobs2022 WHERE job_number in (SELECT job_number FROM cannajobs_tests2022 WHERE status = 0) ORDER BY receive_date DESC'  
@@ -110,14 +110,14 @@ exports.getJobNotes = (jobNum) => {
         const sql = `SELECT note FROM cannabase_notes WHERE job_number = ${jobNum}`  
         console.log('Running searchJobs(): ', sql);
         
-        let jobNotes = []
+        //let jobNotes = []
 
          db.all(sql, (err,row) => {
             if(err) {
                 console.error(err.message)
                 reject(err)
             }else{
-                console.log(row[row.length-1])
+                //console.log(row[row.length-1])
                 resolve(row[row.length-1])
             }
         })
@@ -258,6 +258,8 @@ exports.deleteJob = (jobNum) => {
         const SQL = `DELETE FROM cannabase_jobs WHERE job_number == ${jobNum};`
         const SQL2 = `DELETE FROM cannabase_tests WHERE job_number == ${jobNum};`
         const SQL3 = `DELETE FROM cannabase_notes WHERE job_number == ${jobNum};`
+
+        console.log("Running deleteJob()")
         db.run(SQL, (err,row) => {
             if(err) {
                 console.error(err.message)
@@ -281,7 +283,36 @@ exports.deleteJob = (jobNum) => {
         })
     })
 
+}
 
+exports.setJobStatus = (jobNum, status) => {
+    return new Promise((resolve, reject) => {
+
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+        
+        today = yyyy + '-' + mm + '-' + dd;
+
+        let SQL = ``
+
+        if(status === 0 ){
+            SQL = `UPDATE cannabase_jobs SET status = ${status}, complete_date = null WHERE job_number = ${jobNum}`
+        }else{
+            SQL = `UPDATE cannabase_jobs SET status = ${status}, complete_date = '${today}' WHERE job_number = ${jobNum}`
+        }
+      
+
+        console.log("Running setJobStatus(): ", SQL)
+        db.run(SQL, (err,row) => {
+            if(err) {
+                console.error(err.message)
+                reject(err)
+            }
+            resolve()
+        })
+    })
 }
 
 exports.getTestStatus =(jobNum, testNum) => {
@@ -388,6 +419,22 @@ exports.clientExists = (clientName) => {
         })
     })
 }
+
+exports.getClientJobs = (clientName) => {
+    return new Promise((resolve, reject) => {
+        const SQL = `SELECT * FROM cannabase_jobs WHERE client_name = '${clientName}'`
+
+        db.all(SQL, (err,row) => {
+            if(err) {
+                console.error(err.message)
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 
 exports.getNumberClients = () => {
     return new Promise((resolve, reject) => {

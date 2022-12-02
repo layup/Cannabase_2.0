@@ -1,33 +1,31 @@
 import React, { useEffect, useState } from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
 
-import JobItem from '../components/JobItem'
+import ActionButton from '../components/ActionButton'
+import JobHeader from '../components/JobHeader'
 import test_image from '../../assets/test_image.jpg'
 import JobTests from '../components/JobTests'
 import Search from '../../shared/components/Navigation/Search'
+import Modal from '../../shared/components/UIElements/Modal'
+
 import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
-import Modal from '../../shared/components/UIElements/Modal'
-
 const Job = () => {
 
     let id = useParams()
-
     const navigate = useNavigate(); 
 
     //const [loading, setLoading] = useState(true)
-    const [jobStatus, setJobStatus] = useState(); 
     const [jobInfo, setJobInfo] = useState(); 
     const [jobNotes, setJobNotes] = useState(); 
-    const [testInfo, setTestInfo] = useState(); 
-    const [searchInput, setSearchInput] = useState(''); 
+    const [testInfo, setTestInfo] = useState();     
+    const [statusModal, setStatusModal] = useState(false); 
+    const [editJobModal, setJobModal] = useState(false); 
     const [deleteJobModal, setDeleteJobModal] = useState(false); 
-    const [completeJobModal, setCompleteJobModal] = useState(false); 
-    const [reports, setReports] = useState([]) //edit so can map multiple reports 
+    const [reports, setReports] = useState() 
 
-    //TODO set the job status 
     useEffect(() => {
         async function getJobInfoData(){
             await window.api.getJobInfo(id.jobNum).then((data) => {
@@ -39,12 +37,9 @@ const Job = () => {
                 setTestInfo(tests)       
             })
         }
-
         async function scanReportsFolder(){
             await window.api.scanReportsFolder(id.jobNum).then((reports) => {
                 setReports(reports)
-                //console.log({reports})
-               
             })
         }
         async function getJobNotes(){
@@ -52,7 +47,6 @@ const Job = () => {
                 if(notes){
                     setJobNotes(notes.note)
                 }
-               
             })
         }
 
@@ -63,13 +57,11 @@ const Job = () => {
     }, [id])
 
     const openPDF = async (report) => {
-        //console.log('report:', report)
         await window.api.openPDF(id.jobNum, report)
     }
 
     const updateNotes = async (event) => {
         setJobNotes(event.target.value)
-        //console.log(jobNotes)
         await window.api.updateNotes(id.jobNum, jobNotes)
     }
 
@@ -81,12 +73,18 @@ const Job = () => {
         })
     }
 
-    const cancelCompleteJob = () => setCompleteJobModal(false);
-    const confirmCompleteJob = () => setCompleteJobModal(false); 
+    const cancelStatusModal = () => setStatusModal(false);
+    const confirmStatusModal = async (status) => {
+        await window.api.setJobStatus(id.jobNum, status).then(() => {        
+            setStatusModal(false)
+        })            
+        await window.api.getJobInfo(id.jobNum).then((data) => {
+                setJobInfo(data);
+        }); 
+    }
 
     return (
         <React.Fragment> 
-
             <Modal 
                 show={deleteJobModal}
                 onCancel={cancelDeleteJob}
@@ -106,20 +104,34 @@ const Job = () => {
             </Modal>
 
             <Modal 
-                show={completeJobModal}
-                onCancel={cancelCompleteJob}
-                header="Delete Job?"
+                show={statusModal}
+                onCancel={cancelStatusModal}
+                header={
+                    <div className='p-2 border-b-1'>
+                        {jobInfo && (jobInfo.status === 1 ? 
+                            <h1>Reset Job</h1>
+                            :<h1>Complete Job</h1>)
+                        }
+                    </div>
+                }
                 className='w-1/3 left-1/3'
                 footer={
                     <div className='bg-zinc-200 p-2 rounded-b-md space-x-4 text-right w-full' >
-                        <button onClick={confirmCompleteJob}>cancel</button>
-                        <button className='bg-emerald-600 text-white p-1 px-2 rounded-md'onClick={confirmDeleteJob}>Confirm</button>
+                        <button onClick={cancelStatusModal}>cancel</button>
+                        <button 
+                            className='bg-emerald-600 text-white p-1 px-2 rounded-md'
+                            onClick={() => confirmStatusModal(jobInfo.status === 1 ? 0 : 1) }
+                        >
+                            Confirm
+                        </button>
                     </div>
                 }
             > 
                 <div className='text-center p-4 text-lg w-full'>
-                    <p>Are you sure you want to mark the job as complete?</p>
-                    <p></p>
+                    {jobInfo && (jobInfo.status === 1 ? 
+                        <p>Are you sure you want to reset this Job? </p>
+                        :<p>Are you sure you want to mark the job as Complete?</p>)
+                    }
                 </div>
             </Modal>
 
@@ -130,45 +142,35 @@ const Job = () => {
 
                         <Search />
                         
-                        <div className='flex bg-zinc-100 p-2 justify-between items-center flex-col xl:flex-row'>
-                            <div className='flex space-x-2'>
-                                <div className='p-2'>
-                                    <p><span className=''>Job ID:</span> W{id.jobNum} </p>
-                                    <p className=''>Client: {jobInfo && <span className='text-blue-500'>{jobInfo.client_name}</span>} </p>
-                                </div>
-
-                                <div className='p-2'>
-                                    <p>Recieve Date: {jobInfo && jobInfo.receive_date}</p>
-                                    <p>Complete Date: N/A</p>
-                                </div> 
-                                
-                                <p className='p-2'>Status: 
-                                    <span className='text-red-400 uppercase'> Incomplete</span>
-                                </p>         
+                        <div className='flex bg-zinc-100 p-2 justify-between  flex-col xl:flex-row'>
+                            <JobHeader jobInfo={jobInfo} jobNum={id.jobNum}  />
                             
-                            </div>
-                            
-                            <div className='space-x-2 p-2'>
-                                <button 
-                                    className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-emerald-500 hover:text-white' 
-                                    onClick={() => {setCompleteJobModal((true))}}
-                                >
-                                    Complete Job
-                                </button>
+                            <div className='flex h-12 space-x-1 p-2 '>
+                                {jobInfo && (jobInfo.status === 0?  
+                                    <ActionButton
+                                        className={'hover:bg-emerald-500'}
+                                        onClick={() => {setStatusModal(true)}}
+                                        content={"Complete Job"}
+                                    />
+                                    :<ActionButton
+                                        className={'hover:bg-blue-400'}
+                                        onClick={() => {setStatusModal(true)}}
+                                        content={"Reset Job"}
+                                    />)
+                                }
 
-                                <button 
-                                    className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white  uppercase text-sm hover:bg-blue-400 hover:text-white'
-                                >
-                                    Edit Job
-                                </button>
+                                <ActionButton
+                                    className={'hover:bg-blue-400'}
+                                    
+                                    content={"Edit Job"}
+                                />
 
-
-                                <button 
-                                    className=' p-2 w-36 rounded-lg border-1 border-zinc-500 text-black bg-white uppercase text-sm hover:bg-red-400 hover:text-white'
+                                <ActionButton 
+                                    className='hover:bg-red-400'
                                     onClick={() => {setDeleteJobModal(true)}}
+                                    content={"Delete Job"}
                                 >
-                                    Delete Job
-                                </button>
+                                </ActionButton>
                             </div>
         
                         </div>
@@ -186,22 +188,25 @@ const Job = () => {
                         />
                         
                     </div>
-                    <div className='row-span-3 col-span-2 bg-zinc-100 flex flex-col items-center overflow-y-auto '>
-                        <h1 className='images w-full text-center sticky top-0 p-3 bg-white'>
+                    <div className='row-span-3 col-span-2 bg-zinc-100 flex flex-col items-center'>
+                        <h1 className='images w-full text-center p-3 bg-white'>
                             Images
                         </h1> 
-                        <div className='bg-white my-2'>
-                            <img src={test_image} classname='' alt='weed'/>
-                        <p className='text-center py-2'>W12913</p>
+                        <div className='overflow-y-auto w-full p-2'>                        
+                            <div className='bg-white my-2 p-1'>
+                                <img src={test_image} classname='object-none h-48 w-96'  alt='weed'/>
+                                <p className='text-center p-2'>W12913</p>
+                            </div>
+                            <div className='bg-white my-2'>
+                                <img src={test_image} classname='' alt='weed'/>
+                                <p className='text-center py-2'>W12913</p>
+                            </div>
+                            <div className='bg-white my-2'>
+                                <img src={test_image} classname='' alt='weed'/>
+                                <p className='text-center py-2'>W12913</p>
+                            </div>
                         </div>
-                        <div className='bg-white my-2 '>
-                            <img src={test_image} classname='' alt='weed'/>
-                            <p className='text-center py-2'>W12913</p>
-                        </div>
-                        <div className='bg-white my-2 '>
-                            <img src={test_image} classname='' alt='weed'/>
-                            <p className='text-center py-2'>W12913</p>
-                        </div>
+
                         
                     </div>
                     <div className='row-span-1 col-span-2 border-2 overflow-y-auto'>
@@ -218,7 +223,7 @@ const Job = () => {
                             {reports ? 
                                 reports.map((report) => {
                                     return (
-                                        <div className='flex justify-between space-x-2 hover:bg-gray-200'>
+                                        <div className='flex justify-between space-x-2'>
                                             <div className='text-blue-500 flex space-x-1'>
                                                 <DescriptionIcon />
                                                 <p className='font-2xl'>{report}</p> 
@@ -234,7 +239,6 @@ const Job = () => {
                                                 </button>    
                                             </div>
                                         </div>
-                                        
                                     )
                                 }): <p>No scanned reports found.</p>
                             }
@@ -249,8 +253,6 @@ const Job = () => {
                         </div>
 
                     </div>
-
-
                 </div>
             </div>
         </React.Fragment>

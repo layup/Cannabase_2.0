@@ -24,7 +24,7 @@ function App() {
         <Routes>
           <Route exact path="/" element={<Dashboard />} /> 
           <Route path="/clients" element={<Clients />} />
-          <Route path="/clients/:clientName" element={<Client />} />
+            <Route path="/clients/:clientName" element={<Client />} />
           <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:jobNum" element={<Job />} />
           <Route path="/settings" element={<Settings />} /> 

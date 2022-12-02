@@ -1,4 +1,4 @@
-const {shell, ipcRenderer } = require('electron')
+const {shell, ipcRenderer, BrowserWindow } = require('electron')
 const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path')
@@ -40,8 +40,11 @@ exports.scanReportsFolder = (jobNum) => {
 
 //read local dir and find the files that we need 
 exports.openPDF = (jobNum, report) => {
+    // Load a remote URL
+    
     var reportsDir = store.get('reportsPath')
     var currentPath = path.join(reportsDir, jobNum)
 
     shell.openExternal('file://' + path.join(currentPath, report))
+
 } 

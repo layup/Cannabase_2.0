@@ -9,7 +9,7 @@ const MainTable = (props) => {
 
     useEffect(() => {
         async function getData(){
-            await window.api.getNotComplete().then((value) => {
+            await window.api.getNotCompleteJobs().then((value) => {
                 setData(value)
                 console.log(value.length)
                 props.setActiveJobs(value.length)

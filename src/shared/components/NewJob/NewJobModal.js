@@ -138,6 +138,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
       }
 
       cancelCreateNewJob() 
+      
     }
 
 

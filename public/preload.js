@@ -4,8 +4,8 @@ const latexManger = require('./latex/latexManger')
 
 console.log('Preload Scripts Loaded');
 
-const getNotComplete = async () => {
-    return  CannabaseMgr.getNotComplete(); 
+const getNotCompleteJobs = async () => {
+    return  CannabaseMgr.getNotCompleteJobs(); 
 }
 
 const getJobInfo = async (jobNum) => {
@@ -40,6 +40,9 @@ const createNewJob = async (jobNum, clientName, tests, notes) => {
 const deleteJob = async(jobNum) => {
     return CannabaseMgr.deleteJob(jobNum);
 }
+const setJobStatus = async(jobNum, status) => {
+    return CannabaseMgr.setJobStatus(jobNum, status); 
+}
 
 const getTestStatus = async (jobNum, testNum) => {
     return CannabaseMgr.getTestStatus(jobNum, testNum)
@@ -53,9 +56,14 @@ const getNumberClients = async () => {
     return CannabaseMgr.getNumberClients(); 
 }
 
+const getClientJobs = async (clientName) => {
+    return CannabaseMgr.getClientJobs(clientName)
+}
+
 const clientSearch = async (clientName) => {
     return CannabaseMgr.clientSearch(clientName)
 }
+
 
 const setTestsStatus = async (jobNum, testNum, status) => {
     return CannabaseMgr.setTestsStatus(jobNum, testNum, status)
@@ -88,8 +96,10 @@ const getStorePathLocations = () => {
 contextBridge.exposeInMainWorld("api", {
     createNewJob: createNewJob,  
     deleteJob: deleteJob, 
-    getNotComplete: getNotComplete, 
+    setJobStatus: setJobStatus, 
+    getNotCompleteJobs: getNotCompleteJobs, 
     getJobInfo: getJobInfo, 
+    getClientJobs: getClientJobs, 
     getTotalJobs: getTotalJobs, 
     getAllJobs: getAllJobs, 
     searchJobs: searchJobs, 
