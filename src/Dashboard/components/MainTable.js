@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react'
 
-import TableHeader from './TableHeader'
-import TableContent from './TableContent'
+
+import JobsTableHeader from '../../shared/components/Table/JobsTableHeader'
+import JobsTableContent from '../../shared/components/Table/JobsTableContent'
 
 const MainTable = (props) => {
 
@@ -11,7 +12,7 @@ const MainTable = (props) => {
         async function getData(){
             await window.api.getNotCompleteJobs().then((value) => {
                 setData(value)
-                console.log(value.length)
+                //console.log(value.length)
                 props.setActiveJobs(value.length)
                 
             });
@@ -26,12 +27,12 @@ const MainTable = (props) => {
     return (
         <div className='w-full h-full'> 
             <table className='table-auto md:table-fixed w-full text-sm md:text-base'>
-                <TableHeader />
+                <JobsTableHeader />
                 <tbody className='text-xs md:text-base text-center overflow-y-auto '>
                     {data && data.map((item) => {
                         return (
                             
-                            <TableContent 
+                            <JobsTableContent 
                                 key={item.id + "_" + item.job_number}
                                 jobNum={item.job_number}
                                 test={item.tests}

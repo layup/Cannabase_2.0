@@ -12,7 +12,7 @@ function Dashboard() {
         <div 
             className=' flex flex-col h-screen max-w-screen lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
         >     
-            
+         
             <Search /> 
             <div className='p-4 bg-zinc-200'>
                 <p>Active Jobs: {activeJobs}</p>
@@ -20,7 +20,6 @@ function Dashboard() {
 
             <div className=' bg-white h-screen overflow-auto ' >
                 <MainTable setActiveJobs={setActiveJobs} />
-
             </div>
 
             <div className='bg-emerald-700 p-2 text-white space-x-2'>

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Search from '../../shared/components/Navigation/Search';
-import TableHeader from '../../shared/components/Table/TableHeader';
-import TableContent from '../../shared/components/Table/TableContent';
+import JobsTableHeader from '../../shared/components/Table/JobsTableHeader';
+import JobsTableContent from '../../shared/components/Table/JobsTableContent';
 
 //import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 //import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-import Filters from '../components/Filters';
+import Filters from '../components/filter/Filters';
 
 const Jobs = () => {
 
@@ -67,12 +67,12 @@ const Jobs = () => {
 
             <div className='overflow-auto h-screen'>
                 <table className='table-auto md:table-fixed w-full text-sm md:text-base'>
-                    <TableHeader />
+                    <JobsTableHeader />
     
                     <tbody className='text-xs md:text-base text-center overflow-y-auto '>
                         {Jobs && Jobs.map((item) => {
                             return (
-                                <TableContent 
+                                <JobsTableContent 
                                     key={item.id}
                                     jobNum={item.job_number}
                                     test={item.tests}

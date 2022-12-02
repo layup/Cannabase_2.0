@@ -6,7 +6,9 @@ import JobHeader from '../components/JobHeader'
 import test_image from '../../assets/test_image.jpg'
 import JobTests from '../components/JobTests'
 import Search from '../../shared/components/Navigation/Search'
-import Modal from '../../shared/components/UIElements/Modal'
+import CompleteJobModal from '../components/modals/CompleteJobModal'
+import DeleteJobModal from '../components/modals/DeleteJobModal'
+import EditJobModal from '../../shared/components/NewJob/EditJobModal'
 
 import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,9 +22,9 @@ const Job = () => {
     //const [loading, setLoading] = useState(true)
     const [jobInfo, setJobInfo] = useState(); 
     const [jobNotes, setJobNotes] = useState(); 
-    const [testInfo, setTestInfo] = useState();     
+    const [jobTests, setjobTests] = useState();     
     const [statusModal, setStatusModal] = useState(false); 
-    const [editJobModal, setJobModal] = useState(false); 
+    const [editJobModal, setEditJobModal] = useState(false); 
     const [deleteJobModal, setDeleteJobModal] = useState(false); 
     const [reports, setReports] = useState() 
 
@@ -34,7 +36,7 @@ const Job = () => {
         }
         async function getTestData(){
             await window.api.getTests(id.jobNum).then((tests) =>{
-                setTestInfo(tests)       
+                setjobTests(tests)       
             })
         }
         async function scanReportsFolder(){
@@ -85,55 +87,31 @@ const Job = () => {
 
     return (
         <React.Fragment> 
-            <Modal 
-                show={deleteJobModal}
-                onCancel={cancelDeleteJob}
-                header="Delete Job?"
-                className='w-1/3 left-1/3'
-                footer={
-                    <div className='bg-zinc-200 p-2 rounded-b-md space-x-4 text-right w-full' >
-                        <button onClick={cancelDeleteJob}>cancel</button>
-                        <button className='bg-red-400 text-white p-1 px-2 rounded-md'onClick={confirmDeleteJob}>Delete</button>
-                    </div>
-                }
-            > 
-                <div className='text-center p-4 text-lg w-full '>
-                    <p>Are you sure you want to delete job?</p>
-                    <p>You cannot undo this action</p>
-                </div>
-            </Modal>
+            <DeleteJobModal 
+                deleteJobModal={deleteJobModal}
+                setDeleteJobModal={setDeleteJobModal}
+                cancelDeleteJob={cancelDeleteJob}
+                confirmDeleteJob={confirmDeleteJob}
+            /> 
 
-            <Modal 
-                show={statusModal}
-                onCancel={cancelStatusModal}
-                header={
-                    <div className='p-2 border-b-1'>
-                        {jobInfo && (jobInfo.status === 1 ? 
-                            <h1>Reset Job</h1>
-                            :<h1>Complete Job</h1>)
-                        }
-                    </div>
-                }
-                className='w-1/3 left-1/3'
-                footer={
-                    <div className='bg-zinc-200 p-2 rounded-b-md space-x-4 text-right w-full' >
-                        <button onClick={cancelStatusModal}>cancel</button>
-                        <button 
-                            className='bg-emerald-600 text-white p-1 px-2 rounded-md'
-                            onClick={() => confirmStatusModal(jobInfo.status === 1 ? 0 : 1) }
-                        >
-                            Confirm
-                        </button>
-                    </div>
-                }
-            > 
-                <div className='text-center p-4 text-lg w-full'>
-                    {jobInfo && (jobInfo.status === 1 ? 
-                        <p>Are you sure you want to reset this Job? </p>
-                        :<p>Are you sure you want to mark the job as Complete?</p>)
-                    }
-                </div>
-            </Modal>
+            {/* need to load the tests and update afterwords*/}
+            {jobInfo && <EditJobModal  
+                show={editJobModal}
+                setCreateNewJob={setEditJobModal}
+                jobInfo={jobInfo}
+                jobTests={jobTests}
+                notes={jobNotes}
+                //cancelUpdate={cancelCreateNewJob}
+                //confirmUpdate={confirmCreateNewJob}
+            /> }
+
+            <CompleteJobModal 
+                statusModal={statusModal}
+                cancelStatusModal={cancelStatusModal}
+                confirmStatusModal={confirmStatusModal}
+                setStatusModal={setStatusModal}
+                jobInfo={jobInfo}
+            /> 
 
             <div 
                 className='bg-white flex flex-col h-screen max-w-screen lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
@@ -161,7 +139,7 @@ const Job = () => {
 
                                 <ActionButton
                                     className={'hover:bg-blue-400'}
-                                    
+                                    onClick={() => {setEditJobModal(true)}} 
                                     content={"Edit Job"}
                                 />
 
@@ -210,9 +188,9 @@ const Job = () => {
                         
                     </div>
                     <div className='row-span-1 col-span-2 border-2 overflow-y-auto'>
-                        {testInfo && 
+                        {jobTests && 
                             <JobTests
-                                testInfo={testInfo}
+                                testInfo={jobTests}
                                 jobId={id.jobNum}
                             />
                         }

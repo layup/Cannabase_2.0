@@ -1,4 +1,4 @@
-const {shell, ipcRenderer, BrowserWindow } = require('electron')
+const {shell, ipcRenderer, BrowserWindow, dialog } = require('electron')
 const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path')
@@ -27,14 +27,10 @@ exports.scanReportsFolder = (jobNum) => {
                             //console.log(scanned_files)
                         } 
                     }
-
-                
+       
                 });
             });
         }
-
-        //console.log('scanned files: ', scanned_files)
-        //resolve(scanned_files)
     })
 }
 
@@ -48,3 +44,7 @@ exports.openPDF = (jobNum, report) => {
     shell.openExternal('file://' + path.join(currentPath, report))
 
 } 
+
+exports.openFileXlsx = async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog()
+}
