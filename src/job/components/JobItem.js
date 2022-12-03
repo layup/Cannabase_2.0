@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { matchString } from '../../utils/utils'
+import { matchString } from '../../shared/utils/utils'
 
 const JobItem = (props) => {
 

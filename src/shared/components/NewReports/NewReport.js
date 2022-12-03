@@ -54,7 +54,12 @@ const NewReport = (props) => {
         props.cancelCreateNewReport() 
       }
   
- 
+    const openFileXlsx = async () => {
+        console.log('running tests')
+        await window.api.openFileXlsx().then((value) => {
+            console.log('done:', value)
+        });
+    }
 
     return (
         <Modal
@@ -116,6 +121,7 @@ const NewReport = (props) => {
                         <p>or</p>
                         <button
                             className='text-blue-700'
+                            onClick={openFileXlsx}
                         >
                             Browse File
                         </button>

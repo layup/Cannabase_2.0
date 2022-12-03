@@ -5,7 +5,7 @@ import {useNavigate, redirect} from 'react-router-dom';
 
 import Modal from '../UIElements/Modal'
 import Job from '../../../job/pages/Job';
-import { convertForDatabase } from '../../../utils/utils';
+import { convertForDatabase } from '../../utils/utils'
 
 import Close from '@mui/icons-material/Close';
 import SelectClient from './SelectClient';

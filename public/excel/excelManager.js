@@ -1,7 +1,8 @@
-const {shell, ipcRenderer, BrowserWindow, dialog } = require('electron')
+const {shell, ipcRenderer, BrowserWindow, dialog, remote, } = require('electron')
 const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path')
+
 
 const store = new Store()
 
@@ -44,7 +45,3 @@ exports.openPDF = (jobNum, report) => {
     shell.openExternal('file://' + path.join(currentPath, report))
 
 } 
-
-exports.openFileXlsx = async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog()
-}

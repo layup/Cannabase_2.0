@@ -19,6 +19,7 @@ const Job = () => {
     let id = useParams()
     const navigate = useNavigate(); 
 
+
     //const [loading, setLoading] = useState(true)
     const [jobInfo, setJobInfo] = useState(); 
     const [jobNotes, setJobNotes] = useState(); 
@@ -52,10 +53,17 @@ const Job = () => {
             })
         }
 
+        async function temp(){
+            await window.api.temp().then(() => {
+                console.log('done')
+            }); 
+        }
+        
         getJobInfoData()
         getTestData();
         scanReportsFolder(); 
         getJobNotes();
+        temp();
     }, [id])
 
     const openPDF = async (report) => {

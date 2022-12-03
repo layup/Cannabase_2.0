@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from 'react'
-import { convertForDatabase } from '../../../utils/utils';
+import { convertForDatabase } from '../../utils/utils'
 
 import Modal from '../UIElements/Modal'
 import SelectClient from './SelectClient';
