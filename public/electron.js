@@ -87,6 +87,11 @@ async function handleSetFilePath(setFile) {
     }
   }
 
+
+function generateData(){
+
+}
+
 async function openFileXlsx() {
     const { canceled, filePaths } = await dialog.showOpenDialog() 
     var fileName = filePaths[0].replace(/^.*[\\\/]/, ''); 
@@ -96,41 +101,103 @@ async function openFileXlsx() {
         console.log('is xslx file')
     }
 
-    const maxRow = 182;
-    const minRow = 75;
+    //should be around 137 - 74 = 63 
+    //total = 186 - 74 = 112
+    
+    //const maxRow = 137;
+    //const minRow = 41;
 
-    const wb = XLSX.readFile(filePaths[0], {sheetRows: maxRow});
+    let headers = ['index', 'component', 'trace', 'RT' , 'BUD1', 'BUD2']
+
+    //load an XSLX file into memory 
+    //const wb = XLSX.readFile(filePaths[0], {sheetRows: maxRow});
+    const wb = XLSX.readFile(filePaths[0]);
+    //wb['!ref'] = "A74:B74" // change the sheet range to A2:C3
+    console.log(wb.SheetNames)
+    //select the first and only sheet to read 
     const ws = wb.Sheets[wb.SheetNames[0]];
+
+    //don't know how many columns there will be before hand 
+    
     let data = XLSX.utils.sheet_to_json(ws);
-    data = data.slice(minRow <= 2 ? 0 : minRow - 2);
-    console.log(data);
+    let dataRows = Object.keys(data).length 
+
+    console.log(typeof data); 
+    //console.log(Object.keys(data));
+    //console.log(Object.keys(data).length)
+    
+    data = data.slice((dataRows-1) - 112, dataRows - 10);
+    //remove 3 random middle columns 64 - 66
+    //easiser to parase past it 
+
+    //console.log(Object.keys(data)); 
+    dataRows = Object.keys(data).length 
+    //0-102 
+    //console.log(dataRows)
+    //console.log(data)
+    
+    console.log(data[0])
+    console.log(typeof data)
+    console.log(typeof data[0])
+    
+    //data[0] bud locations 
+    //data[]
+
+    //console.log(Object.keys(data[0]))
+    
+    let budHeader = data[2]
+    let budNames = data[1]
+    let budLocations = []
+    
+   
+
+    for (var key in budHeader) {
+        //console.log(key + " -> " + temp[key]); 
+        if(budHeader[key] === 'ng/g'){
+            budLocations.push(key)
+        }
+    }
+ 
+    console.log(budLocations)
+
+    //get all the weed names 
+    for(var key2 in budLocations){
+        //console.log(key2)
+        //console.log(budNames[budLocations[key2]])
+    }
+
+    //get the bud names 
+
+    console.log("TESINGS")
+
+    for (var key3 in budLocations){
+        console.log(budNames[budLocations[key3]])
+        data.forEach((item) => {
+            if((typeof(item[budLocations[key3]]) !== "undefined") && (typeof(item.__EMPTY_1) !== 'undefined')){
+                console.log(item.__EMPTY_1, item[budLocations[key3]])
+            }
+
+            
+        })
+    }
+     
+
+    //console.log(data[56])
+    //console.log(Object.keys(data[56]).length)
+
+    
+
+
     fs.writeFileSync('test.json',JSON.stringify(data))
 
 
-    /*
-    const file = reader.readFile(filePaths[0])
-    let data = []
-    const sheets = file.SheetNames
-    console.log(sheets[0])
 
-    for(let i = 0; i < sheets.length; i++){
-        const temp = reader.utils.sheet_to_json(
-        file.Sheets[file.SheetNames[i]])
-        temp.forEach((res) => {
-            data.push(res)
-        })
-    }
-
-    console.log(data)
-    */
 
     console.log(filePaths[0])
     console.log(fileName)
 
     return fileName
 }
-
-
 
 app.whenReady().then(() => {
     ipcMain.handle('dialog:openFile', handleFileOpen)
@@ -139,26 +206,39 @@ app.whenReady().then(() => {
         const results = await handleSetFilePath(...args)
         return results 
     })
-    ipcMain.handle('dia')
-
+  
     const schema = {
         databaseLocation: {
             type: 'string',
             description: 'Path for SQL database'
         },
-        BenchLocation: {
+        txtPath: {
             type: 'string',
-            description:'Path for benchsheets and COCs'
+            description:'Path for TXT-Month'
         }, 
-        clientCopiesLocaton: {
+        goodCopiesPath: {
             type:'string', 
             description: 'Path for the Good Copies and COCs'
+        }, 
+        reportsPath : {
+            type:'string', 
+            description: 'Path for the reports for jobs'
+        }, 
+        imagePath: {
+            type:'string', 
+            description: 'Path for the images for each job '
         }
+        
     };
 
+
+    //const store = new schema({schema})
+    //store.clear()
+
     
-    console.log("Stored SQL Database Path: ", store.get('databaseLocation'))
-    console.log("Stored Reports Path: ", store.get('reportsPath'))
+
+    //console.log("Stored SQL Database Path: ", store.get('databaseLocation'))
+    //console.log("Stored Reports Path: ", store.get('reportsPath'))
     
     createWindow()
 });

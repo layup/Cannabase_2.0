@@ -6,6 +6,7 @@ const Settings = () => {
 
     const [databasePath, setDatabasePath] = useState()
     const [reportsPath, setReportsPath] = useState() 
+    const [txtPath, setTxtPath] = useState(); 
 
     //change so can be reused 
     const selectDatabasePath = async (callpack) => {
@@ -18,12 +19,20 @@ const Settings = () => {
             setReportsPath(value)
         })
     }
-
+    const selectTxtPath = async (filePath) => {
+        await window.api.setFilePath(filePath).then((value) => {
+            setTxtPath(value)
+        })
+    }
     //get all the paths from the start
     useEffect(() => {
         const results = window.api.getStorePathLocations()
-        setDatabasePath(results.dbPath)
+       
+        console.log(results)
+        setDatabasePath(results.databaseLocation)
         setReportsPath(results.reportsPath)
+        setTxtPath(results.txtPath)
+
 
     }, [])
 
@@ -35,6 +44,7 @@ const Settings = () => {
             <div className='flex flex-col space-y-2 p-2 w-full just'>
 
                 <h2>File Path Location</h2>
+
 
                 <Filepath 
                     title="SQL Database Path (U Drive)"
@@ -65,8 +75,9 @@ const Settings = () => {
                 />     
                 <Filepath 
                     title="TXT File Path (U Drive) "
-                    setPath={selectDatabasePath}
-                    currentPath={'test'}
+                    setPath={selectTxtPath}
+                    path="txtPath"
+                    currentPath={txtPath}
                 />     
                
                 

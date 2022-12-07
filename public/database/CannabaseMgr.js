@@ -455,9 +455,6 @@ exports.getNumberClients = () => {
 exports.getStorePathLocations = () => {
     const store = new Store(); 
 
-    var dbPath = store.get('databaseLocation');
-    var reportsPath = store.get('reportsPath');
-
-    return {dbPath, reportsPath}
-
+    const temp = store.store 
+    return temp
 }
