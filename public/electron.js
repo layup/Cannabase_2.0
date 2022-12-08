@@ -3,8 +3,7 @@ const path = require('path');
 //const url = require('url');
 const Store = require('electron-store');
 const isDev = require('electron-is-dev');
-const XLSX = require('xlsx')
-const fs = require('fs');
+
 
 const store = new Store()
 
@@ -87,28 +86,24 @@ async function handleSetFilePath(setFile) {
     }
   }
 
-
-function generateData(){
-
-}
-
 async function openFileXlsx() {
     const { canceled, filePaths } = await dialog.showOpenDialog() 
     var fileName = filePaths[0].replace(/^.*[\\\/]/, ''); 
 
-    //check if is an .xslx
+    let validFile = false; 
+
     if(fileName.includes('.xlsx')){
-        console.log('is xslx file')
+        validFile = true; 
     }
 
+    return {validFile: validFile, fileName: fileName, filePath: filePaths[0]}
+    
+    /*   
     //should be around 137 - 74 = 63 
     //total = 186 - 74 = 112
     
     //const maxRow = 137;
     //const minRow = 41;
-
-    let headers = ['index', 'component', 'trace', 'RT' , 'BUD1', 'BUD2']
-
     //load an XSLX file into memory 
     //const wb = XLSX.readFile(filePaths[0], {sheetRows: maxRow});
     const wb = XLSX.readFile(filePaths[0]);
@@ -170,15 +165,18 @@ async function openFileXlsx() {
 
     console.log("TESINGS")
 
+    //create an object with 
+
     for (var key3 in budLocations){
         console.log(budNames[budLocations[key3]])
         data.forEach((item) => {
             if((typeof(item[budLocations[key3]]) !== "undefined") && (typeof(item.__EMPTY_1) !== 'undefined')){
                 console.log(item.__EMPTY_1, item[budLocations[key3]])
-            }
+                //sort as object with location and amount 
 
-            
+            }
         })
+
     }
      
 
@@ -197,6 +195,7 @@ async function openFileXlsx() {
     console.log(fileName)
 
     return fileName
+    */ 
 }
 
 app.whenReady().then(() => {

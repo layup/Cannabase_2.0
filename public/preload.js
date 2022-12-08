@@ -6,7 +6,7 @@ const excelManager = require('./excel/excelManager')
 console.log('Preload Scripts Loaded');
 
 const getNotCompleteJobs = async () => {
-    return  CannabaseMgr.getNotCompleteJobs(); 
+    return CannabaseMgr.getNotCompleteJobs(); 
 }
 
 const getJobInfo = async (jobNum) => {
@@ -65,11 +65,9 @@ const clientSearch = async (clientName) => {
     return CannabaseMgr.clientSearch(clientName)
 }
 
-
 const setTestsStatus = async (jobNum, testNum, status) => {
     return CannabaseMgr.setTestsStatus(jobNum, testNum, status)
 }
-
 
 const openFile = () => {
     return ipcRenderer.invoke('dialog:openFile')
@@ -81,8 +79,6 @@ const openFileXlsx = () => {
 const setFilePath = (filePath) => {
     return ipcRenderer.invoke('dialog:setPath', filePath)
 } 
-
-
 
 const scanReportsFolder = (jobNum) => {
     return excelManager.scanReportsFolder(jobNum)
@@ -96,6 +92,13 @@ const getStorePathLocations = () => {
     return CannabaseMgr.getStorePathLocations()
 }
 
+const processExcelFile = (reportType, filePath) => {
+    return excelManager.processExcelFile(reportType, filePath)
+}
+
+const processTxt = (jobNumbers) => {
+    return excelManager.processTxt(jobNumbers)
+}
 
 
 contextBridge.exposeInMainWorld("api", {
@@ -123,5 +126,8 @@ contextBridge.exposeInMainWorld("api", {
     scanReportsFolder: scanReportsFolder, 
     openPDF: openPDF, 
     openFileXlsx: openFileXlsx,
+
+    processExcelFile: processExcelFile, 
+    processTxt: processTxt
    
 })

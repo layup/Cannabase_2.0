@@ -6,12 +6,17 @@ import MushroomReport from './MushroomReport';
 
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import Close from '@mui/icons-material/Close';
+import { useNavigate } from 'react-router-dom';
 
 const NewReport = (props) => {
 
+    const navigate = useNavigate()
+
     const [selectReport, setSelectReport] = useState(""); 
-    const [file, setFile ] = useState("");
+    const [fileName, setFileName ] = useState("");
+    const [filePath, setFilePath] = useState(""); 
     const [next, setNext] = useState(false)
+    const [displayError, setDisplayError] = useState(false)
 
     const errors = useRef({
         selectReport:'', 
@@ -21,30 +26,37 @@ const NewReport = (props) => {
     const nextStage = () => {
 
         if(selectReport){
-            errors.current.selectReport = "Please Select a report "
+            errors.current.selectReport = ""
              
         }else {
-            errors.current.selectReport = ""
+            errors.current.selectReport = "Please Select a report"
         }
     
-          //deal with clientName validation 
-        if(file){
-            errors.current.file = "Please select a .xlsx file "
+        //deal with file Path validation 
+
+        if(fileName){
+
             
         }else {
-            errors.current.file = ""
+            errors.current.file = "Please select a .xlsx file " 
         }
 
         if(errors.current.selectReport || errors.current.file){
+            setDisplayError(true)
             console.log(errors.current)
             return 
         }
-        console.log("pass")
+
+        handleCancel()        
+        navigate(`/reports/create`, {state: {fileName: fileName, filePath: filePath, selectReport: selectReport}});
+    
     }
 
     const handleCancel = () => {
         setSelectReport("")
-        setFile("")
+        setFileName("")
+        setFilePath("")
+        setDisplayError(false)
 
         errors.current = {
             selectReport:'', 
@@ -56,10 +68,21 @@ const NewReport = (props) => {
   
     const openFileXlsx = async () => {
         console.log('running tests')
-        await window.api.openFileXlsx().then((value) => {
-            console.log('done:', value)
+        await window.api.openFileXlsx().then(({validFile, fileName, filePath}) => {
+            if(validFile){
+                setFileName(fileName)
+                setFilePath(filePath)
+            }else {
+                errors.current.file = "Please select a .xlsx file " 
+            }
         });
     }
+
+    const removeFile = () => {
+        setFileName("")
+        setFilePath("")
+    }
+
 
     return (
         <Modal
@@ -85,6 +108,15 @@ const NewReport = (props) => {
             </div>
         }
         >
+            {displayError && 
+                <div className="w-sreen bg-red-400 mx-5 my-2 text-center p-3 text-white border-l-4 border-red-700 flex justify-between">
+                <p>Please try again.</p>
+                <button onClick={() => setDisplayError(false)}>
+                    <Close />
+                </button>
+                </div> 
+            } 
+
             <div className='flex flex-col p-2 px-6 w-full'>
                 <div>
                     <h1 className='text-lg'>Select Type of Report</h1>
@@ -104,30 +136,50 @@ const NewReport = (props) => {
                             <input 
                                 type="checkbox"
                                 className=''
-                                checked={selectReport === 'mushroom'}
-                                onChange={() => setSelectReport('mushroom')}
+                                checked={selectReport === 'pesticides'}
+                                onChange={() => setSelectReport('pesticides')}
                             />
                             <labe>Pesticides/Toxins Batch</labe>
                         </div>
                     </div>
                 </div>
 
+                {errors.current.selectReport && <p className='text-xs text-red-400'>Please select a report.</p>}
+
             
+
                 <div className='my-2'>
                     <h1 className='text-lg'>Attach Document</h1>
-                    <div className='border-2 border-dashed p-24 flex flex-col items-center font-medium border-zinc-300'> 
-                        <FileUploadIcon className='text-xl'/> 
-                        <p>Drag or Drop Here </p>
-                        <p>or</p>
-                        <button
-                            className='text-blue-700'
-                            onClick={openFileXlsx}
-                        >
-                            Browse File
-                        </button>
-                    </div>
+                    {fileName ? 
+                        (
+                            <div className='h-64 flex justify-center items-center border-2 border-dashed'>
+                                <p className='font-medium px-20'>{fileName}</p> 
+                                <button onClick={removeFile}>
+                                    <Close /> 
+                                </button>
+                            </div>
+
+                        ) : ( 
+                            <div className='h-64 border-2 border-dashed flex flex-col justify-center items-center font-medium border-zinc-300'> 
+                                <FileUploadIcon className='text-xl'/> 
+                                <p>Drag or Drop Here </p>
+                                <p>or</p>
+                                <button
+                                    className='text-blue-700'
+                                    onClick={openFileXlsx}
+                                >
+                                    Browse File
+                                </button>
+                            </div>
+                        )
+                    }
                     <p className=''>Accepted File Types: .xlsx</p>
                 </div>
+                
+
+
+
+                {errors.current.file && <p className='text-xs text-red-400'>Please select a valid file.</p>}
 
             </div>
         </Modal>

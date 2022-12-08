@@ -79,11 +79,12 @@ function Sidebar() {
                             subLocation={"/jobs/:jobId"}
                             icon={<WorkIcon />}
                         />
-
-                        <div className=' flex p-4 text-zinc-600'>
-                            <ArticleIcon className=''/>
-                            <p className='px-3 hidden lg:block'>Reports</p>
-                        </div>
+                        <SidebarLink
+                            name="Reports"
+                            location={"/reports"}
+                            subLocation={"/reports/create"}
+                            icon={<ArchiveIcon />}
+                        />
 
 
                         <div className=' flex p-4 text-zinc-600'>
