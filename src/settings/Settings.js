@@ -11,7 +11,7 @@ const Settings = () => {
     //change so can be reused 
     const selectDatabasePath = async (callpack) => {
         await window.api.openFile().then((value) => {
-            setDatabasePath(value)
+            //setDatabasePath(value)
         })   
     }
     const setFilePath = async (filePath) => {
@@ -26,12 +26,21 @@ const Settings = () => {
     }
     //get all the paths from the start
     useEffect(() => {
-        const results = window.api.getStorePathLocations()
+        try {
+            const results = window.api.getStorePathLocations()
+            console.log(results)
+            setDatabasePath(results.databaseLocation)
+            setReportsPath(results.reportsPath)
+            setTxtPath(results.txtPath)
+        } catch (error) {
+            console.log(error)
+        }
+        
        
-        console.log(results)
-        setDatabasePath(results.databaseLocation)
-        setReportsPath(results.reportsPath)
-        setTxtPath(results.txtPath)
+        //console.log(results)
+        //setDatabasePath(results.databaseLocation)
+        //setReportsPath(results.reportsPath)
+        //setTxtPath(results.txtPath)
 
 
     }, [])
@@ -45,7 +54,7 @@ const Settings = () => {
 
                 <h2>File Path Location</h2>
 
-
+                
                 <Filepath 
                     title="SQL Database Path (U Drive)"
                     setPath={selectDatabasePath}
@@ -79,7 +88,7 @@ const Settings = () => {
                     path="txtPath"
                     currentPath={txtPath}
                 />     
-               
+ 
                 
                 <div className='space-x-2'>
                     <button className='bg-gray-200 p-2 rounded-md'>Dismiss All Changes</button>

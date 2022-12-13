@@ -1,9 +1,8 @@
-const {contextBridge, ipcRenderer, ipcMain} = require('electron')
+const {app, contextBridge, ipcRenderer, ipcMain} = require('electron')
 const CannabaseMgr = require('./database/CannabaseMgr')
 const excelManager = require('./excel/excelManager')
 
-
-console.log('Preload Scripts Loaded');
+//console.log('Preload Scripts Loaded');
 
 const getNotCompleteJobs = async () => {
     return CannabaseMgr.getNotCompleteJobs(); 
@@ -100,8 +99,13 @@ const processTxt = (jobNumbers) => {
     return excelManager.processTxt(jobNumbers)
 }
 
+const generateReports = (clientInfo, samples, sampleData, jobNumbers) => {
+    return excelManager.generateReports(clientInfo, samples,  sampleData, jobNumbers)
+}
+
 
 contextBridge.exposeInMainWorld("api", {
+    openFile: openFile,
     createNewJob: createNewJob,  
     deleteJob: deleteJob, 
     setJobStatus: setJobStatus, 
@@ -121,13 +125,14 @@ contextBridge.exposeInMainWorld("api", {
     clientSearch: clientSearch,
     
     getStorePathLocations: getStorePathLocations, 
-    openFile: openFile,
+   
     setFilePath: setFilePath, 
     scanReportsFolder: scanReportsFolder, 
     openPDF: openPDF, 
     openFileXlsx: openFileXlsx,
 
     processExcelFile: processExcelFile, 
-    processTxt: processTxt
+    processTxt: processTxt,
+    generateReports: generateReports
    
 })

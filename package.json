@@ -25,7 +25,8 @@
     "sqlite3": "^5.1.2",
     "styled-components": "^5.3.6",
     "web-vitals": "^2.1.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "scripts": {
     "start": "react-scripts start",

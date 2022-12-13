@@ -3,6 +3,8 @@ const Store = require('electron-store')
 var dbmanager = require('./dbmanager')
 var db = dbmanager.db 
 
+const store = new Store(); 
+
 exports.getNotCompleteJobs = () => {
 
     return new Promise((resolve, reject) => {
@@ -453,8 +455,7 @@ exports.getNumberClients = () => {
 }
 
 exports.getStorePathLocations = () => {
-    const store = new Store(); 
+    
+    return store.store 
 
-    const temp = store.store 
-    return temp
 }
