@@ -87,7 +87,7 @@ const copyTemplate = (jobNumbers) => {
 
 }
 
-const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData) => { 
+const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData, sampleOptions) => { 
     for(const [key, value] of Object.entries(fileLocation)){
 
         console.log(key, value)
@@ -104,7 +104,7 @@ const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData) => 
         row = worksheet.getRow(4)
         row.getCell(2).value = clientInfo[key].time 
         row = worksheet.getRow(5)
-        row.getCell(2).value = clientInfo[key].jobNum
+        row.getCell(2).value = parseInt(clientInfo[key].jobNum)
         row = worksheet.getRow(6)
         row.getCell(2).value = clientInfo[key].sampleType1 
         row = worksheet.getRow(7)
@@ -118,7 +118,7 @@ const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData) => 
         row = worksheet.getRow(11)
         row.getCell(2).value = clientInfo[key].addy3 
         row = worksheet.getRow(12)
-        row.getCell(2).value = clientInfo[key].numSamples 
+        row.getCell(2).value = parseInt(clientInfo[key].numSamples)
         row = worksheet.getRow(13)
         row.getCell(2).value = clientInfo[key].email
         row = worksheet.getRow(14)
@@ -128,11 +128,23 @@ const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData) => 
         row = worksheet.getRow(16)
         row.getCell(2).value = clientInfo[key].paymentInfo
 
+        //set the samples name for excel document 
+        row = worksheet.getRow(27) 
+        let sampleName = ''
+        let counter = 1; 
+
+        console.log(clientInfo[key]['sampleNames'])
+
+        for(const [key1,value1] of Object.entries(clientInfo[key].sampleNames)){
+            sampleName += `${counter})${value1} `  
+            counter++; 
+        }
+        
+        row.getCell(2).value = sampleName
+
+
         row.commit(); 
-
         wb.xlsx.writeFile(value);
-
-
         let matchingSamples = []
 
         for(let i = 0; i < samples.length; i++){ 
@@ -148,6 +160,7 @@ const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData) => 
 
                 for(const [key2, value2] of Object.entries(sampleData[matchingSamples[j]])){
                     //console.log(parseInt(key2), parseFloat(value2))
+                    
 
                     let locaiton = (parseInt(key2) + 1)
                     
@@ -216,7 +229,7 @@ const copyClientData = async (fileLocation, samples, sampleData, clientInfo) => 
 }
 
 
-exports.generateReports =  async (clientInfo, samples, sampleData , jobNumbers) => { 
+exports.generateReports =  async (clientInfo, samples, sampleData , jobNumbers, sampleOptions) => { 
    
     console.log(clientInfo)
     console.log(samples)
@@ -225,12 +238,9 @@ exports.generateReports =  async (clientInfo, samples, sampleData , jobNumbers) 
     
 
     const promise1 = await copyTemplate(jobNumbers).then( async (fileLocations) => {
-        console.log('Promise1 then')
         console.log(fileLocations)
-
-        
         for (const fileLocation of fileLocations){ 
-            await copyClientInfo(fileLocation,clientInfo, samples, sampleData)
+            await copyClientInfo(fileLocation,clientInfo, samples, sampleData, sampleOptions)
             //await copyClientData(fileLocation, samples, sampleData, clientInfo)
             
             console.log('DONE')
@@ -351,7 +361,6 @@ exports.processTxt = async (jobNumbers) => {
     let clientPath = {}
     let selectedNumbers = []
  
-
     //check for the file location and if they exists 
     for(let i = 0; i < jobNumbers.length; i++){
         for(let j = 0; j < txtNames.length; j++) {
@@ -369,8 +378,6 @@ exports.processTxt = async (jobNumbers) => {
     let difference = jobNumbers.filter(x => !selectedNumbers.includes(x));
     
     let clientInfo = {}
-
-
     
     for(var clientKey in clientPath){
         clientInfo[clientKey] = await GenerateClientData(clientKey, clientPath[clientKey])
@@ -400,15 +407,13 @@ exports.processTxt = async (jobNumbers) => {
                 paymentInfo: "", 
                 telephone: "",
                 fax: "",  
-                email: ""
+                email: "",
+                sampleNames: {}
             }
         }
     }
     
-
-
     return clientInfo
-   
 } 
 
 
@@ -425,12 +430,13 @@ const  GenerateClientData = async (jobNum, jobPath) => {
     let paymentInfo = ""
     let telephone, fax = ""
     let email = "" 
-    let sampleNames = []; 
+    let sampleNames = {}
 
     var instream = fs.createReadStream(jobPath)
     var rl = readline.createInterface(instream); 
 
     let counter = 0; 
+    let sampleCounter = 0; 
 
     for await (const line of rl){
         
@@ -516,7 +522,20 @@ const  GenerateClientData = async (jobNum, jobPath) => {
 
             counter++; 
         } 
+
+        if(counter > 7){
+            if(sampleCounter !== parseInt(numSamples)){
+                let sampleMatch = line.match(/(?<=[1-9] ).*/)
+                if(sampleMatch){
+                    sampleMatch  = sampleMatch[0].replace(/\s\s+/g, ' ');
+                    sampleNames[`${jobNum}-${sampleCounter+1}`] = sampleMatch
+                    sampleCounter++; 
+                }
+            }
+        }
+
     }
+
 
     return {
         jobNum: jobNum, 
@@ -534,7 +553,8 @@ const  GenerateClientData = async (jobNum, jobPath) => {
         paymentInfo: paymentInfo, 
         telephone: telephone,
         fax: fax,  
-        email: email
+        email: email,
+        sampleNames:sampleNames 
     }
 
 }

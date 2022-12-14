@@ -1,26 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import ClientInfoItem from '../component/ClientInfoItem';
+import SamplesSection from '../component/SamplesSection';
 
 
 const CreateReports = (props) => {
 
     const location = useLocation(); 
-
     const [jobNumbers, setJobNumbers] = useState("")
     const [samples, setSamples] = useState("")
     const [sampleData, setSampleData] = useState("")
     const [clientInfo, setClientInfo] = useState("")
-
-    // console.log(location.state.fileName)
-    //console.log(location.state.filePath)
-    //console.log(location.state.selectReport)
+    const [sampleOptions, setSampleOptions] = useState("")
 
     useEffect(() => {
         async function processExcelFile(){
             await window.api.processExcelFile(location.state.selectReport, location.state.filePath).then(({jobNumbers, samples, sampleData}) => {
-
-                
                 setJobNumbers(jobNumbers)
                 setSamples(samples)
                 setSampleData(sampleData)
@@ -34,28 +29,79 @@ const CreateReports = (props) => {
         async function processTxt(){
             await window.api.processTxt(jobNumbers).then((data) => {
                 setClientInfo(data);
+
+                //set the sample option defaults 
+                for (let i = 0; i < samples.length; i++) {
+                    if(data[samples[i].substring(0,6)]['sampleType1'] === 'oil'){
+                        setSampleOptions((prevState) => ({
+                            ...prevState, 
+                            [samples[i]]:{
+                                sampleType:'oil', 
+                                amount:'single', 
+                                'toxins':'pest'
+                            }
+                        }))
+                    }else {
+                        setSampleOptions((prevState) => ({
+                            ...prevState, 
+                            [samples[i]]:{
+                                sampleType:'bud', 
+                                amount:'single', 
+                                'toxins':'pest'
+                            }
+                        }))
+                    }
+                        
+                    }     
+                
             })
         }
 
         processTxt()
-        console.log(Object.keys(clientInfo))
 
+        
     }, [jobNumbers])
 
-    const updateClientInfo = ( jobNum, keyName, value) => {
-        setClientInfo((prevState) => ({
-            ...prevState,
+
+    const updateClientInfo = ( jobNum, keyName, value, key) => {
+
+        if(keyName === 'sampleNames'){
+            setClientInfo((prevState) => ({
+                ...prevState,
+                [jobNum]: {
+                    ...prevState[jobNum],
+                    [keyName]: {
+                        ...prevState[jobNum][keyName],
+                        [key]: value
+                    }
+                }
+            }))
+        }else {
+            setClientInfo((prevState) => ({
+                ...prevState,
+                [jobNum]: {
+                    ...prevState[jobNum],
+                    [keyName]: value
+                }
+            }))
+        }
+        
+    }
+
+    const updateSampleOptions = (jobNum, keyName, value) => {
+        setSampleOptions((prevState) => ({
+            ...prevState, 
             [jobNum]: {
                 ...prevState[jobNum],
-                [keyName]: value
+                [keyName]:value
             }
         }))
     }
 
+
     const generateReports = async () => {
         console.log('generating reports')
-
-        await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers)
+        await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers, sampleOptions)
     }
 
     return (
@@ -185,10 +231,13 @@ const CreateReports = (props) => {
 
             </div>
 
-            <div>
-                <h1>Samples</h1>
-            </div>
-
+            <SamplesSection 
+                clientInfo={clientInfo}
+                updateSampleName={updateClientInfo}
+                updateSampleOptions={updateSampleOptions}
+                samples={samples}
+                sampleOptions={sampleOptions}
+            />
 
         </div>
     )
