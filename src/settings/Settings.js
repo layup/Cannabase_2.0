@@ -7,6 +7,7 @@ const Settings = () => {
     const [databasePath, setDatabasePath] = useState()
     const [reportsPath, setReportsPath] = useState() 
     const [txtPath, setTxtPath] = useState(); 
+    const [templatesPath, setTemplatesPath] = useState(); 
 
     //change so can be reused 
     const selectDatabasePath = async (callpack) => {
@@ -22,6 +23,12 @@ const Settings = () => {
     const selectTxtPath = async (filePath) => {
         await window.api.setFilePath(filePath).then((value) => {
             setTxtPath(value)
+        })
+    }
+
+    const selectTemplatePath = async (filePath) => {
+        await window.api.setFilePath(filePath).then((value) => {
+            setTemplatesPath(value)  
         })
     }
     //get all the paths from the start
@@ -87,6 +94,12 @@ const Settings = () => {
                     setPath={selectTxtPath}
                     path="txtPath"
                     currentPath={txtPath}
+                />     
+                <Filepath 
+                    title="Templates File Path (U Drive) "
+                    setPath={selectTemplatePath}
+                    path="templatesPath"
+                    currentPath={templatesPath}
                 />     
  
                 

@@ -16,6 +16,11 @@ const CreateReports = (props) => {
     useEffect(() => {
         async function processExcelFile(){
             await window.api.processExcelFile(location.state.selectReport, location.state.filePath).then(({jobNumbers, samples, sampleData}) => {
+                
+                console.log(jobNumbers)
+                console.log(samples)
+                console.log(sampleData)
+                
                 setJobNumbers(jobNumbers)
                 setSamples(samples)
                 setSampleData(sampleData)
@@ -28,6 +33,8 @@ const CreateReports = (props) => {
     useEffect(() => {
         async function processTxt(){
             await window.api.processTxt(jobNumbers).then((data) => {
+                console.log(data)
+
                 setClientInfo(data);
 
                 //set the sample option defaults 
@@ -101,7 +108,7 @@ const CreateReports = (props) => {
 
     const generateReports = async () => {
         console.log('generating reports')
-        await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers, sampleOptions)
+        await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers, sampleOptions, "pest")
     }
 
     return (

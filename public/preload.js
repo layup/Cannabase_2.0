@@ -99,8 +99,8 @@ const processTxt = (jobNumbers) => {
     return excelManager.processTxt(jobNumbers)
 }
 
-const generateReports = (clientInfo, samples, sampleData, jobNumbers, sampleOptions) => {
-    return excelManager.generateReports(clientInfo, samples,  sampleData, jobNumbers, sampleOptions)
+const generateReports = (clientInfo, samples, sampleData, jobNumbers, sampleOptions, reportType) => {
+    return excelManager.generateReports(clientInfo, samples,  sampleData, jobNumbers, sampleOptions, reportType)
 }
 
 

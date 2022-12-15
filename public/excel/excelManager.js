@@ -44,7 +44,6 @@ exports.scanReportsFolder = (jobNum) => {
 //read local dir and find the files that we need 
 exports.openPDF = (jobNum, report) => {
     // Load a remote URL
-    
     var reportsDir = store.get('reportsPath')
     var currentPath = path.join(reportsDir, jobNum)
 
@@ -53,50 +52,95 @@ exports.openPDF = (jobNum, report) => {
 } 
 
 
-const copyTemplate = (jobNumbers) => { 
-    const template_location = '/Users/layup/Documents/Programming/work /cannabase/cannabase2.0/public/excel/particles_template.xlsx'
-        
+//edit the excel files from the thing
+//scan for .xlsx files 
+exports.editFile = (jobNum) => {
+
+}
+
+
+const generateFileNames = (jobNumbers, fileExtension, templateLocation) => {
+
     const reportsPath = store.get('reportsPath')
-    
+
+    let fileLocations = [] 
+
+    for(var i = 0; i < jobNumbers.length; i++ ){ 
+
+        const folderName = path.join(reportsPath + "/" + jobNumbers[i]) 
+        const fileName = path.join(jobNumbers[i] + fileExtension)
+        const fileLocation =  path.join(folderName + "/" + fileName) 
+
+        if (!fs.existsSync(folderName)){
+            fs.mkdirSync(folderName);
+        }
+        fs.copyFile(templateLocation, fileLocation, (err) => {
+            if (err) throw err;
+            console.log(`Template (${fileExtension})copied to ${folderName}`);
+        });
+
+        fileLocations.push({[jobNumbers[i]]: fileLocation})
+
+    }   
+    return fileLocations
+
+}
+
+const copyTemplate = (jobNumbers, reportType) => { 
+    const templatesPath = store.get('templatesPath'); 
+
+    console.log(templatesPath)
+    console.log(reportType)
+
+    const templateNames = {
+        thc: 'cannabis_template.xlsx', 
+        pest: 'particles_template.xlsx', 
+        toxic: 'toxins_template.xlsx'
+    }
+
     return new Promise((resolve, reject) => {
 
-        let fileLocations = []
+        let pestTemplate = path.join(templatesPath, templateNames['pest']) 
+        let toxicTemplate = path.join(templatesPath, templateNames['toxic']) 
+        let thcTemplate = path.join(templatesPath, templateNames['thc']) 
 
-        for(var i = 0; i < jobNumbers.length; i++ ){ 
+        if(reportType === 'both'){
+            let toxicFileLocations = generateFileNames(jobNumbers, '_Toxic_report.xlsx', toxicTemplate) 
+            let pestFileLocations = generateFileNames(jobNumbers, '_Pesticides_report.xlsx', pestTemplate)
 
-            const folderName = path.join(reportsPath + "/" + jobNumbers[i]) 
-            const fileName = path.join(jobNumbers[i] + "_Pesticides.xlsx")
-            const fileLocation =  path.join(folderName + "/" + fileName) 
+            resolve({toxic: toxicFileLocations,pest:pestFileLocations})
+        }
 
-            if (!fs.existsSync(folderName)){
-                fs.mkdirSync(folderName);
-            }
-            fs.copyFile(template_location, fileLocation, (err) => {
-                if (err) throw err;
-                console.log('Pesticides Template Copied to ', folderName);
-            });
+        if(reportType === 'pest'){
+            resolve(generateFileNames(jobNumbers, '_Pesticides_report.xlsx', pestTemplate))
+        }
 
-            fileLocations.push({[jobNumbers[i]]: fileLocation})
+        if(reportType === 'toxic'){
+            resolve(generateFileNames(jobNumbers, '_Toxic_report.xlsx', toxicTemplate))
+        }
 
-        //copy data into excel sheets 
-        
-        }   
+        if(reportType === 'thc'){
+            resolve(generateFileNames(jobNumbers, '_THC_report.xlsx', thcTemplate))
+        }
 
-        resolve(fileLocations)
+
     })
 
 }
 
 const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData, sampleOptions) => { 
+
+    //set either for Toxins, Pestices or Both
     for(const [key, value] of Object.entries(fileLocation)){
 
-        console.log(key, value)
+        //console.log(key, value)
 
         var wb = new Excel.Workbook(); 
         await wb.xlsx.readFile(value)
         var worksheet = wb.getWorksheet('Headers'); 
         var worksheet2 = wb.getWorksheet('SampleData')
 
+        //general client information that is the same for all of them 
         var row = worksheet.getRow(2)
         row.getCell(2).value = clientInfo[key].clientName
         row = worksheet.getRow(3)
@@ -129,19 +173,39 @@ const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData, sam
         row.getCell(2).value = clientInfo[key].paymentInfo
 
         //set the samples name for excel document 
-        row = worksheet.getRow(27) 
+        
         let sampleName = ''
+        let sampleType = ''
         let counter = 1; 
-
+        
         console.log(clientInfo[key]['sampleNames'])
 
-        for(const [key1,value1] of Object.entries(clientInfo[key].sampleNames)){
-            sampleName += `${counter})${value1} `  
+        //set the given sample names and sample type
+        for(let [key1,value1] of Object.entries(clientInfo[key].sampleNames)){
+            sampleName += `${counter}) ${value1} `  
+            sampleType = sampleOptions[key1].sampleType
             counter++; 
         }
-        
+
+        row = worksheet.getRow(27) 
         row.getCell(2).value = sampleName
 
+        //this is where differences appear 
+
+        row = worksheet.getRow(28)
+        row.getCell(2).value = sampleType
+
+        row = worksheet.getRow(29)
+        switch(sampleType) {
+            case 'oil':
+                row.getCell(2).value = 'LOQ (Oil) '
+                break;
+            case 'paper':
+                row.getCell(2).value = 'LOQ (Paper)'
+                break;
+            default:
+                row.getCell(2).value = 'LOQ (Bud)'
+        } 
 
         row.commit(); 
         wb.xlsx.writeFile(value);
@@ -156,22 +220,19 @@ const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData, sam
         for(let j = 0; j < matchingSamples.length; j++){ 
 
             if(Object.keys(sampleData[matchingSamples[j]])){
-         
 
                 for(const [key2, value2] of Object.entries(sampleData[matchingSamples[j]])){
                     //console.log(parseInt(key2), parseFloat(value2))
                     
-
                     let locaiton = (parseInt(key2) + 1)
                     
                     let row2 =  worksheet2.getRow(locaiton)
                     
-                    row2.getCell((6 + j)).value = value2
+                    row2.getCell((7 + j)).value = value2
                     row2.commit()
                    
                 }
             }
-        
         }
 
         wb.xlsx.writeFile(value);
@@ -180,100 +241,66 @@ const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData, sam
     }
 }
 
-const copyClientData = async (fileLocation, samples, sampleData, clientInfo) => {
+//void function, should probably try and split it out among different things 
+const copyPestData = () => {
 
-    for(const [key, value] of Object.entries(fileLocation)){
-    
-        let matchingSamples = []
-
-        for(let i = 0; i < samples.length; i++){ 
-            if(samples[i].substring(0,6) === key){
-                matchingSamples.push(samples[i])
-            }
-        }
-
-
-        for(let j = 0; j < matchingSamples.length; j++){ 
-            //console.log(matchingSamples[j])
-            //console.log(sampleData[matchingSamples[j]])
-
-            if(Object.keys(sampleData[matchingSamples[j]])){
-                
-                //console.log(sampleData[matchingSamples[j]]) 
-
-                for(const [key2, value2] of Object.entries(sampleData[matchingSamples[j]])){
-                    console.log('Runninng: ', key2, value2)
-                    console.log(key2, value2)
-                    var wb = new Excel.Workbook(); 
-                    console.log('running: ', value)
-                    await wb.xlsx.readFile(value)
-                    //var worksheet = wb.getWorksheet('SampleData')
-                    console.log('testing')
-                    console.log(wb)
-                    //var row = worksheet.getRow(key2+1)
-                    //row.getCell(key2+1).value = value2 
-                    //row.commit()
-                    //wb.xlsx.write(value)
-
-                }
-            }
-        
-        }
-
-        
-    
-        
-    } 
-    
 
 }
 
+const copyThcData = () => { 
 
-exports.generateReports =  async (clientInfo, samples, sampleData , jobNumbers, sampleOptions) => { 
+}
+
+exports.generateReports =  async (clientInfo, samples, sampleData , jobNumbers, sampleOptions, reportType) => { 
    
     console.log(clientInfo)
     console.log(samples)
     console.log(sampleData)
     console.log(jobNumbers)
     
-
-    const promise1 = await copyTemplate(jobNumbers).then( async (fileLocations) => {
+    //create copies based on reportType (THC, PESTS and )
+    const promise1 = await copyTemplate(jobNumbers, reportType).then( async (fileLocations) => {
         console.log(fileLocations)
+
+        //must scan throught both iterations 
+        if(reportType === 'both'){ 
+
+
+        }else {
+
+        //all files should normally copy this client data 
         for (const fileLocation of fileLocations){ 
             await copyClientInfo(fileLocation,clientInfo, samples, sampleData, sampleOptions)
-            //await copyClientData(fileLocation, samples, sampleData, clientInfo)
-            
-            console.log('DONE')
 
-            //write client data 
-            //VBA: determine how many sample datas and when to write the last sheet 
-
-
+            }
         }
-        
+
+        //copy the client data based on 
+
+        //both 
+        //toxic 
+        //pests 
+        //thc 
 
     })
-
-
-
+    
+    //thc 
+  
 
 
 }
 
-exports.processExcelFile = (reportType, filePath) => {
-
-
+const processPestFile = (filePath) => {
     return new Promise((resolve, reject) => {
-        const wb = xlsx.readFile(filePath)
 
+        const wb = xlsx.readFile(path.normalize(filePath))
         const ws = wb.Sheets[wb.SheetNames[0]];
 
         let data = xlsx.utils.sheet_to_json(ws)
         let dataRows = Object.keys(data).length
 
-        data = data.slice((dataRows-1) - 112, dataRows - 10);
-
-
+        data = data.slice((dataRows-1) - 112, dataRows - 1);
+    
         let budHeader = data[2]
         let budNames = data[1]
         let budLocations = []
@@ -282,36 +309,24 @@ exports.processExcelFile = (reportType, filePath) => {
         let sampleData = {}
 
         for (var key in budHeader) {
-            //console.log(key + " -> " + temp[key]); 
             if(budHeader[key] === 'ng/g'){
                 budLocations.push(key)
-
             }
         }
     
-
         //get all the unique job numbers
         for(var key2 in budLocations){
-
             samples.push(budNames[budLocations[key2]])
             let jobNumber = budNames[budLocations[key2]].substring(0,6)
 
             if(!jobNumbers.includes(jobNumber)){
                 jobNumbers.push(jobNumber)
             }
-
         }
-
     
-        //create an object with 
-        
         for (let i = 0; i < budLocations.length; i++){
             
             let tempData  ={}
-        
-            //console.log(budNames[budLocations[i]])
-            //sampleData[budNames[budLocations[i]]] = budNames[budLocations[i]]
-
 
             data.forEach((item) => {
                 if((typeof(item[budLocations[i]]) !== "undefined") && (typeof(item.__EMPTY_1) !== 'undefined')){
@@ -326,12 +341,26 @@ exports.processExcelFile = (reportType, filePath) => {
 
         }
         
-        //console.log(sampleData)
-
         fs.writeFileSync('test.json',JSON.stringify(data))
 
         resolve({jobNumbers: jobNumbers, samples: samples, sampleData: sampleData})
-    })
+    }) 
+}
+
+const processThcFile = () => { 
+
+}
+
+exports.processExcelFile = (reportType, filePath) => {
+
+    console.log('Processing Excel File: ', filePath) 
+
+    if(reportType === 'pesticides'){
+        return processPestFile(filePath)
+    }else {
+        //return processThcFile(filePath)
+    }
+
 
 }
 
@@ -340,12 +369,12 @@ exports.processTxt = async (jobNumbers) => {
     console.log("Processing Text")
     const txtPath = path.normalize(store.get('txtPath'))
     
-
     let txtNames = []
     let regex = /TXT-.*/
 
     //scan the dir 
     const dirResults = await fs2.readdir(txtPath)
+    console.log(dirResults)
     
 
     //scan for TXT-MONTH files 
@@ -486,7 +515,6 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                     telephone = line.substring(20,50).replace('TEL:', '').trim()
                     recvTemp = line.match(/((\d+).[\d]C)/)[0]
                 }
-             
             }
 
             if(counter === 5 ){
@@ -502,7 +530,9 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                 if(attention){
                     fax = line.replace('FAX:', '').trim(); 
                 }else {
-                    email = line.substring(20,50).trim()
+                    //email = line.substring(20,50).trim()
+                    email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                    
                     paymentInfo = line.match(/(PD) (\w+) (\w+)/)
                     if(paymentInfo){
                         paymentInfo = paymentInfo[0]
@@ -512,7 +542,8 @@ const  GenerateClientData = async (jobNum, jobPath) => {
             }
             if(counter === 7){
                 if(attention){
-                    email = line.substring(20,50).trim()
+                    //email = line.substring(20,50).trim()
+                    email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
                     paymentInfo = line.match(/(PD) (\w+) (\w+)/)
                     if(paymentInfo){
                         paymentInfo = paymentInfo[0]
