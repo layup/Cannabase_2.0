@@ -83,7 +83,7 @@ function Sidebar() {
                             name="Reports"
                             location={"/reports"}
                             subLocation={"/reports/create"}
-                            icon={<ArchiveIcon />}
+                            icon={<ArticleIcon />}
                         />
 
 

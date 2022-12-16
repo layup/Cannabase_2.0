@@ -47,7 +47,7 @@ const CreateReports = (props) => {
                             ...prevState, 
                             [samples[i]]:{
                                 sampleType:'oil', 
-                                amount:'single', 
+                                amount:'mult', 
                                 'toxins':'pest'
                             }
                         }))
@@ -56,7 +56,7 @@ const CreateReports = (props) => {
                             ...prevState, 
                             [samples[i]]:{
                                 sampleType:'bud', 
-                                amount:'single', 
+                                amount:'mult', 
                                 'toxins':'pest'
                             }
                         }))
@@ -74,7 +74,7 @@ const CreateReports = (props) => {
 
 
     const updateClientInfo = ( jobNum, keyName, value, key) => {
-
+       
         if(keyName === 'sampleNames'){
             setClientInfo((prevState) => ({
                 ...prevState,
@@ -110,7 +110,14 @@ const CreateReports = (props) => {
 
 
     const generateReports = async () => {
-        console.log('generating reports')
+        console.log('generating reports [RENDER]')
+
+        /*
+        for(const [key, value] of Object.entries(clientInfo)){
+            console.log(key, value )
+        }
+        */ 
+
         await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers, sampleOptions, location.state.selectReport)
     }
 

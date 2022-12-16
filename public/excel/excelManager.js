@@ -9,7 +9,6 @@ var readline = require('readline');
 
 const { promises: fs2 } = require("fs");
 
-
 const store = new Store()
 
 exports.scanReportsFolder = (jobNum) => {
@@ -51,13 +50,11 @@ exports.openPDF = (jobNum, report) => {
 
 } 
 
-
 //edit the excel files from the thing
 //scan for .xlsx files 
 exports.editFile = (jobNum) => {
 
 }
-
 
 const generateFileNames = async (jobNumber, fileExtension, templateLocation) => {
 
@@ -174,16 +171,16 @@ const copyPestData = async (worksheet, worksheet2, clientInfo, sampleData, sampl
     row = worksheet.getRow(28)
     row.getCell(2).value = sampleType
 
-    row = worksheet.getRow(29)
+    row = worksheet.getRow(30)
     switch(sampleType) {
         case 'oil':
-            row.getCell(2).value = 'LOQ (Oil) '
+            row.getCell(2).value = 'oil'
             break;
         case 'paper':
-            row.getCell(2).value = 'LOQ (Paper)'
+            row.getCell(2).value = 'paper'
             break;
         default:
-            row.getCell(2).value = 'LOQ (Bud)'
+            row.getCell(2).value = 'bud'
     } 
 
     row.commit(); 
@@ -211,13 +208,12 @@ const copyPestData = async (worksheet, worksheet2, clientInfo, sampleData, sampl
                 
                  row2 =  worksheet2.getRow(locaiton)
                 
-                row2.getCell((7 + j)).value = value2
+                row2.getCell((7 + j)).value = parseInt(value2)
                 row2.commit()
                
             }
         }
     }
-
 
 }
 
@@ -265,8 +261,9 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
     new Promise(async (resolve, reject) => {
 
         if(reportType === 'pesticides'){
-            //console.log('Report Type is: ', reportType)
             let fileLocations = {}
+
+            //check if single or multi before 
 
             //check each before copy template 
             for(let key in sampleOptions){
@@ -276,12 +273,9 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
                 }
             }
 
-            //console.log(fileLocations)
-            console.log(fileLocations)
             await copyPestInfo(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
             //copy pest information to the thing
             
-        
         }
 
         if(reportType === 'cannabis'){
@@ -299,9 +293,21 @@ const processPestFile = (filePath) => {
         const ws = wb.Sheets[wb.SheetNames[0]];
 
         let data = xlsx.utils.sheet_to_json(ws)
-        let dataRows = Object.keys(data).length
+        let dataRows = Object.keys(data).length 
+
+        //check the length of the DataRows 
+        //we keep on creating dataRows based on how large the size is 
+
+        //1 page worth = 122 
+        if(dataRows > 150){
+
+        }
+        console.log(dataRows)
 
         data = data.slice((dataRows-1) - 112, dataRows - 1);
+        //data = data.slice(0, dataRows-1)
+
+        
     
         let budHeader = data[2]
         let budNames = data[1]
@@ -315,6 +321,7 @@ const processPestFile = (filePath) => {
                 budLocations.push(key)
             }
         }
+        console.log(budLocations)
     
         //get all the unique job numbers
         for(var key2 in budLocations){
@@ -343,14 +350,28 @@ const processPestFile = (filePath) => {
 
         }
         
-        fs.writeFileSync('test.json',JSON.stringify(data))
+        //fs.writeFileSync('test.json',JSON.stringify(data))
 
         resolve({jobNumbers: jobNumbers, samples: samples, sampleData: sampleData})
     }) 
 }
 
-const processThcFile = () => { 
+const processThcFile = (filePath) => { 
 
+    console.log("Procesing THC file ")
+
+    return new Promise((resolve, reject) => {
+
+        let workbook = new Excel.Workbook();
+        workbook.xlsx.readFile(path.normalize(filePath)).then(function() {
+            let ws = workbook.getWorksheet("Sheet1")
+            let cell = ws.getCell('AD78').value
+            console.log(cell)
+        });
+
+
+
+    })
 }
 
 //scan throught xlsx file for thc/pest files 
@@ -361,9 +382,8 @@ exports.processExcelFile = (reportType, filePath) => {
     if(reportType === 'pesticides'){
         return processPestFile(filePath)
     }else {
-        //return processThcFile(filePath)
+        return processThcFile(filePath)
     }
-
 
 }
 
@@ -398,7 +418,7 @@ exports.processTxt = async (jobNumbers) => {
         for(let j = 0; j < txtNames.length; j++) {
             let newPath = path.join(txtPath, txtNames[j],"W"+ jobNumbers[i] + ".txt"); 
             
-            if(fs.existsSync(path.resolve(newPath))){
+            if(fs.existsSync(path.normalize(newPath))){
                 //console.log('newPath: ', newPath)
                 clientPath[jobNumbers[i]] = newPath; 
                 selectedNumbers.push(jobNumbers[i])

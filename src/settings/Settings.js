@@ -39,6 +39,7 @@ const Settings = () => {
             setDatabasePath(results.databaseLocation)
             setReportsPath(results.reportsPath)
             setTxtPath(results.txtPath)
+            setTemplatesPath(results.templatesPath)
         } catch (error) {
             console.log(error)
         }
@@ -108,8 +109,18 @@ const Settings = () => {
                     <button className='bg-emerald-200 p-2 rounded-md'>Save All Changes</button>
                 </div>
 
+
+                <div className='text-center'>
+                    <hr /> 
+                    <h2>About</h2>
+                    <h2>Help</h2>
+                    <p><a href="https://github.com/layup/Cannabase_2.0" className='text-blue-400'>Creator: Tommy Lay</a></p>
+
+                </div>
+
             </div>
             
+
 
         </div>
     )

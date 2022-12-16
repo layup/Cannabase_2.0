@@ -42,8 +42,8 @@ const SamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, samp
                   className='w-5/6 p-1 bg-zinc-200 rounded-md'
                   onChange={(e) => updateSampleOptions(sampleName, 'amount',e.target.value)}
                 >
-                  <option value="Single">Single</option>
-                  <option value="Multiple">Multiple</option>
+                  <option value="single">Single</option>
+                  <option value="mult">Multiple</option>
                 </select>
               </td>
               <td>
