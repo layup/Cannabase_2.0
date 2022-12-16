@@ -37,6 +37,9 @@ const CreateReports = (props) => {
 
                 setClientInfo(data);
 
+                //Pests 
+
+                console.log(location.state.selectReport) 
                 //set the sample option defaults 
                 for (let i = 0; i < samples.length; i++) {
                     if(data[samples[i].substring(0,6)]['sampleType1'] === 'oil'){
@@ -108,7 +111,7 @@ const CreateReports = (props) => {
 
     const generateReports = async () => {
         console.log('generating reports')
-        await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers, sampleOptions, "pest")
+        await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers, sampleOptions, location.state.selectReport)
     }
 
     return (

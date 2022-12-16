@@ -59,38 +59,32 @@ exports.editFile = (jobNum) => {
 }
 
 
-const generateFileNames = (jobNumbers, fileExtension, templateLocation) => {
+const generateFileNames = async (jobNumber, fileExtension, templateLocation) => {
 
     const reportsPath = store.get('reportsPath')
 
-    let fileLocations = [] 
-
-    for(var i = 0; i < jobNumbers.length; i++ ){ 
-
-        const folderName = path.join(reportsPath + "/" + jobNumbers[i]) 
-        const fileName = path.join(jobNumbers[i] + fileExtension)
+        const folderName = path.join(reportsPath + "/" + jobNumber.substring(0,6)) 
+        const fileName = path.join(jobNumber.substring(0,6) + fileExtension)
         const fileLocation =  path.join(folderName + "/" + fileName) 
 
         if (!fs.existsSync(folderName)){
             fs.mkdirSync(folderName);
         }
+        
         fs.copyFile(templateLocation, fileLocation, (err) => {
-            if (err) throw err;
-            console.log(`Template (${fileExtension})copied to ${folderName}`);
+        if (err) throw err;
+            console.log(`Template (${fileExtension})copied to ${folderName}: ${jobNumber}`);
+
         });
-
-        fileLocations.push({[jobNumbers[i]]: fileLocation})
-
-    }   
-    return fileLocations
+        
+        return {[jobNumber]: fileLocation}
 
 }
 
-const copyTemplate = (jobNumbers, reportType) => { 
-    const templatesPath = store.get('templatesPath'); 
 
-    console.log(templatesPath)
-    console.log(reportType)
+const copyTemplate =  (jobNumberSample, reportType) => { 
+    const templatesPath = store.get('templatesPath'); 
+    //console.log(jobNumberSample, reportType)
 
     const templateNames = {
         thc: 'cannabis_template.xlsx', 
@@ -98,195 +92,203 @@ const copyTemplate = (jobNumbers, reportType) => {
         toxic: 'toxins_template.xlsx'
     }
 
-    return new Promise((resolve, reject) => {
-
-        let pestTemplate = path.join(templatesPath, templateNames['pest']) 
-        let toxicTemplate = path.join(templatesPath, templateNames['toxic']) 
-        let thcTemplate = path.join(templatesPath, templateNames['thc']) 
+    let pestTemplate = path.join(templatesPath, templateNames['pest']) 
+    let toxicTemplate = path.join(templatesPath, templateNames['toxic']) 
+    let thcTemplate = path.join(templatesPath, templateNames['thc']) 
 
         if(reportType === 'both'){
-            let toxicFileLocations = generateFileNames(jobNumbers, '_Toxic_report.xlsx', toxicTemplate) 
-            let pestFileLocations = generateFileNames(jobNumbers, '_Pesticides_report.xlsx', pestTemplate)
+            let toxicFileLocations =  generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate) 
+            let pestFileLocations =  generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate)
 
-            resolve({toxic: toxicFileLocations,pest:pestFileLocations})
+            return ( ({[jobNumberSample]: [toxicFileLocations, pestFileLocations]}))
         }
 
         if(reportType === 'pest'){
-            resolve(generateFileNames(jobNumbers, '_Pesticides_report.xlsx', pestTemplate))
+            return (generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate))
         }
 
         if(reportType === 'toxic'){
-            resolve(generateFileNames(jobNumbers, '_Toxic_report.xlsx', toxicTemplate))
+             return ((generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate)))
         }
 
         if(reportType === 'thc'){
-            resolve(generateFileNames(jobNumbers, '_THC_report.xlsx', thcTemplate))
+            return( (generateFileNames(jobNumberSample, '_THC_report.xlsx', thcTemplate)))
         }
-
-
-    })
 
 }
 
-const copyClientInfo = async (fileLocation, clientInfo, samples, sampleData, sampleOptions) => { 
+const copyClientInfo = async (worksheet, clientInfo, key) => {
 
-    //set either for Toxins, Pestices or Both
-    for(const [key, value] of Object.entries(fileLocation)){
+    var row = worksheet.getRow(2)
+    row.getCell(2).value = clientInfo[key].clientName
+    row = worksheet.getRow(3)
+    row.getCell(2).value = clientInfo[key].date 
+    row = worksheet.getRow(4)
+    row.getCell(2).value = clientInfo[key].time 
+    row = worksheet.getRow(5)
+    row.getCell(2).value = parseInt(clientInfo[key].jobNum)
+    row = worksheet.getRow(6)
+    row.getCell(2).value = clientInfo[key].sampleType1 
+    row = worksheet.getRow(7)
+    row.getCell(2).value = clientInfo[key].sampleType2
+    row = worksheet.getRow(8)
+    row.getCell(2).value = clientInfo[key].attention 
+    row = worksheet.getRow(9)
+    row.getCell(2).value = clientInfo[key].addy1 
+    row = worksheet.getRow(10)
+    row.getCell(2).value = clientInfo[key].addy2 
+    row = worksheet.getRow(11)
+    row.getCell(2).value = clientInfo[key].addy3 
+    row = worksheet.getRow(12)
+    row.getCell(2).value = parseInt(clientInfo[key].numSamples)
+    row = worksheet.getRow(13)
+    row.getCell(2).value = clientInfo[key].email
+    row = worksheet.getRow(14)
+    row.getCell(2).value = clientInfo[key].telephone 
+    row = worksheet.getRow(15)
+    row.getCell(2).value = clientInfo[key].recvTemp
+    row = worksheet.getRow(16)
+    row.getCell(2).value = clientInfo[key].paymentInfo
 
-        //console.log(key, value)
+    row.commit(); 
+}
 
-        var wb = new Excel.Workbook(); 
-        await wb.xlsx.readFile(value)
-        var worksheet = wb.getWorksheet('Headers'); 
-        var worksheet2 = wb.getWorksheet('SampleData')
+const copyPestData = async (worksheet, worksheet2, clientInfo, sampleData, sampleNames, options, jobName) => {
+    let sampleName = ''
+    let sampleType = ''
+    let counter = 1;  
+    let row, row2; 
 
-        //general client information that is the same for all of them 
-        var row = worksheet.getRow(2)
-        row.getCell(2).value = clientInfo[key].clientName
-        row = worksheet.getRow(3)
-        row.getCell(2).value = clientInfo[key].date 
-        row = worksheet.getRow(4)
-        row.getCell(2).value = clientInfo[key].time 
-        row = worksheet.getRow(5)
-        row.getCell(2).value = parseInt(clientInfo[key].jobNum)
-        row = worksheet.getRow(6)
-        row.getCell(2).value = clientInfo[key].sampleType1 
-        row = worksheet.getRow(7)
-        row.getCell(2).value = clientInfo[key].sampleType2
-        row = worksheet.getRow(8)
-        row.getCell(2).value = clientInfo[key].attention 
-        row = worksheet.getRow(9)
-        row.getCell(2).value = clientInfo[key].addy1 
-        row = worksheet.getRow(10)
-        row.getCell(2).value = clientInfo[key].addy2 
-        row = worksheet.getRow(11)
-        row.getCell(2).value = clientInfo[key].addy3 
-        row = worksheet.getRow(12)
-        row.getCell(2).value = parseInt(clientInfo[key].numSamples)
-        row = worksheet.getRow(13)
-        row.getCell(2).value = clientInfo[key].email
-        row = worksheet.getRow(14)
-        row.getCell(2).value = clientInfo[key].telephone 
-        row = worksheet.getRow(15)
-        row.getCell(2).value = clientInfo[key].recvTemp
-        row = worksheet.getRow(16)
-        row.getCell(2).value = clientInfo[key].paymentInfo
+    console.log('Coping Pestcides/Toxic Data')
+    //console.log(clientInfo[jobName]['sampleNames'])
 
-        //set the samples name for excel document 
-        
-        let sampleName = ''
-        let sampleType = ''
-        let counter = 1; 
-        
-        console.log(clientInfo[key]['sampleNames'])
-
-        //set the given sample names and sample type
-        for(let [key1,value1] of Object.entries(clientInfo[key].sampleNames)){
-            sampleName += `${counter}) ${value1} `  
-            sampleType = sampleOptions[key1].sampleType
-            counter++; 
-        }
-
-        row = worksheet.getRow(27) 
-        row.getCell(2).value = sampleName
-
-        //this is where differences appear 
-
-        row = worksheet.getRow(28)
-        row.getCell(2).value = sampleType
-
-        row = worksheet.getRow(29)
-        switch(sampleType) {
-            case 'oil':
-                row.getCell(2).value = 'LOQ (Oil) '
-                break;
-            case 'paper':
-                row.getCell(2).value = 'LOQ (Paper)'
-                break;
-            default:
-                row.getCell(2).value = 'LOQ (Bud)'
-        } 
-
-        row.commit(); 
-        wb.xlsx.writeFile(value);
-        let matchingSamples = []
-
-        for(let i = 0; i < samples.length; i++){ 
-            if(samples[i].substring(0,6) === key){
-                matchingSamples.push(samples[i])
-            }
-        }
-
-        for(let j = 0; j < matchingSamples.length; j++){ 
-
-            if(Object.keys(sampleData[matchingSamples[j]])){
-
-                for(const [key2, value2] of Object.entries(sampleData[matchingSamples[j]])){
-                    //console.log(parseInt(key2), parseFloat(value2))
-                    
-                    let locaiton = (parseInt(key2) + 1)
-                    
-                    let row2 =  worksheet2.getRow(locaiton)
-                    
-                    row2.getCell((7 + j)).value = value2
-                    row2.commit()
-                   
-                }
-            }
-        }
-
-        wb.xlsx.writeFile(value);
-        
-
+    //set the given sample names and sample type
+    for(let [key, value ] of Object.entries(clientInfo[jobName]['sampleNames'])){
+        sampleName += `${counter}) ${value} `  
+        sampleType = options.toxins 
+        counter++; 
     }
+    row = worksheet.getRow(27) 
+    row.getCell(2).value = sampleName
+
+    row = worksheet.getRow(28)
+    row.getCell(2).value = sampleType
+
+    row = worksheet.getRow(29)
+    switch(sampleType) {
+        case 'oil':
+            row.getCell(2).value = 'LOQ (Oil) '
+            break;
+        case 'paper':
+            row.getCell(2).value = 'LOQ (Paper)'
+            break;
+        default:
+            row.getCell(2).value = 'LOQ (Bud)'
+    } 
+
+    row.commit(); 
+
+    let matchingSamples = []
+
+    for(let i = 0; i < sampleNames.length; i++){ 
+        if(sampleNames[i].substring(0,6) === jobName){
+            matchingSamples.push(sampleNames[i])
+        }
+    }
+    if(matchingSamples.length === 2){
+        row2 = worksheet2.getRow(1)
+        row2.getCell(8).value = 'Sample 2'
+    }
+
+    for(let j = 0; j < matchingSamples.length; j++){ 
+
+        if(Object.keys(sampleData[matchingSamples[j]])){
+
+            for(const [key2, value2] of Object.entries(sampleData[matchingSamples[j]])){
+                //console.log(parseInt(key2), parseFloat(value2))
+                
+                let locaiton = (parseInt(key2) + 1)
+                
+                 row2 =  worksheet2.getRow(locaiton)
+                
+                row2.getCell((7 + j)).value = value2
+                row2.commit()
+               
+            }
+        }
+    }
+
+
 }
 
 //void function, should probably try and split it out among different things 
-const copyPestData = () => {
+const copyPestInfo = async (fileLocations, clientInfo, sampleNames, sampleData, sampleOptions) => { 
 
+    //set either for Toxins, Pestices or Both
+    console.log('Copying Pesticides Data')
+
+    for(const [key, value] of Object.entries(sampleOptions)){
+        console.log(key,value)
+        if(value['toxins'] === 'both'){
+            //console.log(fileLocations[key])
+
+            for(let i = 0; i < fileLocations[key].length; i++){
+                
+            }
+
+        }else{ 
+            console.log(fileLocations[key])
+
+            var wb = new Excel.Workbook(); 
+            await wb.xlsx.readFile(fileLocations[key])
+            let headersWorksheet = wb.getWorksheet('Headers'); 
+            let dataWorksheet = wb.getWorksheet('Data')
+
+            await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+            await copyPestData(headersWorksheet, dataWorksheet, clientInfo, sampleData, sampleNames,  sampleOptions[key], key.substring(0,6))
+            await wb.xlsx.writeFile(fileLocations[key]);
+            
+        }
+    }
 
 }
 
-const copyThcData = () => { 
-
-}
-
-exports.generateReports =  async (clientInfo, samples, sampleData , jobNumbers, sampleOptions, reportType) => { 
+exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbers, sampleOptions, reportType) => { 
    
+    console.log('Generating Reports Backend ')
     console.log(clientInfo)
-    console.log(samples)
+    console.log(sampleNames)
     console.log(sampleData)
+    console.log(sampleOptions)
     console.log(jobNumbers)
     
-    //create copies based on reportType (THC, PESTS and )
-    const promise1 = await copyTemplate(jobNumbers, reportType).then( async (fileLocations) => {
-        console.log(fileLocations)
+    new Promise(async (resolve, reject) => {
 
-        //must scan throught both iterations 
-        if(reportType === 'both'){ 
+        if(reportType === 'pesticides'){
+            //console.log('Report Type is: ', reportType)
+            let fileLocations = {}
 
-
-        }else {
-
-        //all files should normally copy this client data 
-        for (const fileLocation of fileLocations){ 
-            await copyClientInfo(fileLocation,clientInfo, samples, sampleData, sampleOptions)
-
+            //check each before copy template 
+            for(let key in sampleOptions){
+                if(sampleOptions.hasOwnProperty(key)){
+                    let tempObject =  await copyTemplate(key, sampleOptions[key]['toxins'])
+                    fileLocations[key] = tempObject[key]
+                }
             }
+
+            //console.log(fileLocations)
+            console.log(fileLocations)
+            await copyPestInfo(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
+            //copy pest information to the thing
+            
+        
         }
 
-        //copy the client data based on 
+        if(reportType === 'cannabis'){
 
-        //both 
-        //toxic 
-        //pests 
-        //thc 
-
-    })
+        }
     
-    //thc 
-  
-
+    })
 
 }
 
@@ -351,6 +353,7 @@ const processThcFile = () => {
 
 }
 
+//scan throught xlsx file for thc/pest files 
 exports.processExcelFile = (reportType, filePath) => {
 
     console.log('Processing Excel File: ', filePath) 

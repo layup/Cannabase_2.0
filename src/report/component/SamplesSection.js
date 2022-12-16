@@ -22,7 +22,7 @@ const SamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, samp
           let jobNum = sampleName.substr(0,6)
           
           return (
-            <tr className='border-b-1 border-zinc-200'>
+            <tr key={sampleName} className='border-b-1 border-zinc-200'>
               <td className='text-center p-2'>{sampleName}</td>
               <td>
                 <select 
