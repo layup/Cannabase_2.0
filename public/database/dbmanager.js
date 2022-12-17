@@ -4,8 +4,8 @@ const Store = require('electron-store');
 
 const store = new Store()
 var dbPath = path.resolve(__dirname, './Cannabase.db')
-//var dbPath2 = path.normalize(store.get('databaseLocation'));
-var dbPath2 = store.get('databaseLocation2');
+var dbPath2 = path.normalize(store.get('databaseLocation'));
+//var dbPath2 = store.get('databaseLocation2');
 
 try {
   dbPath2 = path.normalize(dbPath2)
