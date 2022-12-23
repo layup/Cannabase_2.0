@@ -243,6 +243,8 @@ const copyPestInfo = async (fileLocations, clientInfo, sampleNames, sampleData, 
             await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
             await copyPestData(headersWorksheet, dataWorksheet, clientInfo, sampleData, sampleNames,  sampleOptions[key], key.substring(0,6))
             await wb.xlsx.writeFile(fileLocations[key]);
+
+            console.log('Done writing')
             
         }
     }
@@ -274,6 +276,7 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
             }
 
             await copyPestInfo(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
+          
             //copy pest information to the thing
             
         }

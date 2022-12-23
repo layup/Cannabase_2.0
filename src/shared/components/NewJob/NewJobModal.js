@@ -1,5 +1,5 @@
 import React, {  useState, useRef } from 'react'
-import {useNavigate, redirect} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 
 
@@ -28,9 +28,7 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
       "Psilocybin"
     ]
 
-
     const navigate = useNavigate();
-
 
     const [testOptions, setTestOptions] = useState(Array(12).fill(false)); 
     const [jobNumber, setJobNumber] = useState("")
@@ -117,8 +115,11 @@ const NewJobModal = ({createNewJob, setCreateNewJob, cancelCreateNewJob, confirm
         console.log("Submitted")
         handleCancel()
         //should take us to the newly created item \
-
-        navigate(`/jobs/:${jobNumber}`);
+        setTimeout(function(){
+          navigate(`/`);
+          window.location.reload(false);
+        }, 100); 
+        
       })
 
     }

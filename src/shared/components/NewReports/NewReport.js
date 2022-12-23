@@ -2,11 +2,9 @@ import React, { useState, useRef, useEffect } from 'react'
 
 import Modal from '../UIElements/Modal'
 
-import MushroomReport from './MushroomReport';
-
-import FileUploadIcon from '@mui/icons-material/FileUpload';
 import Close from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
+
 
 const NewReport = (props) => {
 
@@ -69,14 +67,18 @@ const NewReport = (props) => {
     const openFileXlsx = async () => {
         console.log('running tests')
         await window.api.openFileXlsx().then(({validFile, fileName, filePath}) => {
+            console.log(validFile)
             if(validFile){
                 setFileName(fileName)
                 setFilePath(filePath)
+                errors.current.file = ''
             }else {
+                setDisplayError(true)
                 errors.current.file = "Please select a .xlsx file " 
             }
         });
     }
+
 
     const removeFile = () => {
         setFileName("")
@@ -147,7 +149,6 @@ const NewReport = (props) => {
                 {errors.current.selectReport && <p className='text-xs text-red-400'>Please select a report.</p>}
 
             
-
                 <div className='my-2'>
                     <h1 className='text-lg'>Attach Document</h1>
                     {fileName ? 
@@ -160,24 +161,24 @@ const NewReport = (props) => {
                             </div>
 
                         ) : ( 
-                            <div className='h-64 border-2 border-dashed flex flex-col justify-center items-center font-medium border-zinc-300'> 
-                                <FileUploadIcon className='text-xl'/> 
-                                <p>Drag or Drop Here </p>
-                                <p>or</p>
-                                <button
-                                    className='text-blue-700'
-                                    onClick={openFileXlsx}
-                                >
-                                    Browse File
-                                </button>
+                            <div className='h-64 border-2 border-dashed flex justify-center items-center space-x-2 font-medium border-zinc-300'
+                            
+                            >
+                                    <p>Select a file </p>
+                                    <button
+                                        className='bg-white hover:bg-gray-100 text-gray-800 font-semibold py-1 px-3 border border-gray-400 rounded shadow'
+                                        onClick={openFileXlsx}
+                                    >
+                                        Browse...
+                                    </button>
                             </div>
+
+
                         )
                     }
                     <p className=''>Accepted File Types: .xlsx</p>
                 </div>
                 
-
-
 
                 {errors.current.file && <p className='text-xs text-red-400'>Please select a valid file.</p>}
 

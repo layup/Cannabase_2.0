@@ -88,6 +88,7 @@ async function handleSetFilePath(setFile) {
 
 async function openFileXlsx() {
     const { canceled, filePaths } = await dialog.showOpenDialog() 
+
     var fileName = filePaths[0].replace(/^.*[\\\/]/, ''); 
 
     let validFile = false; 

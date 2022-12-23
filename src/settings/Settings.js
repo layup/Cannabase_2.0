@@ -58,27 +58,29 @@ const Settings = () => {
         <div
             className=' flex flex-col h-screen max-w-screen lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
         >
-            <div className='flex flex-col space-y-2 p-2 w-full just'>
+            <div className='flex flex-col space-y-2 p-2 w-full '>
 
-                <h2>File Path Location</h2>
+                <h2 className='px-1'>File Path Location</h2>
 
                 
                 <Filepath 
-                    title="SQL Database Path (U Drive)"
+                    title="SQL Database Path"
+                    description="Where the .db SQL database is located"
                     setPath={selectDatabasePath}
                     path={'databaseLocation'}
                     currentPath={databasePath}
                 />
+            
  
                 <Filepath 
-                    title="Images Path (X Drive)"
+                    title="Images Path"
                     setPath={selectDatabasePath}
                     path="imagePath"
                     currentPath={'test'}
                 />     
 
                 <Filepath 
-                    title="Reports (X Drive) "
+                    title="Reports"
                     setPath={setFilePath}
                     path={'reportsPath'}
                     currentPath={reportsPath}
@@ -86,29 +88,29 @@ const Settings = () => {
 
 
                 <Filepath 
-                    title="Good Copies Report Path (U drive)"
+                    title="Good Copies Report Path"
                     setPath={selectDatabasePath}
                     currentPath={'test'}
                 />     
                 <Filepath 
-                    title="TXT File Path (U Drive) "
+                    title="TXT File Path  "
                     setPath={selectTxtPath}
                     path="txtPath"
                     currentPath={txtPath}
                 />     
                 <Filepath 
-                    title="Templates File Path (U Drive) "
+                    title="Templates File Path"
                     setPath={selectTemplatePath}
                     path="templatesPath"
                     currentPath={templatesPath}
                 />     
  
-                
+                {/*
                 <div className='space-x-2'>
                     <button className='bg-gray-200 p-2 rounded-md'>Dismiss All Changes</button>
                     <button className='bg-emerald-200 p-2 rounded-md'>Save All Changes</button>
                 </div>
-
+                */} 
 
                 <div className='text-center'>
                     <hr /> 

@@ -1,24 +1,24 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const Store = require('electron-store');
+const fs = require('fs')
 
 const store = new Store()
-var dbPath = path.resolve(__dirname, './Cannabase.db')
-var dbPath2 = path.normalize(store.get('databaseLocation'));
-//var dbPath2 = store.get('databaseLocation2');
+//var dbPath = path.resolve(__dirname, './Cannabase.db')
+let  dbPath = path.resolve(store.get('databaseLocation'));
+//var dbPath3 = store.get('databaseLocation2');
 
-try {
-  dbPath2 = path.normalize(dbPath2)
-} catch (error){
-  console.log(error)
-  dbPath2 = path.normalize('./temp.db')
-
+const pathExists = () => {
+  console.log('Stored SQL db Path: ', dbPath)
+  if(fs.existsSync(dbPath)){
+    console.log('Daatabase does exist')
+    return dbPath
+  }
+  console.log('Database does not exist, creating temp in memory location')
+  return ":memory:" 
 }
 
-
-console.log('Stored SQL dbPath:', dbPath2)
-
-const db = new sqlite3.Database(dbPath2, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE , (err) => {
+const db = new sqlite3.Database(pathExists(dbPath), sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE , (err) => {
     if (err){
       console.error('Database opening error: ', err);
 

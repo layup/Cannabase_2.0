@@ -6,7 +6,7 @@ const NewButton = (props) => {
 
     return (
         <button 
-            className='bg-emerald-700 text-white rounded-md p-1 md:p-2 lg:px-8 bg-emeral-700 w-full hover:bg-emerald-800'
+            className='bg-emerald-700 text-white rounded-md p-1 md:p-2 lg:px-8 bg-emeral-700 w-full hover:bg-emerald-800 shadow'
             onClick={props.onClick}
         >
             <div className='flex justify-between w-full' >
