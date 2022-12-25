@@ -5,17 +5,19 @@ const fs = require('fs')
 
 const store = new Store()
 //var dbPath = path.resolve(__dirname, './Cannabase.db')
-let  dbPath = path.resolve(store.get('databaseLocation'));
+let  dbPath = store.get('databaseLocation');
 //var dbPath3 = store.get('databaseLocation2');
 
 const pathExists = () => {
   console.log('Stored SQL db Path: ', dbPath)
+  
   if(fs.existsSync(dbPath)){
     console.log('Daatabase does exist')
-    return dbPath
+    return path.resolve(dbPath) 
   }
   console.log('Database does not exist, creating temp in memory location')
   return ":memory:" 
+
 }
 
 const db = new sqlite3.Database(pathExists(dbPath), sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE , (err) => {

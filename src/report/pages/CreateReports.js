@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 import ClientInfoItem from '../component/ClientInfoItem';
-import SamplesSection from '../component/SamplesSection';
+import PestSamplesSection from '../component/PestSamplesSection';
 
 import {useNavigate} from 'react-router-dom';
+import ThcSampleSection from '../component/ThcSampleSection';
 
 const CreateReports = (props) => {
 
@@ -22,9 +23,11 @@ const CreateReports = (props) => {
         async function processExcelFile(){
             await window.api.processExcelFile(location.state.selectReport, location.state.filePath).then(({jobNumbers, samples, sampleData}) => {
                 
+                console.log('Processing Excel File')
                 console.log(jobNumbers)
                 console.log(samples)
                 console.log(sampleData)
+                console.log('---------Done--------')
                 
                 setJobNumbers(jobNumbers)
                 setSamples(samples)
@@ -38,40 +41,48 @@ const CreateReports = (props) => {
     useEffect(() => {
         async function processTxt(){
             await window.api.processTxt(jobNumbers).then((data) => {
-                console.log(data)
-
+                console.log("------Callback Processing Text---------") 
+            
                 setClientInfo(data);
 
                 //Pests 
-
-                console.log(location.state.selectReport) 
-                //set the sample option defaults 
-                for (let i = 0; i < samples.length; i++) {
-                    if(data[samples[i].substring(0,6)]['sampleType1'] === 'oil'){
-                        setSampleOptions((prevState) => ({
-                            ...prevState, 
-                            [samples[i]]:{
-                                sampleType:'oil', 
-                                amount:'mult', 
-                                'toxins':'pest'
-                            }
-                        }))
-                    }else {
-                        setSampleOptions((prevState) => ({
-                            ...prevState, 
-                            [samples[i]]:{
-                                sampleType:'bud', 
-                                amount:'mult', 
-                                'toxins':'pest'
-                            }
-                        }))
-                    }
-                        
+                if(location.state.selectReport === 'pesticides'){
+                    for (let i = 0; i < samples.length; i++) {
+                        if(data[samples[i].substring(0,6)]['sampleType1'] === 'oil'){
+                            setSampleOptions((prevState) => ({
+                                ...prevState, 
+                                [samples[i]]:{
+                                    sampleType:'oil', 
+                                    amount:'mult', 
+                                    'toxins':'pest'
+                                }
+                            }))
+                        }else {
+                            setSampleOptions((prevState) => ({
+                                ...prevState, 
+                                [samples[i]]:{
+                                    sampleType:'bud', 
+                                    amount:'mult', 
+                                    'toxins':'pest'
+                                }
+                            }))
+                        }
                     }     
+                }else{
+                    samples.forEach((sample, index) => {
+                        
+                    })
+
+                }
+                
+                
+           
+                //set the sample option defaults 
+
                 
             })
         }
-
+       
         processTxt()
 
         
@@ -134,7 +145,6 @@ const CreateReports = (props) => {
         }, 3000)
            
         
-        
     }
 
     return (
@@ -147,7 +157,7 @@ const CreateReports = (props) => {
             >    
                 <div className=' w-full flex justify-between p-4 border-b-2'>
                     <div className=''>
-                        <h1 className='text-xl font-medium'>Reports</h1>
+                        <h1 className='text-xl font-medium capitalize'>{location.state.selectReport} Reports</h1>
                         <div className='flex space-x-2'>
                             <p>FileName:</p>
                             <p className='text-zinc-400'>{location.state.fileName}</p>
@@ -263,18 +273,28 @@ const CreateReports = (props) => {
                             onChange={updateClientInfo}
                         /> 
 
-
                     </table>
 
                 </div>
 
-                <SamplesSection 
-                    clientInfo={clientInfo}
-                    updateSampleName={updateClientInfo}
-                    updateSampleOptions={updateSampleOptions}
-                    samples={samples}
-                    sampleOptions={sampleOptions}
-                />
+                {location.state.selectReport === 'pesticides' ? 
+                    <PestSamplesSection 
+                        clientInfo={clientInfo}
+                        updateSampleName={updateClientInfo}
+                        updateSampleOptions={updateSampleOptions}
+                        samples={samples}
+                        sampleOptions={sampleOptions}
+                    />
+                :
+                    <ThcSampleSection 
+                        clientInfo={clientInfo}
+                        updateSampleName={updateClientInfo}
+                        updateSampleOptions={updateSampleOptions}
+                        samples={samples}
+                        sampleOptions={sampleOptions}
+                    />
+                        
+                }
 
             </div>
         </React.Fragment>

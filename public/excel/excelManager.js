@@ -1,4 +1,4 @@
-const {shell, ipcRenderer, BrowserWindow, dialog, remote, } = require('electron')
+const {shell } = require('electron')
 const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path')
@@ -6,11 +6,14 @@ const xlsx = require('xlsx')
 const Excel = require('exceljs');
 var readline = require('readline');
 
-
 const { promises: fs2 } = require("fs");
-
 const store = new Store()
 
+/** 
+ * Scans reports folder that is saved in the Store 
+ * @param   {string} jobNum - The file path of the THC excel file 
+ * @return  {array} The scanned report files 
+*/ 
 exports.scanReportsFolder = (jobNum) => {
 
     var reportsDir = store.get('reportsPath')
@@ -28,9 +31,7 @@ exports.scanReportsFolder = (jobNum) => {
                     if(scanned_files.includes(file) === false){
                         if(regex.test(file)){
                             scanned_files.push(file)
-                            //console.log('hello')
                             resolve(scanned_files)
-                            //console.log(scanned_files)
                         } 
                     }
        
@@ -40,7 +41,12 @@ exports.scanReportsFolder = (jobNum) => {
     })
 }
 
-//read local dir and find the files that we need 
+
+/** 
+ * Opens the PDF on the local machines default .pdf reader 
+ * @param   {String} jobNum - the job number of the pdf 
+ * @param   {String} report - the name of the report         
+*/ 
 exports.openPDF = (jobNum, report) => {
     // Load a remote URL
     var reportsDir = store.get('reportsPath')
@@ -56,25 +62,32 @@ exports.editFile = (jobNum) => {
 
 }
 
+/**
+ * Generate the folder and excel file from existing excel template 
+ * @param {String} jobNumber - the job number
+ * @param {String} fileExtension - the file extension 
+ * @param {String} templateLocation - the location of the given template for the report type 
+ * @returns {Object} - Where each jobs file is located 
+ */
 const generateFileNames = async (jobNumber, fileExtension, templateLocation) => {
 
     const reportsPath = store.get('reportsPath')
 
-        const folderName = path.join(reportsPath + "/" + jobNumber.substring(0,6)) 
-        const fileName = path.join(jobNumber.substring(0,6) + fileExtension)
-        const fileLocation =  path.join(folderName + "/" + fileName) 
+    const folderName = path.join(reportsPath + "/" + jobNumber.substring(0,6)) 
+    const fileName = path.join(jobNumber.substring(0,6) + fileExtension)
+    const fileLocation =  path.join(folderName + "/" + fileName) 
 
-        if (!fs.existsSync(folderName)){
-            fs.mkdirSync(folderName);
-        }
-        
-        fs.copyFile(templateLocation, fileLocation, (err) => {
-        if (err) throw err;
-            console.log(`Template (${fileExtension})copied to ${folderName}: ${jobNumber}`);
+    if (!fs.existsSync(folderName)){
+        fs.mkdirSync(folderName);
+    }
+    
+    fs.copyFile(templateLocation, fileLocation, (err) => {
+    if (err) throw err;
+        console.log(`Template (${fileExtension})copied to ${folderName}: ${jobNumber}`);
 
-        });
-        
-        return {[jobNumber]: fileLocation}
+    });
+    
+    return {[jobNumber]: fileLocation}
 
 }
 
@@ -288,7 +301,11 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
     })
 
 }
-
+/** 
+ * Processes pesticides/toxins excel File 
+ * @param  {String} filepath - The file path of the pestcides excel file 
+ * @return {object} An object that contains the job numbers, sample names and sample data
+*/ 
 const processPestFile = (filePath) => {
     return new Promise((resolve, reject) => {
 
@@ -301,7 +318,8 @@ const processPestFile = (filePath) => {
         //check the length of the DataRows 
         //we keep on creating dataRows based on how large the size is 
 
-        //1 page worth = 122 
+        //1 page worth = 122 and maybe do it in a recursive way, could switch up and use EXCELJS processing, 
+        //might be better sinces it's a column by column approach 
         if(dataRows > 150){
 
         }
@@ -309,8 +327,6 @@ const processPestFile = (filePath) => {
 
         data = data.slice((dataRows-1) - 112, dataRows - 1);
         //data = data.slice(0, dataRows-1)
-
-        
     
         let budHeader = data[2]
         let budNames = data[1]
@@ -359,6 +375,13 @@ const processPestFile = (filePath) => {
     }) 
 }
 
+
+/** 
+ * Processes Cannabis excel File 
+ * @param  {String} filepath - The file path of the THC excel file 
+ * @return {object} An object that contains the job numbers, sample names and sample data
+*/ 
+
 const processThcFile = (filePath) => { 
 
     console.log("Procesing THC file ")
@@ -366,21 +389,66 @@ const processThcFile = (filePath) => {
     return new Promise((resolve, reject) => {
 
         let workbook = new Excel.Workbook();
+
+        let sampleNames = []
+        let jobNums = []
+
+        let desc = {}
+        let name = {}
+        let recovery ={}
+        
+
         workbook.xlsx.readFile(path.normalize(filePath)).then(function() {
             let ws = workbook.getWorksheet("Sheet1")
-            let cell = ws.getCell('AD78').value
-            console.log(cell)
+            //console.log(ws)
+            let descCol = ws.getColumn('BG'); 
+            let nameCol = ws.getColumn('BK'); //THC name 
+            let recoveryCol = ws.getColumn('EH')
+            //let mg = ws.getColumn(); 
+            //let concentration = ws.getColumn()
+            
+            descCol.eachCell(function(cell, rowNumber) {
+                //console.log(rowNumber, cell.text)
+               
+                if(cell.text.match(/(\d+)-[0-9]$/)){    
+                    desc[rowNumber] = cell.text
+                    name[rowNumber] = nameCol.values[rowNumber]
+                    recovery[rowNumber] = recoveryCol.values[rowNumber]
+
+                    if(!sampleNames.includes(cell.text)){
+                        sampleNames.push(cell.text)
+                        
+                    }
+                }
+            });
+
+            sampleNames.forEach((sample, i) => {
+                let jobNum = sample.substring(0,6)
+
+                if(!jobNums.includes(jobNum)){
+                    jobNums.push(jobNum)
+                }
+            })
+
+            //console.log('Testing', desc.values[1])
+            resolve({jobNumbers: jobNums, samples: sampleNames, sampleData: {desc:desc,name:name, recovery:recovery}})
         });
+    
 
-
+        
 
     })
 }
 
-//scan throught xlsx file for thc/pest files 
+/** 
+ * Processes the excel file based on the report type 
+ * @param  {string} reportType - either pesticides or cannabis. 
+ * @param  {string} filePath - the file path of the excel file. 
+ * @return {object} An object that contains the job numbers, sample names and the sample data. 
+*/ 
 exports.processExcelFile = (reportType, filePath) => {
 
-    console.log('Processing Excel File: ', filePath) 
+    console.log(`Processing Excel File(${reportType}): ${filePath} `) 
 
     if(reportType === 'pesticides'){
         return processPestFile(filePath)
@@ -390,9 +458,15 @@ exports.processExcelFile = (reportType, filePath) => {
 
 }
 
-
+/**
+ * Processes the TXT files at the defined dir which scans for information based on a job number 
+ * @param {Array} jobNumbers - All of the job numbers in the excel file 
+ * @returns {Object} Contains the information of each job number if exists 
+ */
 exports.processTxt = async (jobNumbers) => {
-    console.log("Processing Text")
+    console.log("-----------Processing Text-------------")
+
+    
     const txtPath = path.normalize(store.get('txtPath'))
     
     let txtNames = []
@@ -400,7 +474,9 @@ exports.processTxt = async (jobNumbers) => {
 
     //scan the dir 
     const dirResults = await fs2.readdir(txtPath)
-    console.log(dirResults)
+
+    //console.log(jobNumbers)
+    //console.log(dirResults)
     
 
     //scan for TXT-MONTH files 
@@ -415,12 +491,15 @@ exports.processTxt = async (jobNumbers) => {
 
     let clientPath = {}
     let selectedNumbers = []
+
+    console.log('--Testing Processing Text Information--')
+    
  
     //check for the file location and if they exists 
     for(let i = 0; i < jobNumbers.length; i++){
         for(let j = 0; j < txtNames.length; j++) {
             let newPath = path.join(txtPath, txtNames[j],"W"+ jobNumbers[i] + ".txt"); 
-            
+        
             if(fs.existsSync(path.normalize(newPath))){
                 //console.log('newPath: ', newPath)
                 clientPath[jobNumbers[i]] = newPath; 
@@ -428,16 +507,23 @@ exports.processTxt = async (jobNumbers) => {
             }
         }    
     }
-    //issue when doesn't exist 
+ 
+    let difference = []
 
-    let difference = jobNumbers.filter(x => !selectedNumbers.includes(x));
-    
+    if(jobNumbers.length > 1){
+         difference = jobNumbers.filter(x => !selectedNumbers.includes(x));
+    }
+
+    //console.log('difference: ', difference)
+    //console.log(clientPath)
+
     let clientInfo = {}
     
     for(var clientKey in clientPath){
         clientInfo[clientKey] = await GenerateClientData(clientKey, clientPath[clientKey])
 
     }
+    
 
     if(difference.length > 0){
         //generate empty data 
@@ -467,15 +553,22 @@ exports.processTxt = async (jobNumbers) => {
             }
         }
     }
-    
+
+    console.log("--------Done Processing Text-----------") 
     return clientInfo
 } 
 
-
+/**
+ * Scans for general information about a given job number 
+ * @param {String} jobNum - the job number 
+ * @param {String} jobPath - the path for the job number 
+ * @returns {Object} contains all of the client information for a given job 
+ */
 
 const  GenerateClientData = async (jobNum, jobPath) => {
 
-    //console.log("Generating Client Data")
+    console.log("--------Generating Client Data---------")
+
 
     let clientName, date, time = ""
     let attention = ""
@@ -494,9 +587,9 @@ const  GenerateClientData = async (jobNum, jobPath) => {
     let sampleCounter = 0; 
 
     for await (const line of rl){
-        
-        if(line.length !== 0) {
-
+        //console.log(`${line.length}: ${line}` )
+        if(line.length > 0 ) {
+            
             if(counter === 0){
                 clientName = line.match(/(\s{5})(.*?)(\s{5})/)[0].trim()
                 date = line.match(/[0-9]{2}[a-zA-Z]{3}[0-9]{2}/)[0]
@@ -511,17 +604,28 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                 if(attention){
                     attention = attention[0] 
                 }else {
-                    addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+                    try {
+                        addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+                    } catch (err){
+                        console.log(err)
+                    }
+                   
                 }
 
             }
             if(counter === 2 ){ 
                 sampleType2 = (line.substring(line.length/2,line.length)).match(/(\w+)?([a-zA-Z0-9\-#]+)/)[0]; 
                 if(attention){
-                    addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+                    try {
+                        addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    
                 }else {
                     addy2 = line.substring(0, line.length/2).trim()
                 }
+                
 
             }
             if(counter === 3){
@@ -534,49 +638,79 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                 }
                 
             }
+            
             if(counter === 4){ 
                 if(attention){
                    addy3 = line.replace(/\s/g, '');
                 }else {
-                    telephone = line.substring(20,50).replace('TEL:', '').trim()
-                    recvTemp = line.match(/((\d+).[\d]C)/)[0]
+                    telephone = line.substring(20,50).replace('TEL:', '').trim() 
+                    try {
+                        recvTemp = line.match(/((\d+).[\d]C)/)[0]
+                    }catch (err){
+                        console.log(err)
+                    }
+                    
                 }
             }
 
             if(counter === 5 ){
                 if(attention){
-                     telephone = line.substring(20,50).replace('TEL:', '').trim()
-                     recvTemp = line.match(/((\d+).[\d]C)/)[0]
+                    telephone = line.substring(20,50).replace('TEL:', '').trim()
+                    try {
+                        recvTemp = line.match(/((\d+).[\d]C)/)[0]
+                    }catch (err){
+                        console.log(err)
+                    } 
                  }else{
                     fax = line.replace('FAX:', '').trim();
                  }
             }
 
             if(counter === 6){ 
+                
                 if(attention){
                     fax = line.replace('FAX:', '').trim(); 
                 }else {
                     //email = line.substring(20,50).trim()
-                    email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                    try {
+                         email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                    } catch (err){
+                        console.log(err)
+                    }
                     
                     paymentInfo = line.match(/(PD) (\w+) (\w+)/)
                     if(paymentInfo){
-                        paymentInfo = paymentInfo[0]
+                        try {
+                            paymentInfo = paymentInfo[0]
+                        } catch (err) {
+                            console.log(err)
+                        }
+                        
                     }
                 }
-
+            
             }
             if(counter === 7){
                 if(attention){
                     //email = line.substring(20,50).trim()
-                    email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                    try{
+                        email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    
                     paymentInfo = line.match(/(PD) (\w+) (\w+)/)
                     if(paymentInfo){
-                        paymentInfo = paymentInfo[0]
+                        try {
+                             paymentInfo = paymentInfo[0]
+                        } catch (err){
+                            console.log(err)
+                        }
+                       
                     } 
                 }
             }
-
+           
             counter++; 
         } 
 

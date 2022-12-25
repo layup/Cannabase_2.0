@@ -1,6 +1,6 @@
 import React from 'react'
 
-const SamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, samples, sampleOptions}) => {
+const PestSamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, samples, sampleOptions}) => {
 
   return (
     <div className='w-full h-full scroll-auto'>
@@ -77,4 +77,4 @@ const SamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, samp
   )
 }
 
-export default SamplesSection
+export default PestSamplesSection
