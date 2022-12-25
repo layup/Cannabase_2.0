@@ -69,7 +69,7 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
                     </tr> 
                   )
                 })}          
-                  </tbody>
+                 
                 
                 </tbody>
                 

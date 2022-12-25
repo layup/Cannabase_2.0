@@ -17,6 +17,7 @@
     "electron-json-storage": "^4.6.0",
     "electron-store": "^8.1.0",
     "exceljs": "^4.3.0",
+    "jspdf": "^2.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.3",

@@ -599,13 +599,27 @@ const  GenerateClientData = async (jobNum, jobPath) => {
             }
             if(counter === 1){
                 attention = line.match(/\*(.*?)(?=\s{3})/)
-                sampleType1 = (line.substring(line.length/2,line.length)).match(/\w+/)[0];
+                console.log('att', attention)
+                
+                if(line.length > 25){
+                     sampleType1 = (line.substring(line.length/2,line.length)).match(/\w+/)[0];
+                }
+               
                 
                 if(attention){
                     attention = attention[0] 
+                    
                 }else {
                     try {
-                        addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+   
+                        if(line.length > 30){
+                            addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+                        }else {
+                            addy1 = (line.substring(0, line.length)).match(/\w+(\s\w+){2,}/)[0];
+                        }
+                        
+                       
+                        //addy1 = (line.substring(0, line.length/2)).match(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9\-#\.\/]+$/);
                     } catch (err){
                         console.log(err)
                     }
