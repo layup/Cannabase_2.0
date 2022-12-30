@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef} from 'react'
 import { useLocation } from 'react-router-dom'
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 import ClientInfoItem from '../component/ClientInfoItem';
@@ -16,6 +16,9 @@ const CreateReports = (props) => {
     const [clientInfo, setClientInfo] = useState("")
     const [sampleOptions, setSampleOptions] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [showError, setShowError] = useState(false);
+
+    const errors = useRef()
 
     const navigate = useNavigate();
 
@@ -42,10 +45,10 @@ const CreateReports = (props) => {
         async function processTxt(){
             await window.api.processTxt(jobNumbers).then((data) => {
                 console.log("------Callback Processing Text---------") 
-            
+                
                 setClientInfo(data);
 
-                //Pests 
+                //Set the default Sample values for both thc and pest files 
                 if(location.state.selectReport === 'pesticides'){
                     for (let i = 0; i < samples.length; i++) {
                         if(data[samples[i].substring(0,6)]['sampleType1'] === 'oil'){
@@ -54,7 +57,7 @@ const CreateReports = (props) => {
                                 [samples[i]]:{
                                     sampleType:'oil', 
                                     amount:'mult', 
-                                    'toxins':'pest'
+                                    'reportType':'pest'
                                 }
                             }))
                         }else {
@@ -63,25 +66,27 @@ const CreateReports = (props) => {
                                 [samples[i]]:{
                                     sampleType:'bud', 
                                     amount:'mult', 
-                                    'toxins':'pest'
+                                    'reportType':'pest'
                                 }
                             }))
                         }
                     }     
                 }else{
                     samples.forEach((sample, index) => {
-                        
+                        setSampleOptions((prevState) => ({
+                            ...prevState, 
+                            [sample]:{
+                                unitType:'moisture',
+                                reportType: 'basic',
+                                amount: 'mult', 
+                            }
+                        }))
                     })
-
                 }
-                
-                
-           
-                //set the sample option defaults 
-
                 
             })
         }
+        
        
         processTxt()
 
@@ -90,7 +95,8 @@ const CreateReports = (props) => {
 
 
     const updateClientInfo = ( jobNum, keyName, value, key) => {
-       
+        console.log(jobNum, keyName, key, value )
+
         if(keyName === 'sampleNames'){
             setClientInfo((prevState) => ({
                 ...prevState,
@@ -112,9 +118,12 @@ const CreateReports = (props) => {
             }))
         }
         
+        console.log(clientInfo)
     }
 
     const updateSampleOptions = (jobNum, keyName, value) => {
+        console.log(jobNum, keyName, value)
+
         setSampleOptions((prevState) => ({
             ...prevState, 
             [jobNum]: {
@@ -141,7 +150,7 @@ const CreateReports = (props) => {
         setTimeout(() => {
             console.log('reports are done ')
             setIsLoading(false)
-            navigate('/reports')
+            //navigate('/reports')
         }, 3000)
            
         

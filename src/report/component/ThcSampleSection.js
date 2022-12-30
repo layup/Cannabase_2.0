@@ -25,16 +25,26 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
                       <td className='text-center p-2'>{sampleName}</td>
                       <td>
                         <select 
-                          value={sampleOptions[sampleName]['sampleType']} 
+                          value={sampleOptions[sampleName]['unitType']} 
                           className='w-5/6 p-1 bg-zinc-200 rounded-md'
-                          onChange={(e) => updateSampleOptions(sampleName, 'sampleType',e.target.value)}
+                          onChange={(e) => updateSampleOptions(sampleName, 'unitType',e.target.value)}
                         >
-                          <option value="bud">Bud</option>
-                          <option value="oil">Oil</option>
-                          <option value="paper">Paper</option>
-                          <option value="other">Other</option>
+                          <option value="moisture">mg/g & Percent (Moisture)</option>
+                          <option value="density">mg/ml & Percent(Density)</option>
+                          <option value="unitMass">mg/unit & mg/g (Unit Mass)</option>
+                          <option value="percentage">Percent Only</option>
                         </select>
                       </td>
+                      <td>
+                      <select 
+                        value={sampleOptions[sampleName]['reportType']} 
+                        className='w-5/6 p-1 bg-zinc-200 rounded-md'
+                        onChange={(e) => updateSampleOptions(sampleName, 'reportType',e.target.value)}
+                      >
+                        <option value="basic">Basic Report</option>
+                        <option value="deluxe">Deluxe Report</option>
+                      </select>
+                    </td>
                       <td>
                         <select 
                           value={sampleOptions[sampleName]['amount']} 
@@ -45,17 +55,16 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
                           <option value="mult">Multiple</option>
                         </select>
                       </td>
+        
                       <td>
-                        <select 
-                          value={sampleOptions[sampleName]['toxins']} 
-                          className='w-5/6 p-1 bg-zinc-200 rounded-md'
-                          onChange={(e) => updateSampleOptions(sampleName, 'toxins',e.target.value)}
-                        >
-                          <option value="toxic">Toxic</option>
-                          <option value="pest">Pesticides</option>
-                          <option value="both">Both</option>
-                        </select>
-                      </td> 
+                        <input 
+                          value={
+                          ""
+                          } 
+                          className="bg-zinc-200 w-11/12 h-full p-1 rounded-md" 
+                          
+                        />  
+                      </td>
         
                       <td>
                         <input 

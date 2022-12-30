@@ -6,6 +6,7 @@ const xlsx = require('xlsx')
 const Excel = require('exceljs');
 var readline = require('readline');
 
+
 const { promises: fs2 } = require("fs");
 const store = new Store()
 
@@ -69,12 +70,19 @@ exports.editFile = (jobNum) => {
  * @param {String} templateLocation - the location of the given template for the report type 
  * @returns {Object} - Where each jobs file is located 
  */
-const generateFileNames = async (jobNumber, fileExtension, templateLocation) => {
+const generateFileNames = async (jobNumber, fileExtension, templateLocation, option) => {
 
     const reportsPath = store.get('reportsPath')
 
     const folderName = path.join(reportsPath + "/" + jobNumber.substring(0,6)) 
-    const fileName = path.join(jobNumber.substring(0,6) + fileExtension)
+    let fileName; 
+
+    if(option === 'single'){
+        fileName = path.join(jobNumber + fileExtension)
+    }else{
+        fileName = path.join(jobNumber.substring(0,6) + fileExtension)
+    }
+     
     const fileLocation =  path.join(folderName + "/" + fileName) 
 
     if (!fs.existsSync(folderName)){
@@ -83,7 +91,7 @@ const generateFileNames = async (jobNumber, fileExtension, templateLocation) => 
     
     fs.copyFile(templateLocation, fileLocation, (err) => {
     if (err) throw err;
-        console.log(`Template (${fileExtension})copied to ${folderName}: ${jobNumber}`);
+        //console.log(`Template (${fileExtension})copied to ${folderName}: ${jobNumber}`);
 
     });
     
@@ -91,8 +99,8 @@ const generateFileNames = async (jobNumber, fileExtension, templateLocation) => 
 
 }
 
-
-const copyTemplate =  (jobNumberSample, reportType) => { 
+//need to add option for single or multi-report 
+const copyTemplate = async (jobNumberSample, reportType, option) => { 
     const templatesPath = store.get('templatesPath'); 
     //console.log(jobNumberSample, reportType)
 
@@ -106,31 +114,50 @@ const copyTemplate =  (jobNumberSample, reportType) => {
     let toxicTemplate = path.join(templatesPath, templateNames['toxic']) 
     let thcTemplate = path.join(templatesPath, templateNames['thc']) 
 
-        if(reportType === 'both'){
-            let toxicFileLocations =  generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate) 
-            let pestFileLocations =  generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate)
+    if(reportType === 'both'){
+        let toxicFileLocations = await generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate, option) 
+        let pestFileLocations =  await generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate, option )
 
-            return ( ({[jobNumberSample]: [toxicFileLocations, pestFileLocations]}))
-        }
+        return ( ({[jobNumberSample]: [toxicFileLocations, pestFileLocations]}))
+            
+    }
 
-        if(reportType === 'pest'){
-            return (generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate))
-        }
+    if(reportType === 'pest'){
+        
+        return (generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate, option))
+    }
 
-        if(reportType === 'toxic'){
-             return ((generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate)))
-        }
+    if(reportType === 'toxic'){
+            return ((generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate, option)))
+    }
 
-        if(reportType === 'thc'){
-            return( (generateFileNames(jobNumberSample, '_THC_report.xlsx', thcTemplate)))
-        }
+    if(reportType === 'basic' || reportType === 'deluxe'){
+        return( (generateFileNames(jobNumberSample, '_THC_report.xlsx', thcTemplate, option)))
+    }
+
 
 }
 
+const tablePlacementCalculator = () => { 
+
+}
+
+
+/**
+ * Copy the basic client information into the excel header sheet 
+ * @param {Object} worksheet - the excel sheet (header) that client information will be copied too  
+ * @param {Object} clientInfo - the job numbers client information  
+ * @param {String} key - the job numver 
+ */
+
 const copyClientInfo = async (worksheet, clientInfo, key) => {
+
+    //console.log('Copying Client Information: ', key)
+    //console.log(clientInfo[key] )
 
     var row = worksheet.getRow(2)
     row.getCell(2).value = clientInfo[key].clientName
+    
     row = worksheet.getRow(3)
     row.getCell(2).value = clientInfo[key].date 
     row = worksheet.getRow(4)
@@ -160,142 +187,476 @@ const copyClientInfo = async (worksheet, clientInfo, key) => {
     row = worksheet.getRow(16)
     row.getCell(2).value = clientInfo[key].paymentInfo
 
-    row.commit(); 
+    await row.commit(); 
 }
 
-const copyPestData = async (worksheet, worksheet2, clientInfo, sampleData, sampleNames, options, jobName) => {
-    let sampleName = ''
-    let sampleType = ''
-    let counter = 1;  
-    let row, row2; 
 
-    console.log('Coping Pestcides/Toxic Data')
-    //console.log(clientInfo[jobName]['sampleNames'])
 
-    //set the given sample names and sample type
-    for(let [key, value ] of Object.entries(clientInfo[jobName]['sampleNames'])){
-        sampleName += `${counter}) ${value} `  
-        sampleType = options.toxins 
-        counter++; 
-    }
-    row = worksheet.getRow(27) 
-    row.getCell(2).value = sampleName
 
-    row = worksheet.getRow(28)
-    row.getCell(2).value = sampleType
+const singleCopyPestData = async (headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
 
-    row = worksheet.getRow(30)
-    switch(sampleType) {
+    //console.log('Coping Pestcides/Toxic Data')
+
+    let headerRow, dataRow; 
+    
+    headerRow = headersWorksheet.getRow(27) 
+    headerRow.getCell(2).value = `1) ${clientInfo[sampleName.substring(0,6)]['sampleNames'][sampleName]}`
+
+    headerRow = headersWorksheet.getRow(28)
+    headerRow.getCell(2).value = options.sampleType 
+
+    headerRow = headersWorksheet.getRow(30)
+
+    switch(options.sampleType) {
         case 'oil':
-            row.getCell(2).value = 'oil'
+            headerRow.getCell(2).value = 'oil'
             break;
         case 'paper':
-            row.getCell(2).value = 'paper'
+            headerRow.getCell(2).value = 'paper'
             break;
         default:
-            row.getCell(2).value = 'bud'
+            headerRow.getCell(2).value = 'bud'
     } 
 
-    row.commit(); 
+   //if object empty with not initiate 
+    for(const [key, value] of Object.entries(sampleData[sampleName])){
+        let location = (parseInt(key) + 1)
 
-    let matchingSamples = []
+        dataRow = dataWorksheet.getRow(location)
+        dataRow.getCell(7).value = parseInt(value)
 
-    for(let i = 0; i < sampleNames.length; i++){ 
-        if(sampleNames[i].substring(0,6) === jobName){
-            matchingSamples.push(sampleNames[i])
+        await dataRow.commit()
+
+    }
+
+    return sampleName
+
+}
+
+//account for more then two, if more then that we can copy and paste into given file type 
+const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
+
+    //console.log('Coping Pestcides/Toxic Data')
+    let headerSampleName = ''; 
+    let headerRow, dataRow;
+    let processed = [] 
+    let counter = 1; 
+
+    for(let [key, value ] of Object.entries(clientInfo[sampleName.substring(0,6)]['sampleNames'])){
+        if(sampleOptions[key].amount === 'mult'){
+            processed.push(key)
+            headerSampleName += `${counter}) ${value}`  
+            counter++; 
         }
     }
-    if(matchingSamples.length === 2){
-        row2 = worksheet2.getRow(1)
-        row2.getCell(8).value = 'Sample 2'
+    
+    headerRow = headersWorksheet.getRow(27) 
+    headerRow.getCell(2).value = headerSampleName
+
+    headerRow = headersWorksheet.getRow(28)
+    headerRow.getCell(2).value = options.sampleType 
+
+    headerRow = headersWorksheet.getRow(30)
+
+    switch(options.sampleType) {
+        case 'oil':
+            headerRow.getCell(2).value = 'oil'
+            break;
+        case 'paper':
+            headerRow.getCell(2).value = 'paper'
+            break;
+        default:
+            headerRow.getCell(2).value = 'bud'
+    } 
+
+    if(processed.length === 2){
+        dataRow = dataWorksheet.getRow(1)
+        dataRow.getCell(8).value = 'Sample 2'
     }
+    //console.log('Matching Samples:', processed)
 
-    for(let j = 0; j < matchingSamples.length; j++){ 
+    for(let j = 0; j < processed.length; j++){ 
 
-        if(Object.keys(sampleData[matchingSamples[j]])){
-
-            for(const [key2, value2] of Object.entries(sampleData[matchingSamples[j]])){
-                //console.log(parseInt(key2), parseFloat(value2))
-                
+        if(Object.keys(sampleData[processed[j]])){
+            
+            for(const [key2, value2] of Object.entries(sampleData[processed[j]])){
                 let locaiton = (parseInt(key2) + 1)
                 
-                 row2 =  worksheet2.getRow(locaiton)
+                dataRow =  dataWorksheet.getRow(locaiton)
                 
-                row2.getCell((7 + j)).value = parseInt(value2)
-                row2.commit()
+                dataRow.getCell((7 + j)).value = parseInt(value2)
+                dataRow.commit()
                
             }
         }
+
     }
 
+
+
+    //console.log('Processed: ', processed )
+    //this is where we can decide to create a recursive function that does match to calculate the correct amount for the thing 
+
+    return processed
+
 }
+
+
 
 //void function, should probably try and split it out among different things 
 const copyPestInfo = async (fileLocations, clientInfo, sampleNames, sampleData, sampleOptions) => { 
 
-    //set either for Toxins, Pestices or Both
     console.log('Copying Pesticides Data')
 
-    for(const [key, value] of Object.entries(sampleOptions)){
-        console.log(key,value)
-        if(value['toxins'] === 'both'){
-            //console.log(fileLocations[key])
+    let completedReports = [] 
 
-            for(let i = 0; i < fileLocations[key].length; i++){
-                
+    for(let [key, value] of Object.entries(sampleOptions)){
+        //console.log(key,value)
+        //console.log('completed Reports:' , completedReports)
+        //if hasn't looped yet 
+        if(!completedReports.includes(key)){
+
+            key = String(key)
+            //if single of multi 
+            if(value['amount'] === 'single'){
+                completedReports.push(key)
+
+                //if both isntead of toxic or pest 
+                if(value['toxins'] === 'both'){
+
+                    //loop throught the pest and toxins 
+                    for(let i = 0; i < fileLocations[key].length; i++){
+                        const  currentPath = fileLocations[key][i][key] 
+
+                        let wb = new Excel.Workbook(); 
+                        await wb.xlsx.readFile(currentPath)
+
+                        let headersWorksheet = wb.getWorksheet('Headers'); 
+                        let dataWorksheet = wb.getWorksheet('Data')
+
+                        await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+                        await singleCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                        await wb.xlsx.writeFile(currentPath);
+
+                    } 
+
+                }else{
+
+                    let wb = new Excel.Workbook(); 
+                    await wb.xlsx.readFile(fileLocations[key])
+
+                    let headersWorksheet = wb.getWorksheet('Headers'); 
+                    let dataWorksheet = wb.getWorksheet('Data')
+
+                    await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+                    await singleCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                    await wb.xlsx.writeFile(fileLocations[key]);
+
+                }
+
+            }else{ 
+                //while this can push multiple keys onto the complete reports page 
+                if(value['toxins'] === 'both'){
+
+                    for(let i = 0; i < fileLocations[key].length; i++){
+                        const  currentPath = fileLocations[key][i][key] 
+
+                        let wb = new Excel.Workbook(); 
+                        await wb.xlsx.readFile(currentPath)
+
+                        let headersWorksheet = wb.getWorksheet('Headers'); 
+                        let dataWorksheet = wb.getWorksheet('Data')
+
+                        await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+
+                        let completed = await multiCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                        completedReports = completedReports.concat(completed) 
+
+                        await wb.xlsx.writeFile(currentPath);
+                    }
+
+                }else {
+                    
+                    let wb = new Excel.Workbook(); 
+                    await wb.xlsx.readFile(fileLocations[key])
+
+                    let headersWorksheet = wb.getWorksheet('Headers'); 
+                    let dataWorksheet = wb.getWorksheet('Data')
+
+                    await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+
+                    let completed = await multiCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                    completedReports = completedReports.concat(completed) 
+
+                    await wb.xlsx.writeFile(fileLocations[key]);
+                }
+
+
             }
-
-        }else{ 
-            console.log(fileLocations[key])
-
-            var wb = new Excel.Workbook(); 
-            await wb.xlsx.readFile(fileLocations[key])
-            let headersWorksheet = wb.getWorksheet('Headers'); 
-            let dataWorksheet = wb.getWorksheet('Data')
-
-            await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
-            await copyPestData(headersWorksheet, dataWorksheet, clientInfo, sampleData, sampleNames,  sampleOptions[key], key.substring(0,6))
-            await wb.xlsx.writeFile(fileLocations[key]);
-
-            console.log('Done writing')
-            
         }
+
     }
 
 }
 
+
+const recursiveTableCopy = async () => {
+
+}
+
+
+//single or multi 
+//report type 
+//unit values 
+const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions) => {
+
+    console.log('------Copying Cannabis Data------')
+    console.log(fileLocations)
+    console.log(clientInfo)
+    console.log(sampleNames)
+    console.log(sampleData)
+    console.log(sampleOptions)
+    console.log("----------------------------------")
+
+    let completedReports = []; 
+
+
+    for(let [key, value] of Object.entries(sampleOptions)){
+    
+        //console.log(key, value)
+        //console.log(fileLocations[key])
+
+        let wb = new Excel.Workbook(); 
+        await wb.xlsx.readFile(fileLocations[key])
+
+        let headersWorksheet = wb.getWorksheet('Headers')
+        let reportType; 
+
+        if(sampleOptions[key].reportType === 'basic'){
+            reportType = wb.getWorksheet('Basic')
+        }else{
+            reportType = wb.getWorksheet('Deluxe')
+        }
+
+        await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+       
+        //get the row 
+    
+        let currrentRow = 0 
+        let totalSamples; 
+        let jobSamples = []
+        
+        let totalTables = 1; 
+
+        let continuedNextPage = {
+            text: 'Contiuned on next page...', 
+            style: {
+                font: {size: 10, name: 'CMU Serif Roman'},
+                alignment: {vertical: "middle"}
+            }
+        }
+        
+        //determine how many samples 
+        try {
+            totalSamples = parseInt(clientInfo[key.substring(0,6)].numSamples)
+            console.log('Total Samples: ', totalSamples)
+
+            for(var [key3, value3] of Object.entries(clientInfo[key.substring(0,6)].sampleNames)){
+                jobSamples.push(value3) 
+            }
+
+        } catch (error){
+            console.log(error)
+        }
+
+        console.log('sample names:' , jobSamples)
+        //24, 25, 27, 28, 30, 31 
+        
+        //TODO: copy sample names, but also have to consider the multiple sheets that can get generated 
+        //if 4 then good totalTables % 4 = remainder, based on tables 
+        
+        let sampleSections = 0; 
+        let usedSamples = 0; 
+        let reportSampleHeader = {
+            0:["Samples: "]
+        }
+
+        //reportSampleHeader[0][0] = reportSampleHeader[0][0].concat("Hello World")
+        
+    
+        for(var x = 0; x < jobSamples.length; x++){
+            //console.log('sample Section: ', x, sampleSections)
+            if((x % 4) === 0 && x !== 0 ){
+                sampleSections++; 
+                reportSampleHeader[sampleSections] = ["Samples: "]
+                console.log('increaing on x: ', x)
+            }
+            
+            let curPos = reportSampleHeader[sampleSections].length -1 
+
+            let testPush = reportSampleHeader[sampleSections][curPos] + ` ${usedSamples+1}) ${jobSamples[x]}`
+            //console.log(testPush)
+
+            if(testPush.length > 110){
+                reportSampleHeader[sampleSections].push(`            ${usedSamples+1}) ${jobSamples[x]} `)
+
+                
+            }else{
+                reportSampleHeader[sampleSections][curPos] = reportSampleHeader[sampleSections][curPos].concat(`${usedSamples+1}) ${jobSamples[x]} `)
+            }
+            
+            usedSamples++; 
+            
+        }
+        console.log('sample report: ', reportSampleHeader)
+        
+
+        let copyText = {}
+
+        for(var j = 0; j < 12; j++ ){
+            let currentRow2 = 24 + j
+            let row = reportType.getRow(currentRow2)
+            
+            let temp = []
+            //needto also add the rows into play playboy 
+
+            row.eachCell({includeEmpty: true}, (cell, colNum) => {
+                temp.push([
+                    cell.value, cell.style
+                ])                
+            })
+
+            copyText[currentRow2] = temp; 
+        }
+
+        //console.log(copyText)
+
+        //console.log(copyText);
+
+        //insert sample names 
+        //console.log('sampleSection: ', sampleSections)
+        if(sampleSections === 0 && key === '171087-1'){
+            //console.log('running test')
+
+            //console.log(row.getCell(1).value)
+            if(reportSampleHeader[0].length === 2){
+                //reportType.spliceColumns(8,1,reportSampleHeader[0][0], reportSampleHeader[0][1])
+                reportType.spliceRows(8, 1, [], [reportSampleHeader[0][0]]);
+                let row = reportType.getRow(10); 
+                let row2 = reportType.getRow(9); 
+                
+                row.getCell(1).value = reportSampleHeader[0][1] 
+                row2.getCell(1).style = row.getCell(1).style
+
+                console.log(row2.getCell(1))
+                
+                //const rowValues = []; 
+                //rowValues[1] = reportSampleHeader[0][1] 
+                //reportType.addRow(rowValues)
+            }else {
+                let row = reportType.getRow(9); 
+                row.getCell(1).value = reportSampleHeader[0][0] 
+            }
+
+        }
+
+
+
+
+
+
+        //name section can contain 110 words but certain words can be a longer 
+        //let row2 = reportType.getRow(39); 
+
+        
+        /*
+        for(var i = 0; i < 11; i++){
+
+            let row1Value = 11 + i
+            let row2Value = 24 + i 
+            currrentRow = row2Value;
+            
+            let row = reportType.getRow(row1Value); 
+            let row2 = reportType.getRow(row2Value); 
+            row2.height = row.height
+
+            row.eachCell({includeEmpty: true},(cell, colNum) => {
+                row2.getCell(colNum).value = cell.value 
+                row2.getCell(colNum).style = cell.style
+                
+            })
+        }
+
+        
+        currrentRow++; 
+
+
+        currrentRow++; 
+        for (var [key2, value2] of Object.entries(copyText)){
+
+            
+            let temp = currrentRow++ 
+            let row3 = reportType.getRow(temp)
+            //console.log('current Row', temp)
+            for(var k = 0; k < 7; k++){
+ 
+           
+                row3.getCell(k+1).value = value2[k][0] 
+                row3.getCell(k+1).style = value2[k][1] 
+                
+            }
+
+
+
+        }
+        */ 
+
+        //console.log(reportType.actualRowCount)
+        //console.log(reportType.rowCount)
+        //console.log(reportType.cellCount)
+
+        //console.log(row)
+        //reportType.insertRow(39, row)
+
+        await wb.xlsx.writeFile(fileLocations[key]);
+
+
+
+    }
+
+    
+
+}
 exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbers, sampleOptions, reportType) => { 
    
-    console.log('Generating Reports Backend ')
+    console.log('----Generating Reports Backend----')
     console.log(clientInfo)
     console.log(sampleNames)
     console.log(sampleData)
     console.log(sampleOptions)
     console.log(jobNumbers)
+    console.log('----------------------------------')
+
     
     new Promise(async (resolve, reject) => {
 
-        if(reportType === 'pesticides'){
-            let fileLocations = {}
+        let fileLocations ={}
 
-            //check if single or multi before 
-
-            //check each before copy template 
-            for(let key in sampleOptions){
-                if(sampleOptions.hasOwnProperty(key)){
-                    let tempObject =  await copyTemplate(key, sampleOptions[key]['toxins'])
-                    fileLocations[key] = tempObject[key]
-                }
+        for(let key in sampleOptions){
+            if(sampleOptions.hasOwnProperty(key)){
+                let tempObject =  await copyTemplate(key, sampleOptions[key]['reportType'], sampleOptions[key].amount)
+                fileLocations[key] = tempObject[key]
+                
             }
+        }
 
+        if(reportType === 'pesticides'){
             await copyPestInfo(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
-          
-            //copy pest information to the thing
             
         }
 
         if(reportType === 'cannabis'){
-
+            await copyTHCInfo(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
         }
     
     })
@@ -395,6 +756,7 @@ const processThcFile = (filePath) => {
 
         let desc = {}
         let name = {}
+        let unit = {}
         let recovery ={}
         
 
@@ -403,7 +765,9 @@ const processThcFile = (filePath) => {
             //console.log(ws)
             let descCol = ws.getColumn('BG'); 
             let nameCol = ws.getColumn('BK'); //THC name 
+            let unitCol = ws.getColumn('BX')
             let recoveryCol = ws.getColumn('EH')
+            
             //let mg = ws.getColumn(); 
             //let concentration = ws.getColumn()
             
@@ -413,6 +777,7 @@ const processThcFile = (filePath) => {
                 if(cell.text.match(/(\d+)-[0-9]$/)){    
                     desc[rowNumber] = cell.text
                     name[rowNumber] = nameCol.values[rowNumber]
+                    unit[rowNumber] = unitCol.values[rowNumber]
                     recovery[rowNumber] = recoveryCol.values[rowNumber]
 
                     if(!sampleNames.includes(cell.text)){
@@ -430,13 +795,12 @@ const processThcFile = (filePath) => {
                 }
             })
 
+            
+
             //console.log('Testing', desc.values[1])
-            resolve({jobNumbers: jobNums, samples: sampleNames, sampleData: {desc:desc,name:name, recovery:recovery}})
+            resolve({jobNumbers: jobNums, samples: sampleNames, sampleData: {desc:desc,name:name, unit:unit}})
         });
     
-
-        
-
     })
 }
 
@@ -528,7 +892,13 @@ exports.processTxt = async (jobNumbers) => {
     if(difference.length > 0){
         //generate empty data 
 
-        console.log(difference)
+        console.log('difference: ', difference)
+
+        let emptySampleNames = {}
+        
+
+        //determine how many samples there are 
+
     
         for(let j = 0; j < difference.length; j++){
             console.log(difference[j])
@@ -599,11 +969,16 @@ const  GenerateClientData = async (jobNum, jobPath) => {
             }
             if(counter === 1){
                 attention = line.match(/\*(.*?)(?=\s{3})/)
-                console.log('att', attention)
+                //console.log('att', attention)
+
+                const headerSplit = line.split("   ").filter(String)
+                //console.log(headerSplit)
                 
-                if(line.length > 25){
-                     sampleType1 = (line.substring(line.length/2,line.length)).match(/\w+/)[0];
+                if(line.length > 25 && headerSplit.length === 2){
+                     //sampleType1 = (line.substring(line.length/2,line.length)).match(/\w+/)[0];
+                     sampleType1 = headerSplit[1].trim()
                 }
+
                
                 
                 if(attention){
@@ -611,12 +986,15 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                     
                 }else {
                     try {
-   
+                        addy1 = headerSplit[0].trim()
+                        /*
                         if(line.length > 30){
-                            addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+                            //addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
+                            addy1 = headerSplit[0].trim(); 
                         }else {
-                            addy1 = (line.substring(0, line.length)).match(/\w+(\s\w+){2,}/)[0];
-                        }
+                            //addy1 = (line.substring(0, line.length)).match(/\w+(\s\w+){2,}/)[0];
+                            addy1 = headerSplit[0].trim(); 
+                        }*/ 
                         
                        
                         //addy1 = (line.substring(0, line.length/2)).match(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9\-#\.\/]+$/);

@@ -16,8 +16,6 @@ import CreateReports from './report/pages/CreateReports';
 import Reports from './report/pages/Reports';
 
 
-
-
 function App() {
   return (
     <HashRouter>

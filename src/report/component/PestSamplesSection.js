@@ -48,9 +48,9 @@ const PestSamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, 
               </td>
               <td>
                 <select 
-                  value={sampleOptions[sampleName]['toxins']} 
+                  value={sampleOptions[sampleName]['reportType']} 
                   className='w-5/6 p-1 bg-zinc-200 rounded-md'
-                  onChange={(e) => updateSampleOptions(sampleName, 'toxins',e.target.value)}
+                  onChange={(e) => updateSampleOptions(sampleName, 'reportType',e.target.value)}
                 >
                   <option value="toxic">Toxic</option>
                   <option value="pest">Pesticides</option>

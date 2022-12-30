@@ -2,7 +2,7 @@ const {app, contextBridge, ipcRenderer, ipcMain} = require('electron')
 const CannabaseMgr = require('./database/CannabaseMgr')
 const excelManager = require('./excel/excelManager')
 
-//console.log('Preload Scripts Loaded');
+console.log('Preload Scripts Loaded');
 
 const getNotCompleteJobs = async () => {
     return CannabaseMgr.getNotCompleteJobs(); 
