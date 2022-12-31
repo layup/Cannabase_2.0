@@ -425,202 +425,254 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
     
         //console.log(key, value)
         //console.log(fileLocations[key])
+        if(!completedReports.includes(key)){
+            console.log('Completed Reports:', completedReports)
 
-        let wb = new Excel.Workbook(); 
-        await wb.xlsx.readFile(fileLocations[key])
+            let wb = new Excel.Workbook(); 
+            await wb.xlsx.readFile(fileLocations[key])
 
-        let headersWorksheet = wb.getWorksheet('Headers')
-        let reportType; 
+            let headersWorksheet = wb.getWorksheet('Headers')
+            let dataWorksheet = wb.getWorksheet('Data')
+            let reportType; 
+            
 
-        if(sampleOptions[key].reportType === 'basic'){
-            reportType = wb.getWorksheet('Basic')
-        }else{
-            reportType = wb.getWorksheet('Deluxe')
-        }
-
-        await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
-       
-        //get the row 
-    
-        let currrentRow = 0 
-        let totalSamples; 
-        let jobSamples = []
-        
-        let totalTables = 1; 
-
-        let continuedNextPage = {
-            text: 'Contiuned on next page...', 
-            style: {
-                font: {size: 10, name: 'CMU Serif Roman'},
-                alignment: {vertical: "middle"}
+            if(sampleOptions[key].reportType === 'basic'){
+                reportType = wb.getWorksheet('Basic')
+            }else{
+                reportType = wb.getWorksheet('Deluxe')
             }
-        }
+
+            await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
         
-        //determine how many samples 
-        try {
-            totalSamples = parseInt(clientInfo[key.substring(0,6)].numSamples)
-            console.log('Total Samples: ', totalSamples)
+            //get the row 
+        
+
+            let jobSamplesName = []
+            let jobSamplesNumber = []
+            
+            let totalTables = 1; 
+            let runningCount = 0; 
+
+            let continuedNextPage = {
+                text: 'Contiuned on next page...', 
+                style: {
+                    font: {size: 10, name: 'CMU Serif Roman'},
+                    alignment: {vertical: "middle"}
+                }
+            }
+            
+            //determine how many samples 
+
 
             for(var [key3, value3] of Object.entries(clientInfo[key.substring(0,6)].sampleNames)){
-                jobSamples.push(value3) 
+                if(sampleNames.includes(key3)){
+                    jobSamplesNumber.push(key3)
+                    jobSamplesName.push(value3)
+                    completedReports.push(key3)
+                }
             }
 
-        } catch (error){
-            console.log(error)
-        }
 
-        console.log('sample names:' , jobSamples)
-        //24, 25, 27, 28, 30, 31 
-        
-        //TODO: copy sample names, but also have to consider the multiple sheets that can get generated 
-        //if 4 then good totalTables % 4 = remainder, based on tables 
-        
-        let sampleSections = 0; 
-        let usedSamples = 0; 
-        let reportSampleHeader = {
-            0:["Samples: "]
-        }
 
-        //reportSampleHeader[0][0] = reportSampleHeader[0][0].concat("Hello World")
+            console.log('sample names:' , jobSamplesName)
+            //24, 25, 27, 28, 30, 31 
+            
+            //TODO: copy sample names, but also have to consider the multiple sheets that can get generated 
+            //if 4 then good totalTables % 4 = remainder, based on tables 
+            
+            let sampleSections = 0; 
+            let usedSamples = 0; 
+            let reportSampleHeader = {
+                0:["Samples: "]
+            }
+
+            //reportSampleHeader[0][0] = reportSampleHeader[0][0].concat("Hello World")
+            
         
+            for(var x = 0; x < jobSamplesName.length; x++){
+                //console.log('sample Section: ', x, sampleSections)
+                if((x % 4) === 0 && x !== 0 ){
+                    sampleSections++; 
+                    reportSampleHeader[sampleSections] = ["Samples: "]
+                    console.log('increaing on x: ', x)
+                }
+                
+                let curPos = reportSampleHeader[sampleSections].length -1 
+
+                let testPush = reportSampleHeader[sampleSections][curPos] + ` ${usedSamples+1}) ${jobSamplesName[x]}`
+                //console.log(testPush)
+
+                if(testPush.length > 100){
+                    reportSampleHeader[sampleSections].push(`            ${usedSamples+1}) ${jobSamplesName[x]} `)
+
+                    
+                }else{
+                    reportSampleHeader[sampleSections][curPos] = reportSampleHeader[sampleSections][curPos].concat(`${usedSamples+1}) ${jobSamplesName[x]} `)
+                }
+                
+                usedSamples++; 
+                
+            }
+            console.log('sample report: ', reportSampleHeader)
+            
+
+            let copyText = {}
+
+            for(var j = 0; j < 12; j++ ){
+                let currentRow2 = 24 + j
+                let row = reportType.getRow(currentRow2)
+                
+                let temp = []
+                //needto also add the rows into play playboy 
+
+                row.eachCell({includeEmpty: true}, (cell, colNum) => {
+                    temp.push([
+                        cell.value, cell.style
+                    ])                
+                })
+
+                copyText[currentRow2] = temp; 
+            }
+
+            //console.log(copyText)
+            //console.log(copyText);
+
+            //insert sample names 
+            //console.log('sampleSection: ', sampleSections)
+            if(sampleSections === 0){
+
+                if(reportSampleHeader[0].length === 2){
+                    
+                    //reportType.spliceColumns(8,1,reportSampleHeader[0][0], reportSampleHeader[0][1])
+                    reportType.spliceRows(8, 1, [], [reportSampleHeader[0][0]]);
+                    let row = reportType.getRow(10); 
+                    let row2 = reportType.getRow(9); 
+                    
+                    row.getCell(1).value = reportSampleHeader[0][1] 
+                    row2.getCell(1).style = row.getCell(1).style
+
+                    //console.log(row2.getCell(1))
+                    runningCount++; 
+                    
+                    //const rowValues = []; 
+                    //rowValues[1] = reportSampleHeader[0][1] 
+                    //reportType.addRow(rowValues)
+                }else {
+                    let row = reportType.getRow(9); 
+                    row.getCell(1).value = reportSampleHeader[0][0] 
+                }
+
+            }
+
+
+            //TODO: write data
+            
+            let sampleJobData = {}
+            let currentCell = 3; 
+
+            console.log('----------Data Processing--------------')
+
+            jobSamplesNumber.forEach((job,index) => {
+
+                let jobLocations = {}
+                let jobCannaValues = {}
+                let counter = 3; 
+
+                let row = dataWorksheet.getRow(1)
+                row.getCell(currentCell).value = 'Sample ' + index + 1; 
+                row = dataWorksheet.getRow(2)
+                row.getCell(currentCell).value = "(mg/g)"
+
+                for (var [rowValue, jobNum] of Object.entries(sampleData['desc'])){
+                    if(job === jobNum){
+
+                        let cannabinoidsName  = sampleData['name'][rowValue]
+                        let cannabinoidsValue = sampleData['unit'][rowValue]/1000  
+                        jobLocations[job] = jobNum
+                        jobCannaValues[cannabinoidsName] = cannabinoidsValue
+
+                        //more efficent if we do it in one go 
+
+                        //could probably do it in a way that I could map the values 
+
+                        row = dataWorksheet.getRow(counter)
+                        row.getCell(currentCell).value  = cannabinoidsValue;
+                        counter++; 
+                        
+                        
+                    }
+                }
+
+                currentCell++; 
+                sampleJobData[job] = jobCannaValues
+            })
+            console.log(sampleJobData);
+
+            console.log('----------Data Copying--------------')
+            
+           //TODO: when doing excel use the acutal values 
+
+
+
+
+
+
+            //name section can contain 110 words but certain words can be a longer 
+            //let row2 = reportType.getRow(39); 
+
+            
+            /*
+            for(var i = 0; i < 11; i++){
+
+                let row1Value = 11 + i
+                let row2Value = 24 + i 
+                currrentRow = row2Value;
+                
+                let row = reportType.getRow(row1Value); 
+                let row2 = reportType.getRow(row2Value); 
+                row2.height = row.height
+
+                row.eachCell({includeEmpty: true},(cell, colNum) => {
+                    row2.getCell(colNum).value = cell.value 
+                    row2.getCell(colNum).style = cell.style
+                    
+                })
+            }
+
+            
+            currrentRow++; 
+
+
+            currrentRow++; 
+            for (var [key2, value2] of Object.entries(copyText)){
+
+                
+                let temp = currrentRow++ 
+                let row3 = reportType.getRow(temp)
+                //console.log('current Row', temp)
+                for(var k = 0; k < 7; k++){
     
-        for(var x = 0; x < jobSamples.length; x++){
-            //console.log('sample Section: ', x, sampleSections)
-            if((x % 4) === 0 && x !== 0 ){
-                sampleSections++; 
-                reportSampleHeader[sampleSections] = ["Samples: "]
-                console.log('increaing on x: ', x)
+            
+                    row3.getCell(k+1).value = value2[k][0] 
+                    row3.getCell(k+1).style = value2[k][1] 
+                    
+                }
+
+
+
             }
-            
-            let curPos = reportSampleHeader[sampleSections].length -1 
+            */ 
 
-            let testPush = reportSampleHeader[sampleSections][curPos] + ` ${usedSamples+1}) ${jobSamples[x]}`
-            //console.log(testPush)
+            //console.log(reportType.actualRowCount)
+            //console.log(reportType.rowCount)
+            //console.log(reportType.cellCount)
 
-            if(testPush.length > 110){
-                reportSampleHeader[sampleSections].push(`            ${usedSamples+1}) ${jobSamples[x]} `)
+            //console.log(row)
+            //reportType.insertRow(39, row)
 
-                
-            }else{
-                reportSampleHeader[sampleSections][curPos] = reportSampleHeader[sampleSections][curPos].concat(`${usedSamples+1}) ${jobSamples[x]} `)
-            }
-            
-            usedSamples++; 
-            
-        }
-        console.log('sample report: ', reportSampleHeader)
-        
-
-        let copyText = {}
-
-        for(var j = 0; j < 12; j++ ){
-            let currentRow2 = 24 + j
-            let row = reportType.getRow(currentRow2)
-            
-            let temp = []
-            //needto also add the rows into play playboy 
-
-            row.eachCell({includeEmpty: true}, (cell, colNum) => {
-                temp.push([
-                    cell.value, cell.style
-                ])                
-            })
-
-            copyText[currentRow2] = temp; 
-        }
-
-        //console.log(copyText)
-
-        //console.log(copyText);
-
-        //insert sample names 
-        //console.log('sampleSection: ', sampleSections)
-        if(sampleSections === 0 && key === '171087-1'){
-            //console.log('running test')
-
-            //console.log(row.getCell(1).value)
-            if(reportSampleHeader[0].length === 2){
-                //reportType.spliceColumns(8,1,reportSampleHeader[0][0], reportSampleHeader[0][1])
-                reportType.spliceRows(8, 1, [], [reportSampleHeader[0][0]]);
-                let row = reportType.getRow(10); 
-                let row2 = reportType.getRow(9); 
-                
-                row.getCell(1).value = reportSampleHeader[0][1] 
-                row2.getCell(1).style = row.getCell(1).style
-
-                console.log(row2.getCell(1))
-                
-                //const rowValues = []; 
-                //rowValues[1] = reportSampleHeader[0][1] 
-                //reportType.addRow(rowValues)
-            }else {
-                let row = reportType.getRow(9); 
-                row.getCell(1).value = reportSampleHeader[0][0] 
-            }
+            await wb.xlsx.writeFile(fileLocations[key]);
 
         }
-
-
-
-
-
-
-        //name section can contain 110 words but certain words can be a longer 
-        //let row2 = reportType.getRow(39); 
-
-        
-        /*
-        for(var i = 0; i < 11; i++){
-
-            let row1Value = 11 + i
-            let row2Value = 24 + i 
-            currrentRow = row2Value;
-            
-            let row = reportType.getRow(row1Value); 
-            let row2 = reportType.getRow(row2Value); 
-            row2.height = row.height
-
-            row.eachCell({includeEmpty: true},(cell, colNum) => {
-                row2.getCell(colNum).value = cell.value 
-                row2.getCell(colNum).style = cell.style
-                
-            })
-        }
-
-        
-        currrentRow++; 
-
-
-        currrentRow++; 
-        for (var [key2, value2] of Object.entries(copyText)){
-
-            
-            let temp = currrentRow++ 
-            let row3 = reportType.getRow(temp)
-            //console.log('current Row', temp)
-            for(var k = 0; k < 7; k++){
- 
-           
-                row3.getCell(k+1).value = value2[k][0] 
-                row3.getCell(k+1).style = value2[k][1] 
-                
-            }
-
-
-
-        }
-        */ 
-
-        //console.log(reportType.actualRowCount)
-        //console.log(reportType.rowCount)
-        //console.log(reportType.cellCount)
-
-        //console.log(row)
-        //reportType.insertRow(39, row)
-
-        await wb.xlsx.writeFile(fileLocations[key]);
-
-
 
     }
 
