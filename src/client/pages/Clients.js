@@ -3,12 +3,16 @@ import React, {useEffect, useState} from 'react'
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from 'react-router-dom';
 
+import {useNavigate} from 'react-router-dom';
+
 const Clients = () => {
     const alphabet = ['All', "#","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
     const [clientData, setClient] = useState([]); 
     const [totalClients, setTotalClients] = useState()
     const [filter, setFilters] = useState('All')
+
+    const navigate = useNavigate();
     
 
     //const [bestMatches, setBestMatches] = useState([])
@@ -53,6 +57,10 @@ const Clients = () => {
 
     }
 
+    const navigateToClient =  (url, state) => {
+        navigate(url, {state:state})
+    }
+
 
     return (
         <div 
@@ -87,13 +95,13 @@ const Clients = () => {
                     </thead>
                     <tbody className='text-xs md:text-base text-center overflow-y-auto '>
                         {clientData && clientData.map((item) => {
+                            let clientURL = `/clients/${item.client_name.replace(/\s+/g, '')}` 
                             return (
-                                <tr className='border-1 hover:bg-yellow-200 '>
+                                
+                                <tr className='border-1 hover:bg-yellow-100 hover:cursor-pointer' onClick={()=> {navigateToClient(clientURL, item.client_name)}}>
                                     <td className='py-2 px-3 text-left'>
                                         <Link to={`/clients/${item.client_name.replace(/\s+/g, '')}`}  state={item.client_name}>{item.client_name}</Link> 
-                                    
                                     </td>
-
                                     <td>N/A</td>
                                     <td>N/A</td>
                                 </tr>

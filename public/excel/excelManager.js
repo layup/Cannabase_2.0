@@ -1008,10 +1008,10 @@ const  GenerateClientData = async (jobNum, jobPath) => {
     let counter = 0; 
     let sampleCounter = 0; 
 
-    for await (const line of rl){
-        //console.log(`${line.length}: ${line}` )
+    for await (const line of rl){       
         if(line.length > 0 ) {
-            
+            //console.log(`${line.length}: ${line}` )
+
             if(counter === 0){
                 clientName = line.match(/(\s{5})(.*?)(\s{5})/)[0].trim()
                 date = line.match(/[0-9]{2}[a-zA-Z]{3}[0-9]{2}/)[0]
@@ -1031,7 +1031,6 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                      sampleType1 = headerSplit[1].trim()
                 }
 
-               
                 
                 if(attention){
                     attention = attention[0] 
@@ -1063,7 +1062,7 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                     try {
                         addy1 = (line.substring(0, line.length/2)).match(/\w+(\s\w+){2,}/)[0];
                     } catch (err) {
-                        console.log(err)
+                       console.log(err)
                     }
                     
                 }else {
@@ -1083,8 +1082,9 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                 
             }
             
+
             if(counter === 4){ 
-                if(attention){
+                if(attention && addy2){
                    addy3 = line.replace(/\s/g, '');
                 }else {
                     telephone = line.substring(20,50).replace('TEL:', '').trim() 
@@ -1097,70 +1097,49 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                 }
             }
 
-            if(counter === 5 ){
-                if(attention){
-                    telephone = line.substring(20,50).replace('TEL:', '').trim()
-                    try {
-                        recvTemp = line.match(/((\d+).[\d]C)/)[0]
-                    }catch (err){
-                        console.log(err)
-                    } 
-                 }else{
-                    fax = line.replace('FAX:', '').trim();
-                 }
+            if(line.includes('FAX:')){
+                fax = line.replace('FAX:', '').trim();
             }
-
-            if(counter === 6){ 
-                
-                if(attention){
-                    fax = line.replace('FAX:', '').trim(); 
-                }else {
-                    //email = line.substring(20,50).trim()
-                    try {
-                         email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
-                    } catch (err){
-                        console.log(err)
-                    }
-                    
-                    paymentInfo = line.match(/(PD) (\w+) (\w+)/)
-                    if(paymentInfo){
-                        try {
-                            paymentInfo = paymentInfo[0]
-                        } catch (err) {
-                            console.log(err)
-                        }
-                        
-                    }
+            if(line.includes('TEL:')){
+                telephone = line.substring(20,50).replace('TEL:', '').trim()
+                try {
+                    recvTemp = line.match(/((\d+).[\d]C)/)[0]
+                }catch (err){
+                    console.log(err)
+                } 
+            }
+            if(line.includes('@')){
+                try{
+                    email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                } catch (err) {
+                    console.log(err)
                 }
+            }
+            if(line.includes('PD')){
+                try {
+                     paymentInfo = line.match(/(PD) (\w+) (\w+)/)[0]
+                } catch (err){
+                    console.log(err)
+                }
+               
+                //paymentInfo = paymentInfo[0]
+            }
+            if(line.includes('Pd')){
+                try {
+                    paymentInfo = line.match(/(Pd) (\w+) (\w+)/)[0]
+               } catch (err){
+                   console.log(err)
+               }
             
-            }
-            if(counter === 7){
-                if(attention){
-                    //email = line.substring(20,50).trim()
-                    try{
-                        email = line.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
-                    } catch (err) {
-                        console.log(err)
-                    }
-                    
-                    paymentInfo = line.match(/(PD) (\w+) (\w+)/)
-                    if(paymentInfo){
-                        try {
-                             paymentInfo = paymentInfo[0]
-                        } catch (err){
-                            console.log(err)
-                        }
-                       
-                    } 
-                }
             }
            
             counter++; 
         } 
 
-        if(counter > 7){
+        if(counter > 7 && line.length > 0 ){
+
             if(sampleCounter !== parseInt(numSamples)){
-                let sampleMatch = line.match(/(?<=[1-9] ).*/)
+                let sampleMatch = line.match(/(?<=\s[1-9] ).*/)
                 if(sampleMatch){
                     sampleMatch  = sampleMatch[0].replace(/\s\s+/g, ' ');
                     sampleNames[`${jobNum}-${sampleCounter+1}`] = sampleMatch
