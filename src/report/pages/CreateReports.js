@@ -71,13 +71,15 @@ const CreateReports = (props) => {
                             }))
                         }
                     }     
-                }else{
+                }
+                if(location.state.selectReport === 'cannabis'){
                     samples.forEach((sample, index) => {
                         setSampleOptions((prevState) => ({
                             ...prevState, 
                             [sample]:{
                                 unitType:'moisture',
                                 reportType: 'basic',
+                                
                                 amount: 'mult', 
                             }
                         }))
@@ -91,7 +93,7 @@ const CreateReports = (props) => {
         processTxt()
 
         
-    }, [jobNumbers])
+    }, [samples])
 
 
     const updateClientInfo = ( jobNum, keyName, value, key) => {
