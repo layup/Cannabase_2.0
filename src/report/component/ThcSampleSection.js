@@ -1,6 +1,9 @@
 import React from 'react'
 
 const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, samples, sampleOptions}) => {
+
+    console.log(samples)
+
     return (
         <div className='w-full h-full scroll-auto'>
             <table className='table-fixed w-full'>
@@ -19,7 +22,7 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
                 <tbody className='text-sm'>
                 {samples && sampleOptions && samples.map((sampleName) => {
                   let jobNum = sampleName.substr(0,6)
-                  
+                 
                   return (
                     <tr key={sampleName} className='border-b-1 border-zinc-200'>
                       <td className='text-center p-2'>{sampleName}</td>

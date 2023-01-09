@@ -45,7 +45,7 @@ const CreateReports = (props) => {
         async function processTxt(){
             await window.api.processTxt(jobNumbers).then((data) => {
                 console.log("------Callback Processing Text---------") 
-                
+                console.log(data) 
                 setClientInfo(data);
 
                 //Set the default Sample values for both thc and pest files 
@@ -93,7 +93,7 @@ const CreateReports = (props) => {
         processTxt()
 
         
-    }, [samples])
+    }, [jobNumbers])
 
 
     const updateClientInfo = ( jobNum, keyName, value, key) => {
