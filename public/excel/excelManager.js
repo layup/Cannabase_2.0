@@ -58,8 +58,11 @@ exports.openPDF = (jobNum, report) => {
 
 //edit the excel files from the thing
 //scan for .xlsx files 
-exports.editFile = (jobNum) => {
+exports.editFile = (jobNum, report) => {
+    var reportsDir = store.get('reportsPath')
+    var currentPath = path.join(reportsDir, jobNum)
 
+    shell.openExternal('file://' + path.join(currentPath, report))
 }
 
 /**
@@ -152,7 +155,6 @@ const copyClientInfo = async (worksheet, clientInfo, key) => {
 
     var row = worksheet.getRow(2)
     row.getCell(2).value = clientInfo[key].clientName
-    
     row = worksheet.getRow(3)
     row.getCell(2).value = clientInfo[key].date 
     row = worksheet.getRow(4)
@@ -396,13 +398,80 @@ const copyPestInfo = async (fileLocations, clientInfo, sampleNames, sampleData, 
 
 
 
-const thcExcelFormuals = (formulaName, dataLocation) => {
+const thcExcelFormuals = (formulaName, letter, currentRow) => {
 
     switch(formulaName){
-        case 'THC':    
-            return {formula: `=IF(Data!$${dataLocation}$14 = 0, "ND", Data!$${dataLocation}$14)`}
 
-            
+        case 'sampleName': 
+            return {formula: `=IF(ISBLANK(Data!$${letter}$1),  "BLANK", Data!$${letter}$1)`, result:''}
+        case 'unit':
+            return {formula:`=IF(ISBLANK(Data!$${letter}$2), "", Data!${letter}$2)`, result: ''}
+
+        case 'CBC':    
+            return [
+                {formula: `=IF(Data!$${letter}$14 = 0, "ND", Data!$${letter}$14)`},
+                {formula: `=IF(Data!$${letter}$14 = 0, "ND", Data!$${letter}$14/10)`}
+            ]
+        
+        case 'CBCA':    
+            return [
+                {formula: `=IF(Data!$${letter}$14 = 0, "ND", Data!$${letter}$14)`},
+                {formula: `=IF(Data!$${letter}$14 = 0, "ND", Data!$${letter}$14/10)`}
+            ]
+
+        case 'CBD': //done 
+            return [
+                {formula: `=IF(Data!$${letter}$8 = 0, "ND", Data!$${letter}$8)`},
+                {formula: `=IF(Data!$${letter}$8 = 0, "ND", Data!$${letter}$8/10)`}
+            ]
+        case "CBDA": //done 
+            return [
+                {formula: `=IF(Data!$${letter}$10 = 0, "ND", Data!$${letter}$10)`},
+                {formula: `=IF(Data!$${letter}$10 = 0, "ND", Data!$${letter}$10/10)`}
+            ]
+
+        case 'CBNA': //done 
+            return [
+                {formula: `=IF(Data!$${letter}$18 = 0, "ND", Data!$${letter}$18)`},
+                {formula: `=IF(Data!$${letter}$18 = 0, "ND", Data!$${letter}$18/10)`} 
+            ]
+        case "CBN": //done 
+            return [
+                {formula: `=IF(Data!$${letter}$11 = 0, "ND", Data!$${letter}$11)`},
+                {formula: `=IF(Data!$${letter}$11 = 0, "ND", Data!$${letter}$11/10)`}
+            ]
+
+        case 'THCA': //done 
+            return [
+                {formula: `=IF(Data!$${letter}$19 = 0, "ND", Data!$${letter}$19)`, result:''},
+                {formula: `=IF(Data!$${letter}$19 = 0, "ND", Data!$${letter}$19/10)`, result:''}
+            ]
+        
+        case 'd9-THC':  //done 
+            return [
+                {formula: `=IF(Data!$${letter}$14 = 0, "ND", Data!$${letter}$14)`, result:''},
+                {formula: `=IF(Data!$${letter}$14 = 0, "ND", Data!$${letter}$14/10)`, result:'' }
+            ]
+        case 'd8-THC':  //done 
+            return [
+                {formula: `=IF(Data!$${letter}$15 = 0, "ND", Data!$${letter}$15)`, result:''},
+                {formula: `=IF(Data!$${letter}$15 = 0, "ND", Data!$${letter}$15/10)`, result:'' }
+            ]
+
+        
+        case 'total-THC':
+            return [
+                {formula: `=SUM(Data!$${letter}$14, Data!$${letter}$19 * 0.877)`},
+                {formula: `=SUM(Data!$${letter}$14/10, (Data!$${letter}$19/10) * 0.877)`}
+            ]
+
+        case 'total-CBD':
+            return [
+                {formula: `=SUM(Data!$${letter}$8, Data!$${letter}$10 * 0.877)`},
+                {formula: `=SUM(Data!$${letter}$8/10, (Data!$${letter}$10/10) * 0.877)`}
+            ]
+
+
         default: 
             return 'Invalid Statment'
         
@@ -410,15 +479,32 @@ const thcExcelFormuals = (formulaName, dataLocation) => {
 
 }
 
+const copyFormating = (row, formulaName, dataLocation) => {
 
-const copyTables = (packageType, tableSize, runningCount, currentPage, reportType) => {
-   
+    const letter = String.fromCharCode(dataLocation + 'A'.charCodeAt(0))
+    const letter2 = String.fromCharCode((dataLocation+1) + 'A'.charCodeAt(0))
+
+    let temp = thcExcelFormuals(formulaName, letter)
+    let temp2 = thcExcelFormuals(formulaName, letter2)
+    row.getCell(2).value = temp[0]
+    row.getCell(3).value = temp[1]
+    row.getCell(4).value = temp2[0]
+    row.getCell(5).value = temp2[1]
+}
+
+
+const copyTables = (packageType, tableSize, runningCount, currentPage, reportType, dataLocation) => {
+    
+    const letter = String.fromCharCode(dataLocation + 'A'.charCodeAt(0))
+    const letter2 = String.fromCharCode((dataLocation+1) + 'A'.charCodeAt(0))
+
+    console.log('letter1: ', letter, ' letter2: ', letter2)
+
     if(packageType === 'Basic'){
         for(var k = 0; k < tableSize; k++){
             let row1Value = 11 + runningCount + k
             let row2Value = currentPage + runningCount + k 
 
-            //console.log('row1Value: ', row1Value)
             console.log('row1Value: ', row1Value, ' | row2Value: ', row2Value);
 
             let row = reportType.getRow(row1Value); 
@@ -426,32 +512,80 @@ const copyTables = (packageType, tableSize, runningCount, currentPage, reportTyp
             row2.height = row.height
 
             row.eachCell({includeEmpty: true},(cell, colNum) => {
-
-                //if statements for changing up the values 
-
                 row2.getCell(colNum).value = cell.value 
                 row2.getCell(colNum).style = cell.style
-
-                
             })
 
+        
+            if(row1Value === 11 + runningCount){
+                console.log('copying Sample Names to:', row2Value) 
+                let temp = thcExcelFormuals('sampleName', letter)
+                let temp2 = thcExcelFormuals('sampleName', letter2)
+                row2.getCell(2).value = temp
+                row2.getCell(3).value = temp
+                row2.getCell(4).value = temp2
+                row2.getCell(5).value = temp2
+
+            }
+
+            if(row1Value === 13 + runningCount){
+                //console.log('copying d9 THC to:', row2Value)
+                copyFormating(row2, 'd9-THC', dataLocation)
+            }
+
+            if(row1Value === 14 + runningCount){
+                //console.log('copying THCA to:', row2Value)
+                copyFormating(row2, 'THCA', dataLocation)
+            }
+            if(row1Value === 15 + runningCount){
+                copyFormating(row2, 'total-THC', dataLocation)
+            }
+            if(row1Value === 16 + runningCount){
+                copyFormating(row2, 'd8-THC', dataLocation) 
+            }
+            if(row1Value === 17 + runningCount){
+                copyFormating(row2, 'CBD', dataLocation) 
+            }
+            if(row1Value === 18 + runningCount){
+                copyFormating(row2, 'CBDA', dataLocation) 
+            }
+            if(row1Value === 19 + runningCount){
+                copyFormating(row2, 'total-CBD', dataLocation)  
+            }
+            if(row1Value === 20 + runningCount){
+                copyFormating(row2, 'CBN', dataLocation)  
+            }
+            if(row1Value === 21 + runningCount){
+                copyFormating(row2, 'CBNA', dataLocation)  
+            }
+            
+            
 
         }            
-        
+
         currentPage+=tableSize
                         
         if(tableSize === 12){
             reportType.mergeCells(currentPage, 2, currentPage, 3 )
             reportType.mergeCells(currentPage, 4, currentPage, 5 )
         }
+
+        //clear the signature name  on page one 
+        let row = reportType.getRow(currentPage + runningCount); 
+        row.getCell(1).value = ''
+        row.getCell(4).value = ''
+
         currentPage++;  
-        console.log('current Page: ', currentPage)
+
+        console.log('Current page after table insertion: ', currentPage)
         return currentPage; 
-  
-    }else{
+
+    //Deluxe Package 
+    }else {
+
+
 
     }
-
 
 }
 
@@ -468,9 +602,11 @@ const copyAdditoinalInfo = (copyText, currentPage, reportType) => {
         }
     }
 }
-//single or multi 
-//report type 
-//unit values 
+
+//TODO: 
+//single or multi [easy]
+//report type [deluxe gonna be easy]
+//unit values [easy]
 
 const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions) => {
 
@@ -563,6 +699,7 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
             }
             console.log('sample report: ', reportSampleHeader)
             
+            console.log('--------Copy Additional Info-----------')
             let copyText = {}
 
             for(var j = 0; j < 12; j++ ){
@@ -617,22 +754,38 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
 
             console.log('----------Table Copying--------------')
 
-            let tableSize = 12; 
+            let test = true; 
+
+            let tableSize; 
+
+            if(test){
+                tableSize = 12; 
+            }else{
+                tableSize = 11; 
+            }
+
             let runningCount = 0;
+            //starting at E
+            let currentTables = 4; 
     
             let pageStart = [9,52, 92, 132, 172]
             let sampleStyle = reportType.getRow(9).getCell(1).style; 
           
             let totalPages = Math.floor(usedSamples/4)
             let remainder = usedSamples % 4; 
-            console.log('usedSamples: ', usedSamples)
-            console.log('total Pages: ', totalPages)
-            console.log('remainder: ', remainder)
+            //console.log('usedSamples: ', usedSamples)
+            //console.log('total Pages: ', totalPages)
+            //console.log('remainder: ', remainder)
 
             for(let [key2, value2] of Object.entries(reportSampleHeader)){
                 console.log(`Key: ${key2}, Value: ${value2}`)
 
                 let currentPage = pageStart[key2]
+
+                if(tableSize === 11 && parseInt(key2) !== 0){
+                    currentPage++; 
+                }
+
                 console.log(currentPage); 
                 console.log(runningCount)
 
@@ -676,28 +829,38 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
                 }
 
                 currentPage++;
-               
+
+                if(tableSize === 11 && parseInt(key2) === 0){
+                    reportType.getRow(22 + runningCount).hidden = true; 
+                    currentPage++; 
+                }
+                
                 console.log('Current Page: ', currentPage);
                 console.log("Running Count: ", runningCount)
          
+                //if first page 
                 if(parseInt(key2) === 0){
 
-                    //determine how many samples in a given table 
+                    //if has more then 2 items or is only page 
                     if((totalPages === 0 && remainder > 2) || (totalPages === 1)){
-                        
+                        //top and bottom spacing 
                         currentPage++; 
                         currentPage += tableSize; 
-                        currentPage++; //top and bottom 
+                        currentPage++; 
 
-                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType)
-
+                        
+                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
+                        currentTables+=2; 
+                        
+                        //not sure why we do this but it works lol 
                         if(runningCount !== 0){
                             currentPage++; 
                         }  
 
-                        //contiune page or write information 
+                        //contiune page or write additonal ending information 
                         if(Object.keys(reportSampleHeader).length > 1){
                             currentPage++; 
+                            console.log(currentPage);
                             let row = reportType.getRow(currentPage); 
                             row.getCell(1).value = continuedNextPage; 
                             
@@ -708,27 +871,29 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
                     
                 //anypage after the first one 
                 }else {
-                    //if last page 
                     if(parseInt(key2) === totalPages){
-                        console.log("last page is ", totalPages)
-                        //means double copy table twice 
-                     
                         if(remainder === 0 || remainder > 2){
-
                             //FIXME: unsure why this fixes the problem 
                             if(runningCount === 0){
                                 currentPage++; 
                             }
 
-                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType)
-                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType)
+                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType,currentTables)
+                            currentTables+=2; 
+                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
+                            currentTables+=2; 
+
                             if(runningCount !== 0){
                                 currentPage++; 
                             } 
 
                         }else{
                             //currentPage++; 
-                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType)  
+                            if(runningCount === 0){
+                                currentPage++; 
+                            }
+                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)  
+                            currentTables+=2; 
                         }
 
                         copyAdditoinalInfo(copyText, currentPage, reportType)
@@ -736,19 +901,18 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
                     }else{
                         //not last page so create two tables 
                         currentPage++; 
-                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType)
-                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType)
+                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType,currentTables)
+                        currentTables+=2; 
+                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
+                        currentTables+=2; 
                         currentPage++; 
+
                         //write contiune to next page section 
                         let row = reportType.getRow(currentPage); 
                         row.getCell(1).value = continuedNextPage; 
-
-
                     }
                 }
             }
-
-
             await wb.xlsx.writeFile(fileLocations[key]);
 
         }
@@ -767,7 +931,6 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
     console.log(sampleOptions)
     console.log(jobNumbers)
     console.log('----------------------------------')
-
     
     new Promise(async (resolve, reject) => {
 

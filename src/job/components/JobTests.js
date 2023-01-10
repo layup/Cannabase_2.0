@@ -7,7 +7,7 @@ const JobTests = (props) => {
         <table className='w-full'> 
             <thead className='table-auto md:table-fixed bg-emerald-700 w-full sticky top-0'>
                 <tr className='text-white [&>th]:text-base [&>th]:font-normal [&>th]:py-2 [&>th]:p-1'>
-                    <th className='w-1/6 '>Mark As done</th>
+                    <th className='w-2/6'>Mark As Complete</th>
                     <th className='w-2/6'>Tests</th>
                     <th className='w-2/6'>Complete Date</th>
                 </tr>

@@ -47,13 +47,13 @@ const JobItem = (props) => {
             <td className=''>
                 {JobComplete  ? 
                     <button 
-                        className=' p-1  rounded-lg w-full uppercase border-1 border-red-700 text-red-700 text-sm hover:bg-red-700 hover:text-white '
+                        className='p-1 rounded-lg w-full uppercase border-1 border-red-700 text-red-700 text-sm hover:bg-red-700 hover:text-white '
                         onClick={resetTests}
                     >
                         Reset
                     </button>
                     :<button 
-                        className=' p-1  rounded-lg w-full uppercase border-1 border-black text-sm hover:bg-emerald-700 hover:text-white hover:border-emerald-600'
+                        className='p-1 rounded-lg w-full uppercase border-1 border-black text-sm hover:bg-emerald-700 hover:text-white hover:border-emerald-600'
                         onClick={completeTests}
                     >
                         Complete
