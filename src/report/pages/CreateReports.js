@@ -78,7 +78,7 @@ const CreateReports = (props) => {
                             ...prevState, 
                             [sample]:{
                                 unitType:'moisture',
-                                reportType: 'basic',
+                                reportType: 'deluxe',
                                 
                                 amount: 'mult', 
                             }

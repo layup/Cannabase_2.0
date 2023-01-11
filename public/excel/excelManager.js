@@ -493,7 +493,7 @@ const copyFormating = (row, formulaName, dataLocation) => {
 }
 
 
-const copyTables = (packageType, tableSize, runningCount, currentPage, reportType, dataLocation) => {
+const pasteTables = (packageType, tableSize, runningCount, currentPage, reportType, dataLocation) => {
     
     const letter = String.fromCharCode(dataLocation + 'A'.charCodeAt(0))
     const letter2 = String.fromCharCode((dataLocation+1) + 'A'.charCodeAt(0))
@@ -582,14 +582,46 @@ const copyTables = (packageType, tableSize, runningCount, currentPage, reportTyp
 
     //Deluxe Package 
     }else {
+        for(k = 0; k < tableSize; k++){
+            let row1Value = 11 + runningCount + k
+            let row2Value = currentPage + runningCount + k 
 
+            console.log('row1Value: ', row1Value, ' | row2Value: ', row2Value);
+
+            let row = reportType.getRow(row1Value); 
+            let row2 = reportType.getRow(row2Value); 
+            row2.height = row.height
+
+            row.eachCell({includeEmpty: true},(cell, colNum) => {
+                row2.getCell(colNum).value = cell.value 
+                row2.getCell(colNum).style = cell.style
+            })
+
+
+        }
+        currentPage+=tableSize
+                        
+        if(tableSize === 22){
+            reportType.mergeCells(currentPage, 2, currentPage, 3 )
+            reportType.mergeCells(currentPage, 4, currentPage, 5 )
+        }
+
+        //clear the signature name  on page one 
+        let row = reportType.getRow(currentPage + runningCount); 
+        row.getCell(1).value = ''
+        row.getCell(4).value = ''
+
+        currentPage++;  
+
+        console.log('Current page after table insertion: ', currentPage)
+        return currentPage; 
 
 
     }
 
 }
 
-const copyAdditoinalInfo = (copyText, currentPage, reportType) => {
+const pastingAdditoinalInfo = (copyText, currentPage, reportType) => {
     for (var [key, value] of Object.entries(copyText)){
 
         let temp = currentPage++;
@@ -603,12 +635,362 @@ const copyAdditoinalInfo = (copyText, currentPage, reportType) => {
     }
 }
 
+const copyAdditonalInfo = (sheetName, reportType) => {
+    let copyText = {}
+
+    for(var j = 0; j < 12; j++ ){
+        let currentRow; 
+        if(reportType === 'basic'){
+            currentRow = 24 + j 
+        }else{
+            currentRow = 34 + j 
+        }
+        
+        //
+        let row = sheetName.getRow(currentRow)
+        
+        let temp = []
+        //needto also add the rows into play playboy 
+
+        row.eachCell({includeEmpty: true}, (cell, colNum) => {
+            temp.push([
+                cell.value, cell.style
+            ])                
+        })
+
+        copyText[currentRow] = temp; 
+    }
+
+    return copyText; 
+}
+
+const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage) => {
+    
+    let test = true; 
+    let tableSize; 
+
+    if(test){
+        tableSize = 12; 
+    }else{
+        tableSize = 11; 
+    }
+
+    let runningCount = 0;
+    //starting at E
+    let currentTables = 4; 
+
+    let pageStart = [9,52, 92, 132, 172]
+    let sampleStyle = reportType.getRow(9).getCell(1).style; 
+    
+    let totalPages = Math.floor(usedSamples/4)
+    let remainder = usedSamples % 4; 
+    //console.log('usedSamples: ', usedSamples)
+    //console.log('total Pages: ', totalPages)
+    //console.log('remainder: ', remainder)
+
+    for(let [key2, value2] of Object.entries(reportSampleHeader)){
+        console.log(`Key: ${key2}, Value: ${value2}`)
+
+        let currentPage = pageStart[key2]
+
+        if(tableSize === 11 && parseInt(key2) !== 0){
+            currentPage++; 
+        }
+
+        console.log(currentPage); 
+        console.log(runningCount)
+
+        //if sample name takes up 2 sections, copy stypes and shift down 
+        if(value2.length === 2){
+
+            reportType.spliceRows((currentPage-1), 1, [], []);
+            let row = reportType.getRow(currentPage)
+            let row2 = reportType.getRow(currentPage+1); 
+
+            row.getCell(1).value = value2[0]
+            row.getCell(1).style = sampleStyle
+
+            row2.getCell(1).value = value2[1];
+            row2.getCell(1).style = sampleStyle; 
+
+            if(parseInt(key2) === 0){
+                runningCount++; 
+                
+            }else{
+                currentPage++; 
+            }
+
+        }else{
+            //normal just copies the information 
+
+            let row = reportType.getRow(currentPage); 
+            row.getCell(1).style = sampleStyle 
+            row.getCell(1).value = value2[0]
+        }                      
+        //adds border and set height 
+        if(parseInt(key2) > 0){
+            //console.log('Adding border to row:', (currentPage+1))
+            let temp = (currentPage+1); 
+            let row3 = reportType.getRow(temp);
+        
+            for(let i = 1; i< 8; i++){ 
+                row3.getCell(i).border = {top: {style: 'thin'}}
+            }
+            reportType.getRow(temp).height = 8; 
+        }
+
+        currentPage++;
+
+        if(tableSize === 11 && parseInt(key2) === 0){
+            reportType.getRow(22 + runningCount).hidden = true; 
+            currentPage++; 
+        }
+        
+        //console.log('Current Page: ', currentPage);
+        //console.log("Running Count: ", runningCount)
+    
+        //if first page 
+        if(parseInt(key2) === 0){
+
+            //if has more then 2 items or is only page 
+            if((totalPages === 0 && remainder > 2) || (totalPages === 1)){
+                //top and bottom spacing 
+                currentPage++; 
+                currentPage += tableSize; 
+                currentPage++; 
+                
+                currentPage = pasteTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
+                currentTables+=2; 
+                
+                //not sure why we do this but it works lol 
+                if(runningCount !== 0){
+                    currentPage++; 
+                }  
+
+                //contiune page or write additonal ending information 
+                if(Object.keys(reportSampleHeader).length > 1){
+                    currentPage++; 
+                    let row = reportType.getRow(currentPage); 
+                    row.getCell(1).value = continuedNextPage; 
+                    
+                }else{ 
+                    pastingAdditoinalInfo(copyText, currentPage, reportType)
+                }
+            }
+            
+        //anypage after the first one 
+        }else {
+            if(parseInt(key2) === totalPages){
+                if(remainder === 0 || remainder > 2){
+                    //FIXME: unsure why this fixes the problem 
+                    if(runningCount === 0){
+                        currentPage++; 
+                    }
+
+                    currentPage = pasteTables('Basic', tableSize, runningCount, currentPage, reportType,currentTables)
+                    currentTables+=2; 
+                    currentPage = pasteTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
+                    currentTables+=2; 
+
+                    if(runningCount !== 0){
+                        currentPage++; 
+                    } 
+
+                }else{
+                    //currentPage++; 
+                    if(runningCount === 0){
+                        currentPage++; 
+                    }
+                    currentPage = pasteTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)  
+                    currentTables+=2; 
+                }
+
+                pastingAdditoinalInfo(copyText, currentPage, reportType)
+
+            }else{
+                //not last page so create two tables 
+                currentPage++; 
+                currentPage = pasteTables('Basic', tableSize, runningCount, currentPage, reportType,currentTables)
+                currentTables+=2; 
+                currentPage = pasteTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
+                currentTables+=2; 
+                currentPage++; 
+
+                //write contiune to next page section 
+                let row = reportType.getRow(currentPage); 
+                row.getCell(1).value = continuedNextPage; 
+            }
+        }
+    }
+}
+
+const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage) => {
+
+    console.log("running deluxe report generation")
+
+    let test = true; 
+    let tableSize; 
+
+    if(test){
+        tableSize = 22; 
+    }else{
+        tableSize = 21; 
+    }
+
+    let runningCount = 0;
+
+    //starting at E
+    let currentTables = 2; 
+
+    let pageStart = [9,50, 89, 128, 167, 206, 245, 284, 323, 362]
+    let sampleStyle = reportType.getRow(9).getCell(1).style; 
+    
+    let totalPages = Math.floor(usedSamples/2)
+    let remainder = usedSamples % 2; 
+
+    console.log('usedSamples: ', usedSamples)
+    console.log('total Pages: ', totalPages)
+    console.log('remainder: ', remainder)
+
+    for(let [key2, value2] of Object.entries(reportSampleHeader)){
+        console.log(`Key: ${key2}, Value: ${value2}`)
+
+        let currentPage = pageStart[key2]
+
+        if(tableSize === 21 && parseInt(key2) !== 0){
+            currentPage++; 
+        }
+
+        //console.log(currentPage); 
+        //console.log(runningCount)
+
+        //if sample name takes up 2 sections, copy stypes and shift down 
+        if(value2.length === 2){
+
+            reportType.spliceRows((currentPage-1), 1, [], []);
+            let row = reportType.getRow(currentPage)
+            let row2 = reportType.getRow(currentPage+1); 
+
+            row.getCell(1).value = value2[0]
+            row.getCell(1).style = sampleStyle
+
+            row2.getCell(1).value = value2[1];
+            row2.getCell(1).style = sampleStyle; 
+
+            if(parseInt(key2) === 0){
+                runningCount++; 
+            }else{
+                currentPage++; 
+            }
+
+        }else{
+            //normal just copies the information 
+            console.log('about to copy to: ', currentPage)
+            let row = reportType.getRow(currentPage); 
+            row.getCell(1).style = sampleStyle 
+            row.getCell(1).value = value2[0]
+            
+        }                      
+        //adds border and set height 
+        if(parseInt(key2) > 0){
+            //console.log('Adding border to row:', (currentPage+1))
+            let temp = (currentPage+1); 
+            let row3 = reportType.getRow(temp);
+        
+            for(let i = 1; i< 8; i++){ 
+                row3.getCell(i).border = {top: {style: 'thin'}}
+            }
+            reportType.getRow(temp).height = 8; 
+        }
+
+        currentPage++;
+
+        if(tableSize === 21 && parseInt(key2) === 0){
+            reportType.getRow(32 + runningCount).hidden = true; 
+            currentPage++; 
+        }
+
+        //paste full tables reguardless 
+        //contiune or paste ending content 
+
+        //clear the tex below and add continue to next page 
+        if(parseInt(key2) === 0){
+
+            
+            if(totalPages > 0){      
+                
+                
+                
+                console.log('RUnning the clearing thing')
+                currentPage = 33; 
+                //clear row that is getting copied 
+                let row = reportType.getRow(currentPage); 
+
+
+                for(var i = 0; i < 12; i++){
+                    let row2 = reportType.getRow(34 + i)
+                    console.log(34 + i); 
+                    row2.getCell(1).style = row.getCell(1).style; 
+                    row2.getCell(1).value = ''
+                    row2.getCell(4).style = row.getCell(1).style; 
+                    row2.getCell(4).value = ''
+
+                }
+                currentPage++; 
+                currentPage++; 
+                row = reportType.getRow(currentPage); 
+                row.getCell(1).value = continuedNextPage; 
+
+                //pastingAdditoinalInfo(copyText, currentPage, reportType)
+
+                
+
+
+            }
+
+
+        //copy table and check if end 
+        }else{
+            currentPage++;             
+            currentPage = pasteTables('Deluxe', tableSize, runningCount, currentPage, reportType, currentTables)
+            currentTables+=1; 
+            
+            //not sure why we do this but it works lol 
+            if(runningCount !== 0){
+                currentPage++; 
+            }  
+
+            //contiune page or write additonal ending information 
+            //console.log(Object.keys(reportSampleHeader).length)
+            if(Object.keys(reportSampleHeader).length !== totalPages + 1){
+                currentPage++; 
+                let row = reportType.getRow(currentPage); 
+                row.getCell(1).value = continuedNextPage; 
+                
+            }else{ 
+                pastingAdditoinalInfo(copyText, currentPage, reportType)
+            }
+        }
+
+
+
+
+        
+    }
+        
+        //console.log('Current Page: ', currentPage);
+        //console.log("Running Count: ", runningCount)
+    
+        //if first page 
+        
+
+}
 //TODO: 
 //single or multi [easy]
 //report type [deluxe gonna be easy]
 //unit values [easy]
 
-const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions) => {
+const generateThcReport = async(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions) => {
 
     console.log('------Copying Cannabis Data------')
     console.log(fileLocations)
@@ -619,6 +1001,12 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
     console.log("----------------------------------")
 
     let completedReports = []; 
+    
+    let continuedNextPage = {
+        'richText': [
+            {'font': {'bold':true, 'color':{'theme': 1}, 'size': 11, name: 'CMU Serif'}, 'text': 'Contiuned on next page...'} 
+        ]
+    }
 
     for(let [key, value] of Object.entries(sampleOptions)){
     
@@ -632,24 +1020,20 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
 
             let headersWorksheet = wb.getWorksheet('Headers')
             let dataWorksheet = wb.getWorksheet('Data')
-            let reportType; 
+            let reportType, copyText; 
             
             if(sampleOptions[key].reportType === 'basic'){
                 reportType = wb.getWorksheet('Basic')
+                copyText = copyAdditonalInfo(reportType, 'basic')
             }else{
                 reportType = wb.getWorksheet('Deluxe')
+                copyText = copyAdditonalInfo(reportType, 'deluxe')
             }
 
             await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
         
             let jobSamplesName = []
             let jobSamplesNumber = []
-            
-            let continuedNextPage = {
-                'richText': [
-                    {'font': {'bold':true, 'color':{'theme': 1}, 'size': 11, name: 'CMU Serif'}, 'text': 'Contiuned on next page...'} 
-                ]
-            }
             
             //determine how many samples 
             for(var [key3, value3] of Object.entries(clientInfo[key.substring(0,6)].sampleNames)){
@@ -661,66 +1045,55 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
             }
 
             console.log('sample names:' , jobSamplesName)
-            //24, 25, 27, 28, 30, 31 
-            
-            //TODO: copy sample names, but also have to consider the multiple sheets that can get generated 
-            //if 4 then good totalTables % 4 = remainder, based on tables 
-            
+            console.log('completed Reports ',completedReports) 
+
             let sampleSections = 0; 
             let usedSamples = 0; 
             let reportSampleHeader = {
                 0:["Samples: "]
             }
 
-            for(var x = 0; x < jobSamplesName.length; x++){
-                //console.log('sample Section: ', x, sampleSections)
-                if((x % 4) === 0 && x !== 0 ){
-                    sampleSections++; 
-                    reportSampleHeader[sampleSections] = ["Samples: "]
+            for (var x = 0; x < jobSamplesName.length; x++){
 
-                    console.log('increaing on x: ', x)
+                if(sampleOptions[key].reportType === 'basic'){
+                    if((x % 4) === 0 && x !== 0){
+                        sampleSections++; 
+                        reportSampleHeader[sampleSections] = ["Samples: "]
+                    }
+                }else{
+                    if((x % 2) === 0 && x !== 0){
+                        sampleSections++; 
+                        reportSampleHeader[sampleSections] = ["Samples: "]
+                    } 
                 }
-                
-                let curPos = reportSampleHeader[sampleSections].length -1 
 
+                let curPos = reportSampleHeader[sampleSections].length -1 
                 let testPush = reportSampleHeader[sampleSections][curPos] + ` ${usedSamples+1}) ${jobSamplesName[x]}`
-                //console.log(testPush)
 
                 if(testPush.length > 100){
                     reportSampleHeader[sampleSections].push(`            ${usedSamples+1}) ${jobSamplesName[x]} `)
-
-                    
                 }else{
                     reportSampleHeader[sampleSections][curPos] = reportSampleHeader[sampleSections][curPos].concat(`${usedSamples+1}) ${jobSamplesName[x].trim()} `)
                 }
                 
                 usedSamples++; 
-                
             }
+
             console.log('sample report: ', reportSampleHeader)
             
-            console.log('--------Copy Additional Info-----------')
-            let copyText = {}
-
-            for(var j = 0; j < 12; j++ ){
-                let currentRow2 = 24 + j
-                let row = reportType.getRow(currentRow2)
-                
-                let temp = []
-                //needto also add the rows into play playboy 
-
-                row.eachCell({includeEmpty: true}, (cell, colNum) => {
-                    temp.push([
-                        cell.value, cell.style
-                    ])                
-                })
-
-                copyText[currentRow2] = temp; 
-            }
-
+            //console.log('--------Copy Additional Info-----------')
+            
             console.log('----------Data Processing--------------')
             let sampleJobData = {}
             let currentCell = 3; 
+            let recoveryRow = 3; 
+            
+            for(var [rowNumber, recoveryVal] of Object.entries(sampleData['recovery'])){     
+                let row = dataWorksheet.getRow(recoveryRow)         
+                row.getCell(2).value = parseFloat(recoveryVal[1]) 
+                recoveryRow++; 
+                
+            }
 
             jobSamplesNumber.forEach((job,index) => {
 
@@ -749,170 +1122,22 @@ const copyTHCInfo = async(fileLocations, clientInfo, sampleNames, sampleData, sa
 
                 currentCell++; 
                 sampleJobData[job] = jobCannaValues
-            })
+            })         
+
+
             console.log(sampleJobData);
 
             console.log('----------Table Copying--------------')
 
-            let test = true; 
 
-            let tableSize; 
-
-            if(test){
-                tableSize = 12; 
-            }else{
-                tableSize = 11; 
-            }
-
-            let runningCount = 0;
-            //starting at E
-            let currentTables = 4; 
-    
-            let pageStart = [9,52, 92, 132, 172]
-            let sampleStyle = reportType.getRow(9).getCell(1).style; 
           
-            let totalPages = Math.floor(usedSamples/4)
-            let remainder = usedSamples % 4; 
-            //console.log('usedSamples: ', usedSamples)
-            //console.log('total Pages: ', totalPages)
-            //console.log('remainder: ', remainder)
-
-            for(let [key2, value2] of Object.entries(reportSampleHeader)){
-                console.log(`Key: ${key2}, Value: ${value2}`)
-
-                let currentPage = pageStart[key2]
-
-                if(tableSize === 11 && parseInt(key2) !== 0){
-                    currentPage++; 
-                }
-
-                console.log(currentPage); 
-                console.log(runningCount)
-
-                //if sample name takes up 2 sections, copy stypes and shift down 
-                if(value2.length === 2){
- 
-                    reportType.spliceRows((currentPage-1), 1, [], []);
-                    let row = reportType.getRow(currentPage)
-                    let row2 = reportType.getRow(currentPage+1); 
-
-                    row.getCell(1).value = value2[0]
-                    row.getCell(1).style = sampleStyle
-
-                    row2.getCell(1).value = value2[1];
-                    row2.getCell(1).style = sampleStyle; 
-
-                    if(parseInt(key2) === 0){
-                        runningCount++; 
-                        
-                    }else{
-                        currentPage++; 
-                    }
-
-                }else{
-                    //normal just copies the information 
-                    console.log('current page(1): ',currentPage )
-                    let row = reportType.getRow(currentPage); 
-                    row.getCell(1).style = sampleStyle 
-                    row.getCell(1).value = value2[0]
-                }                      
-                //adds border and set height 
-                if(parseInt(key2) > 0){
-                    //console.log('Adding border to row:', (currentPage+1))
-                    let temp = (currentPage+1); 
-                    let row3 = reportType.getRow(temp);
-                
-                    for(let i = 1; i< 8; i++){ 
-                        row3.getCell(i).border = {top: {style: 'thin'}}
-                    }
-                    reportType.getRow(temp).height = 8; 
-                }
-
-                currentPage++;
-
-                if(tableSize === 11 && parseInt(key2) === 0){
-                    reportType.getRow(22 + runningCount).hidden = true; 
-                    currentPage++; 
-                }
-                
-                console.log('Current Page: ', currentPage);
-                console.log("Running Count: ", runningCount)
-         
-                //if first page 
-                if(parseInt(key2) === 0){
-
-                    //if has more then 2 items or is only page 
-                    if((totalPages === 0 && remainder > 2) || (totalPages === 1)){
-                        //top and bottom spacing 
-                        currentPage++; 
-                        currentPage += tableSize; 
-                        currentPage++; 
-
-                        
-                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
-                        currentTables+=2; 
-                        
-                        //not sure why we do this but it works lol 
-                        if(runningCount !== 0){
-                            currentPage++; 
-                        }  
-
-                        //contiune page or write additonal ending information 
-                        if(Object.keys(reportSampleHeader).length > 1){
-                            currentPage++; 
-                            console.log(currentPage);
-                            let row = reportType.getRow(currentPage); 
-                            row.getCell(1).value = continuedNextPage; 
-                            
-                        }else{ 
-                            copyAdditoinalInfo(copyText, currentPage, reportType)
-                        }
-                    }
-                    
-                //anypage after the first one 
-                }else {
-                    if(parseInt(key2) === totalPages){
-                        if(remainder === 0 || remainder > 2){
-                            //FIXME: unsure why this fixes the problem 
-                            if(runningCount === 0){
-                                currentPage++; 
-                            }
-
-                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType,currentTables)
-                            currentTables+=2; 
-                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
-                            currentTables+=2; 
-
-                            if(runningCount !== 0){
-                                currentPage++; 
-                            } 
-
-                        }else{
-                            //currentPage++; 
-                            if(runningCount === 0){
-                                currentPage++; 
-                            }
-                            currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)  
-                            currentTables+=2; 
-                        }
-
-                        copyAdditoinalInfo(copyText, currentPage, reportType)
-
-                    }else{
-                        //not last page so create two tables 
-                        currentPage++; 
-                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType,currentTables)
-                        currentTables+=2; 
-                        currentPage = copyTables('Basic', tableSize, runningCount, currentPage, reportType, currentTables)
-                        currentTables+=2; 
-                        currentPage++; 
-
-                        //write contiune to next page section 
-                        let row = reportType.getRow(currentPage); 
-                        row.getCell(1).value = continuedNextPage; 
-                    }
-                }
+            
+            if(sampleOptions[key].reportType === 'basic'){
+                basicReport(reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage);
+            }else{
+                deluxeReport(reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage);
             }
+
             await wb.xlsx.writeFile(fileLocations[key]);
 
         }
@@ -950,7 +1175,8 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
         }
 
         if(reportType === 'cannabis'){
-            await copyTHCInfo(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
+          
+            await generateThcReport(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
         }
     
     })
@@ -1063,6 +1289,8 @@ const processThcFile = (filePath) => {
             let nameCol = ws.getColumn('BK'); //THC name 
             let unitCol = ws.getColumn('BX')
             let recoveryCol = ws.getColumn('EH')
+            let stdconc = ws.getColumn('AL')
+            
             
             //let mg = ws.getColumn(); 
             //let concentration = ws.getColumn()
@@ -1081,7 +1309,7 @@ const processThcFile = (filePath) => {
                         unit[rowNumber] = 0; 
                     }
                   
-                    recovery[rowNumber] = recoveryCol.values[rowNumber]
+                    //recovery[rowNumber] = recoveryCol.values[rowNumber]
 
                     if(!sampleNames.includes(cell.text)){
                         sampleNames.push(cell.text)
@@ -1090,6 +1318,16 @@ const processThcFile = (filePath) => {
                 }
             });
 
+            stdconc.eachCell(function(cell, rowNumber){
+                //console.log(rowNumber, cell.text)
+                if(parseInt(cell.text) === 10){
+                    //console.log(rowNumber)
+                    recovery[rowNumber] = [nameCol.values[rowNumber],recoveryCol.values[rowNumber]]
+                    
+                }
+            })
+        
+            //console.log(recovery)
             sampleNames.forEach((sample, i) => {
                 let jobNum = sample.substring(0,6)
 
@@ -1101,7 +1339,7 @@ const processThcFile = (filePath) => {
             
 
             //console.log('Testing', desc.values[1])
-            resolve({jobNumbers: jobNums, samples: sampleNames, sampleData: {desc:desc,name:name, unit:unit}})
+            resolve({jobNumbers: jobNums, samples: sampleNames, recovery:recovery, sampleData: {desc:desc,name:name, unit:unit, recovery:recovery}})
         });
     
     })
@@ -1254,9 +1492,14 @@ const  GenerateClientData = async (jobNum, jobPath) => {
             //console.log(`${line.length}: ${line}` )
 
             if(counter === 0){
-                clientName = line.match(/(\s{5})(.*?)(\s{5})/)[0].trim()
-                date = line.match(/[0-9]{2}[a-zA-Z]{3}[0-9]{2}/)[0]
-                time = line.substring(65,73).trim()
+                try {
+                    clientName = line.match(/(\s{5})(.*?)(\s{5})/)[0].trim()
+                    date = line.match(/[0-9]{2}[a-zA-Z]{3}[0-9]{2}/)[0]
+                    time = line.substring(65,73).trim()
+                } catch (err){
+                    console.log(err)
+                }
+
                 
             }
             if(counter === 1){
@@ -1308,7 +1551,8 @@ const  GenerateClientData = async (jobNum, jobPath) => {
 
             if(counter === 4){ 
                 if(attention && addy2){
-                   addy3 = line.replace(/\s/g, '');
+                   //addy3 = line.replace(/\s/g, '');
+                    addy3 = line.substring(0,10).trim(); 
                 }else {
                     telephone = line.substring(20,50).replace('TEL:', '').trim() 
                     try {
