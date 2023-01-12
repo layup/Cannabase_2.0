@@ -78,8 +78,9 @@ const CreateReports = (props) => {
                             ...prevState, 
                             [sample]:{
                                 unitType:'moisture',
-                                reportType: 'deluxe',
-                                
+                                reportType: 'basic',
+                                unit: '', 
+                                unitValue: '', 
                                 amount: 'mult', 
                             }
                         }))
@@ -97,7 +98,7 @@ const CreateReports = (props) => {
 
 
     const updateClientInfo = ( jobNum, keyName, value, key) => {
-        console.log(jobNum, keyName, key, value )
+        //console.log(jobNum, keyName, key, value )
 
         if(keyName === 'sampleNames'){
             setClientInfo((prevState) => ({
@@ -120,11 +121,11 @@ const CreateReports = (props) => {
             }))
         }
         
-        console.log(clientInfo)
+        //console.log(clientInfo)
     }
 
     const updateSampleOptions = (jobNum, keyName, value) => {
-        console.log(jobNum, keyName, value)
+        //console.log(jobNum, keyName, value)
 
         setSampleOptions((prevState) => ({
             ...prevState, 

@@ -14,6 +14,7 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
                         <th>Basic/Deluxe</th>
                         <th>Single/Multi</th>
                         <th>De/Un/Mo</th>
+                        <th>Unit Value</th>
                         <th>Sample Name</th>
                     </tr>
                 </thead>
@@ -61,13 +62,25 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
         
                       <td>
                         <input 
-                          value={
-                          ""
-                          } 
+                        value={
+                          sampleOptions[sampleName]['unit']
+                        } 
                           className="bg-zinc-200 w-11/12 h-full p-1 rounded-md" 
+                          onChange={(e) => updateSampleOptions(sampleName, 'unit',e.target.value)}
                           
                         />  
                       </td>
+
+                      <td>
+                      <input 
+                      value={
+                        sampleOptions[sampleName]['unitValue']
+                      } 
+                        className="bg-zinc-200 w-11/12 h-full p-1 rounded-md" 
+                        onChange={(e) => updateSampleOptions(sampleName, 'unitValue',e.target.value)}
+                        
+                      />  
+                    </td>
         
                       <td>
                         <input 
