@@ -18,7 +18,13 @@ const CreateReports = (props) => {
     const [isLoading, setIsLoading] = useState(false)
     const [showError, setShowError] = useState(false);
 
-    const errors = useRef()
+
+    //ERROR CASES 
+    //1. ENTER IN MO/DE/UN = MUST HAVE A VALUE ASSOCIATED WITH IT 
+    //2. MUST HAVE A NAME FOR THE SAMPLE 
+    //3. 
+    //4. 
+    //const errors = useRef()
 
     const navigate = useNavigate();
 
@@ -78,7 +84,7 @@ const CreateReports = (props) => {
                             ...prevState, 
                             [sample]:{
                                 unitType:'moisture',
-                                reportType: 'basic',
+                                reportType: 'deluxe',
                                 unit: '', 
                                 unitValue: '', 
                                 amount: 'mult', 
@@ -145,6 +151,30 @@ const CreateReports = (props) => {
             console.log(key, value )
         }
         */ 
+
+        if(location.state.selectReport === 'cannabis'){
+            //console.log('samples: ', samples)
+
+            samples.forEach((sample)=>{
+                let currentSample = sampleOptions[sample]
+
+                console.log(currentSample)
+                //unit is select
+                if(currentSample.unit !== ''){
+                    if(currentSample.unitValue === ''){
+                        console.log(`${sample} Plese Enter a Unit Value`)
+
+                    }
+                }
+                console.log(clientInfo[sample.substring(0,6)]['sampleNames'][sample])
+                if(clientInfo[sample.substring(0,6)]['sampleNames'][sample] === ''){
+                    console.log(`${sample} Plese enter a job sample name`)
+                }
+
+
+            })
+
+        }
         setIsLoading(true)
 
         await window.api.generateReports(clientInfo, samples, sampleData, jobNumbers, sampleOptions, location.state.selectReport)

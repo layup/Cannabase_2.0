@@ -142,7 +142,7 @@ const processThcFile = (filePath) => {
  * @param {String} letter - column in which the data is located in the excel file 
  * @returns {Array} - two objects in the array, first being value, second being percentage of the value 
  */
-const thcExcelFormuals = (formulaName, letter) => {
+const thcExcelFormuals = (formulaName, letter, unitValue = 0) => {
 
     switch(formulaName){
 
@@ -153,82 +153,82 @@ const thcExcelFormuals = (formulaName, letter) => {
 
         case 'CBDV':   
             return [
-                {formula: `=IF(Data!$${letter}$4 = 0, "ND", Data!$${letter}$4)`},
-                {formula: `=IF(Data!$${letter}$4 = 0, "ND", Data!$${letter}$4/10)`}
+                {formula: `=IF(Data!$${letter}$4 = 0, "ND", Data!$${letter}$4)`, result:''},
+                {formula: `=IF(Data!$${letter}$4 = 0, "ND", Data!$${letter}$4/10)`, result:''}
             ]
         
         case 'CBDVA':    
             return [
-                {formula: `=IF(Data!$${letter}$5 = 0, "ND", Data!$${letter}$5)`},
-                {formula: `=IF(Data!$${letter}$5 = 0, "ND", Data!$${letter}$5/10)`}
+                {formula: `=IF(Data!$${letter}$5 = 0, "ND", Data!$${letter}$5)`, result:''},
+                {formula: `=IF(Data!$${letter}$5 = 0, "ND", Data!$${letter}$5/10)`, result:''}
             ]
         case 'THCV':   
             return [
-                {formula: `=IF(Data!$${letter}$6 = 0, "ND", Data!$${letter}$6)`},
-                {formula: `=IF(Data!$${letter}$6 = 0, "ND", Data!$${letter}$6/10)`}
+                {formula: `=IF(Data!$${letter}$6 = 0, "ND", Data!$${letter}$6)`, result:''},
+                {formula: `=IF(Data!$${letter}$6 = 0, "ND", Data!$${letter}$6/10)`, result:''}
             ]
 
         case 'CBC':     
             return [
-                {formula: `=IF(Data!$${letter}$17 = 0, "ND", Data!$${letter}$17)`},
-                {formula: `=IF(Data!$${letter}$17 = 0, "ND", Data!$${letter}$17/10)`}
+                {formula: `=IF(Data!$${letter}$17 = 0, "ND", Data!$${letter}$17)`, result:''},
+                {formula: `=IF(Data!$${letter}$17 = 0, "ND", Data!$${letter}$17/10)`, result:''}
             ]
         
         case 'CBCA':    
             return [
-                {formula: `=IF(Data!$${letter}$21 = 0, "ND", Data!$${letter}$21)`},
-                {formula: `=IF(Data!$${letter}$21 = 0, "ND", Data!$${letter}$21/10)`}
+                {formula: `=IF(Data!$${letter}$21 = 0, "ND", Data!$${letter}$21)`, result:''},
+                {formula: `=IF(Data!$${letter}$21 = 0, "ND", Data!$${letter}$21/10)`, result:''}
             ]
 
         case 'CBD': 
             return [
-                {formula: `=IF(Data!$${letter}$8 = 0, "ND", Data!$${letter}$8)`},
-                {formula: `=IF(Data!$${letter}$8 = 0, "ND", Data!$${letter}$8/10)`}
+                {formula: `=IF(Data!$${letter}$8 = 0, "ND", Data!$${letter}$8)`, result:''},
+                {formula: `=IF(Data!$${letter}$8 = 0, "ND", Data!$${letter}$8/10)`, result:''}
             ]
 
         case 'CBG':   
             return [
-                {formula: `=IF(Data!$${letter}$9 = 0, "ND", Data!$${letter}$9)`},
-                {formula: `=IF(Data!$${letter}$9 = 0, "ND", Data!$${letter}$9/10)`}
+                {formula: `=IF(Data!$${letter}$9 = 0, "ND", Data!$${letter}$9)`, result:''},
+                {formula: `=IF(Data!$${letter}$9 = 0, "ND", Data!$${letter}$9/10)`, result:''}
             ]
         case 'CBGA':  
             return [
-                {formula: `=IF(Data!$${letter}$12 = 0, "ND", Data!$${letter}$12)`},
-                {formula: `=IF(Data!$${letter}$12 = 0, "ND", Data!$${letter}$12/10)`}
+                {formula: `=IF(Data!$${letter}$12 = 0, "ND", Data!$${letter}$12)`, result:''},
+                {formula: `=IF(Data!$${letter}$12 = 0, "ND", Data!$${letter}$12/10)`, result:''}
             ]
         
         case 'THCVA':  
             return [
-                {formula: `=IF(Data!$${letter}$13 = 0, "ND", Data!$${letter}$13)`},
-                {formula: `=IF(Data!$${letter}$13 = 0, "ND", Data!$${letter}$13/10)`}
+                {formula: `=IF(Data!$${letter}$13 = 0, "ND", Data!$${letter}$13)`, result:''},
+                {formula: `=IF(Data!$${letter}$13 = 0, "ND", Data!$${letter}$13/10)`, result:''}
             ]
         
         case 'CBL':  
             return [
-                {formula: `=IF(Data!$${letter}$16 = 0, "ND", Data!$${letter}$16)`},
-                {formula: `=IF(Data!$${letter}$16 = 0, "ND", Data!$${letter}$16/10)`}
+                {formula: `=IF(Data!$${letter}$16 = 0, "ND", Data!$${letter}$16)`, result:''},
+                {formula: `=IF(Data!$${letter}$16 = 0, "ND", Data!$${letter}$16/10)`, result:''}
             ]
         case 'CBLA': 
             return [
-                {formula: `=IF(Data!$${letter}$20 = 0, "ND", Data!$${letter}$20)`},
-                {formula: `=IF(Data!$${letter}$20 = 0, "ND", Data!$${letter}$20/10)`}
+                {formula: `=IF(Data!$${letter}$20 = 0, "ND", Data!$${letter}$20)`, result:''},
+                {formula: `=IF(Data!$${letter}$20 = 0, "ND", Data!$${letter}$20/10)`, result:''}
             ]
 
         case "CBDA":  
             return [
-                {formula: `=IF(Data!$${letter}$10 = 0, "ND", Data!$${letter}$10)`},
-                {formula: `=IF(Data!$${letter}$10 = 0, "ND", Data!$${letter}$10/10)`}
+                {formula: `=IF(Data!$${letter}$10 = 0, "ND", Data!$${letter}$10)`, result:''},
+                {formula: `=IF(Data!$${letter}$10 = 0, "ND", Data!$${letter}$10/10)`, result:''}
             ]
 
         case 'CBNA': 
             return [
-                {formula: `=IF(Data!$${letter}$18 = 0, "ND", Data!$${letter}$18)`},
-                {formula: `=IF(Data!$${letter}$18 = 0, "ND", Data!$${letter}$18/10)`} 
+                {formula: `=IF(Data!$${letter}$18 = 0, "ND", Data!$${letter}$18)`, result:''},
+                {formula: `=IF(Data!$${letter}$18 = 0, "ND", Data!$${letter}$18/10)`, result:''} 
             ]
         case "CBN": 
             return [
-                {formula: `=IF(Data!$${letter}$11 = 0, "ND", Data!$${letter}$11)`},
-                {formula: `=IF(Data!$${letter}$11 = 0, "ND", Data!$${letter}$11/10)`}
+                {formula: `=IF(Data!$${letter}$11 = 0, "ND", Data!$${letter}$11)`, result:''},
+                {formula: `=IF(Data!$${letter}$11 = 0, "ND", Data!$${letter}$11/10)`, result:''}
             ]
 
         case 'THCA': 
@@ -250,14 +250,19 @@ const thcExcelFormuals = (formulaName, letter) => {
 
         case 'total-THC':
             return [
-                {formula: `=SUM(Data!$${letter}$14, Data!$${letter}$19 * 0.877)`},
-                {formula: `=SUM(Data!$${letter}$14/10, (Data!$${letter}$19/10) * 0.877)`}
+                {formula: `=SUM(Data!$${letter}$14, Data!$${letter}$19 * 0.877)`, result:''},
+                {formula: `=SUM(Data!$${letter}$14/10, (Data!$${letter}$19/10) * 0.877)`, result:''}
             ]
 
         case 'total-CBD':
             return [
-                {formula: `=SUM(Data!$${letter}$8, Data!$${letter}$10 * 0.877)`},
-                {formula: `=SUM(Data!$${letter}$8/10, (Data!$${letter}$10/10) * 0.877)`}
+                {formula: `=SUM(Data!$${letter}$8, Data!$${letter}$10 * 0.877)`, result:''},
+                {formula: `=SUM(Data!$${letter}$8/10, (Data!$${letter}$10/10) * 0.877)`, result:''}
+            ]
+
+        case 'unitValue':
+            return [
+                {formula: `=IF(ISBLANK(Data!$${letter}$22), "", Data!$${letter}$22)`, result:''},
             ]
 
         default: 
@@ -345,7 +350,12 @@ const pasteTables = (packageType, tableSize, runningCount, currentPage, reportTy
             if(row1Value === 21 + runningCount){
                 copyFormating(row2, 'CBNA', dataLocation)  
             }
-            
+            if(tableSize === 12 && row1Value === 22 + runningCount){
+                let temp = thcExcelFormuals('unitValue', letter)
+                let temp2 = thcExcelFormuals('unitValue', letter2)
+                row2.getCell(2).value = temp[0]
+                row2.getCell(4).value = temp2[0]
+            }
         }            
 
         currentPage+=tableSize
@@ -359,6 +369,8 @@ const pasteTables = (packageType, tableSize, runningCount, currentPage, reportTy
         let row = reportType.getRow(currentPage + runningCount); 
         row.getCell(1).value = ''
         row.getCell(4).value = ''
+
+
 
         currentPage++;  
 
@@ -457,14 +469,25 @@ const pasteTables = (packageType, tableSize, runningCount, currentPage, reportTy
             if(row1Value === 31 + runningCount){
                 copyFormating(row2, 'CBNA', dataLocation)  
             }
-
+            if(tableSize === 22 && row1Value === 32 + runningCount){
+                let temp = thcExcelFormuals('unitValue', letter)
+                let temp2 = thcExcelFormuals('unitValue', letter2)
+                row2.getCell(2).value = temp[0]
+                row2.getCell(4).value = temp2[0]
+            }
+            
+        
 
         }
+
         currentPage+=tableSize
                         
         if(tableSize === 22){
+            //FIXME: Why does it do this 
+            currentPage--; 
             reportType.mergeCells(currentPage, 2, currentPage, 3 )
             reportType.mergeCells(currentPage, 4, currentPage, 5 )
+            currentPage++; 
         }
 
         //clear the signature name  on page one 
@@ -522,12 +545,12 @@ const copyAdditonalInfo = (sheetName, reportType) => {
     return copyText; 
 }
 
-const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage) => {
+const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage, showExtraRow) => {
     
     let test = true; 
     let tableSize; 
 
-    if(test){
+    if(showExtraRow){
         tableSize = 12; 
     }else{
         tableSize = 11; 
@@ -538,6 +561,7 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
     let currentTables = 4; 
 
     let pageStart = [9,52, 92, 132, 172]
+    //let pageStart2 = [9,48, 86, 123, 160, 197] //automatic 
     let sampleStyle = reportType.getRow(9).getCell(1).style; 
     
     let totalPages = Math.floor(usedSamples/4)
@@ -602,6 +626,8 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
             reportType.getRow(22 + runningCount).hidden = true; 
             currentPage++; 
         }
+
+
         
         //console.log('Current Page: ', currentPage);
         //console.log("Running Count: ", runningCount)
@@ -682,14 +708,14 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
     }
 }
 
-const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage) => {
+const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage, showExtraRow) => {
 
     console.log("running deluxe report generation")
 
     let test = true; 
     let tableSize; 
 
-    if(test){
+    if(showExtraRow){
         tableSize = 22; 
     }else{
         tableSize = 21; 
@@ -791,6 +817,7 @@ const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, con
         }else{
             currentPage++;             
             currentPage = pasteTables('Deluxe', tableSize, runningCount, currentPage, reportType, currentTables)
+            //currentPage++; 
             currentTables+=2; 
             
             //not sure why we do this but it works lol 
@@ -940,16 +967,65 @@ const generateThcReport = async(fileLocations, clientInfo, sampleNames, sampleDa
                 
             }
 
+            let showExtraRow = false; 
             jobSamplesNumber.forEach((job,index) => {
 
+                console.log(index, job)
                 let jobLocations = {}
                 let jobCannaValues = {}
                 let counter = 3; 
 
                 let row = dataWorksheet.getRow(1)
+                let headerRow = headersWorksheet.getRow(28); 
                 row.getCell(currentCell).value = 'Sample ' + (index + 1); 
                 row = dataWorksheet.getRow(2)
                 row.getCell(currentCell).value = "(mg/g)"
+
+                if(sampleOptions[job]['unitType'] === 'moisture'){
+                    row.getCell(currentCell).value = "(mg/g)"
+                    showExtraRow = true; 
+
+                    if(sampleOptions[job]['unit'] !== ''){
+                        headerRow.getCell(2).value = `Moisture ${sampleOptions[job]['unit']}`
+                    
+                    }else {
+                        headerRow.getCell(2).value = 'Moisture (%)'
+                    }
+                
+                }
+                
+                if(sampleOptions[job]['unitType'] === 'density'){  
+                    row.getCell(currentCell).value = "(mg/ml)"
+                    
+                    showExtraRow = true; 
+
+                    if(sampleOptions[job]['unit'] !== ''){
+                        headerRow.getCell(2).value = `Density ${sampleOptions[job]['unit']}`
+                    
+                    }else {
+                        headerRow.getCell(2).value = 'Density (mg/ml)'
+                    }
+                    
+                }
+                if(sampleOptions[job]['unitType'] === 'unitMass'){
+                    row.getCell(currentCell).value = "(mg/g)"
+                    
+                    showExtraRow = true;
+                    
+                    headerRow.getCell(2).value = 'Unit Mass (mg/ml)'
+
+                }
+                //need to remove the mg/g
+                if(sampleOptions[job]['unitType'] === 'percentage'){
+                    row.getCell(currentCell).value = "(mg/g)"
+                }
+                
+                //not empty 
+                if(sampleOptions[job]['unit'] !== ''){
+                    showExtraRow = true; 
+                    row.getCell(currentCell).value = ""
+                }
+
 
                 for (var [rowValue, jobNum] of Object.entries(sampleData['desc'])){
                     if(job === jobNum){
@@ -965,6 +1041,20 @@ const generateThcReport = async(fileLocations, clientInfo, sampleNames, sampleDa
                     }
                 }
 
+                //have an if condition 
+                if(sampleOptions[job]['unitValue'] !== ''){
+                    row = dataWorksheet.getRow(22)
+                    console.log(parseInt(sampleOptions[job]['unitValue']))
+                    if(isNaN(parseInt(sampleOptions[job]['unitValue']))){
+                        row.getCell(currentCell).value = 0
+                    }else{
+                        row.getCell(currentCell).value = parseInt(sampleOptions[job]['unitValue'])
+                    }
+                   
+                }
+               
+        
+            
                 currentCell++; 
                 sampleJobData[job] = jobCannaValues
             })         
@@ -974,10 +1064,25 @@ const generateThcReport = async(fileLocations, clientInfo, sampleNames, sampleDa
             console.log('----------Table Copying--------------')
 
 
+            //maybe have an inital run that copies 
+            //pass in sample option, all good until the Unit Mass Section 
             if(sampleOptions[key].reportType === 'basic'){
-                basicReport(reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage);
+                basicReport(reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage, showExtraRow);
+
+                if(showExtraRow){
+                    console.log('trying to merge')
+                    try{
+                        reportType.mergeCells(23, 2, 23, 3 )
+                        reportType.mergeCells(23, 4, 23, 5 ) 
+                    }catch (err){
+                        console.log(err)
+                    }
+                }
+
             }else{
-                deluxeReport(reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage);
+                deluxeReport(reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage, showExtraRow);
+
+
             }
 
             await wb.xlsx.writeFile(fileLocations[key]);
