@@ -8,6 +8,8 @@ const Settings = () => {
     const [reportsPath, setReportsPath] = useState() 
     const [txtPath, setTxtPath] = useState(); 
     const [templatesPath, setTemplatesPath] = useState(); 
+    const [goodReportsPath, setGoodReportsPath] = useState();  
+    const [imagePath, setImgePath] = useState(); 
 
     //change so can be reused 
     const selectDatabasePath = async (callpack) => {
@@ -20,17 +22,8 @@ const Settings = () => {
             setReportsPath(value)
         })
     }
-    const selectTxtPath = async (filePath) => {
-        await window.api.setFilePath(filePath).then((value) => {
-            setTxtPath(value)
-        })
-    }
 
-    const selectTemplatePath = async (filePath) => {
-        await window.api.setFilePath(filePath).then((value) => {
-            setTemplatesPath(value)  
-        })
-    }
+
     //get all the paths from the start
     useEffect(() => {
         try {
@@ -40,6 +33,8 @@ const Settings = () => {
             setReportsPath(results.reportsPath)
             setTxtPath(results.txtPath)
             setTemplatesPath(results.templatesPath)
+            setGoodReportsPath(results.goodReportsPath)
+            setImgePath(results.imagePath)
         } catch (error) {
             console.log(error)
         }
@@ -73,14 +68,14 @@ const Settings = () => {
             
  
                 <Filepath 
-                    title="Images Path"
-                    setPath={selectDatabasePath}
+                    title="Images Folder Path"
+                    setPath={setFilePath}
                     path="imagePath"
-                    currentPath={'test'}
+                    currentPath={imagePath}
                 />     
 
                 <Filepath 
-                    title="Reports"
+                    title="Reports Folder Path"
                     setPath={setFilePath}
                     path={'reportsPath'}
                     currentPath={reportsPath}
@@ -88,19 +83,20 @@ const Settings = () => {
 
 
                 <Filepath 
-                    title="Good Copies Report Path"
-                    setPath={selectDatabasePath}
-                    currentPath={'test'}
+                    title="Good Copies Folder Path"
+                    setPath={setFilePath}
+                    path={'goodReportsPath'}
+                    currentPath={goodReportsPath}
                 />     
                 <Filepath 
-                    title="TXT File Path  "
-                    setPath={selectTxtPath}
+                    title="TXT File Folder Path  "
+                    setPath={setFilePath}
                     path="txtPath"
                     currentPath={txtPath}
                 />     
                 <Filepath 
-                    title="Templates File Path"
-                    setPath={selectTemplatePath}
+                    title="Templates File Folder Path"
+                    setPath={setFilePath}
                     path="templatesPath"
                     currentPath={templatesPath}
                 />     

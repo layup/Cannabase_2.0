@@ -63,7 +63,10 @@ const Jobs = () => {
           
             <Search />
 
-            <Filters />
+            {/*  <Filters /> **/}
+            <div className='bg-zinc-200 p-4 flex space-x-3 text-center'>
+                <p>Filters section coming soon! </p>
+            </div>
 
             <div className='overflow-auto h-screen'>
                 <table className='table-auto md:table-fixed w-full text-sm md:text-base'>

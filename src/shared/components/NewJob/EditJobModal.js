@@ -41,6 +41,7 @@ const EditJobModal = ({show, setCreateNewJob, jobInfo, jobTests, notes}) => {
   //load in all the set variables 
   //all the data can be passed in 
   useEffect(() => {
+    console.log(jobTests)
     setTestOptions(new Array(12).fill(false))
     setJobNumber("W" + jobInfo.job_number)
     setClientName(jobInfo.client_name)
@@ -72,24 +73,30 @@ const EditJobModal = ({show, setCreateNewJob, jobInfo, jobTests, notes}) => {
     setShowClientList(true)
   }
 
-  const handleJobNote = event => {
+  const handleJobNote = async (event) => {
     setJobNotes(event.target.value)
+    let temp = jobNumber.replace(/\D/g,'');
+    //await window.api.updateNotes(temp, jobNotes)
   }
 
   const handleTestOptions = (postion) => {
     const updatedTestsOptions = testOptions.map((item, index) => 
       index === postion ? !item : item 
     );
-
     setTestOptions(updatedTestsOptions)
+  }
+
+  const saveChanges = async () => {
+
+    let temp = jobNumber.replace(/\D/g,'');
+    await window.api.updateNotes(temp, jobNotes)
   }
 
   const HandleSubmit = async () => {
     //deal with jobnumber validation 
     //check if the job exists already 
     if(jobNumber.length !== 7 ){
-      errors.current.jobNumber = "Please Enter a valid Job Number "
-       
+      errors.current.jobNumber = "Please Enter a valid Job Number " 
     }else {
       errors.current.jobNumber = ""
     }
@@ -112,6 +119,12 @@ const EditJobModal = ({show, setCreateNewJob, jobInfo, jobTests, notes}) => {
       setDisplayError(true)
       console.log(errors.current)
       return; 
+    }else{
+
+      saveChanges();
+      setCreateNewJob(false)
+      console.log('Good Job')
+      
     }      
 
     setDisplayError(false)

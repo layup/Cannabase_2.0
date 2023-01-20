@@ -82,6 +82,13 @@ const setFilePath = (filePath) => {
 const scanReportsFolder = (jobNum) => {
     return excelManager.scanReportsFolder(jobNum)
 }
+const scanGoodCopies = (jobNum, clientName) => {
+    return excelManager.scanGoodCopies(jobNum, clientName)
+}
+
+const scanImages = (jobNum) => {
+    return excelManager.scanImages(jobNum); 
+}
 
 const openPDF = (jobNum, report ) => {
     return excelManager.openPDF(jobNum, report);
@@ -130,6 +137,8 @@ contextBridge.exposeInMainWorld("api", {
    
     setFilePath: setFilePath, 
     scanReportsFolder: scanReportsFolder, 
+    scanGoodCopies: scanGoodCopies, 
+    scanImages: scanImages, 
     openPDF: openPDF, 
     openFileXlsx: openFileXlsx,
 

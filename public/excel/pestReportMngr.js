@@ -1,7 +1,7 @@
 const Excel = require('exceljs');
 const xlsx = require('xlsx')
 const path = require('path')
-
+const fs = require('fs')
 /**
  * Copy the basic client information into the excel header sheet 
  * @param {Object} worksheet - the excel sheet (header) that client information will be copied too  
@@ -58,69 +58,152 @@ const copyClientInfo = async (worksheet, clientInfo, key) => {
 const processPestFile = (filePath) => {
     return new Promise((resolve, reject) => {
 
+        console.log("Processing Pest/Toxins File")
         const wb = xlsx.readFile(path.normalize(filePath))
         const ws = wb.Sheets[wb.SheetNames[0]];
 
         let data = xlsx.utils.sheet_to_json(ws)
         let dataRows = Object.keys(data).length 
 
-        //check the length of the DataRows 
-        //we keep on creating dataRows based on how large the size is 
+        //console.log(dataRows) //235 
+        //console.log(data)
 
-        //1 page worth = 122 and maybe do it in a recursive way, could switch up and use EXCELJS processing, 
-        //might be better sinces it's a column by column approach 
-        if(dataRows > 150){
+        //1 page worth = 122 and maybe do it in a recursive way, could switch up and use EXCELJS processing,
+        //[9-]
+        //skip the first 9 [0-8] only for page 1
+        //each consists of 112 rows  
 
-        }
-        console.log(dataRows)
-
-        data = data.slice((dataRows-1) - 112, dataRows - 1);
-        //data = data.slice(0, dataRows-1)
-    
-        let budHeader = data[2]
-        let budNames = data[1]
+        let totalSections = parseInt(dataRows/(104 + 3 + 3)) 
+        let dataSections = []
+        let budHeader = []
+        let budNames = []
         let budLocations = []
+        let samples =[]
+        let samples2 =[]
         let jobNumbers = []
-        let samples = []
+        let jobNumberSection = []
         let sampleData = {}
 
-        for (var key in budHeader) {
-            if(budHeader[key] === 'ng/g'){
-                budLocations.push(key)
-            }
-        }
-        console.log(budLocations)
-    
-        //get all the unique job numbers
-        for(var key2 in budLocations){
-            samples.push(budNames[budLocations[key2]])
-            let jobNumber = budNames[budLocations[key2]].substring(0,6)
+        if(totalSections > 1){
+            for(var i = 0; i < totalSections; i++){
 
-            if(!jobNumbers.includes(jobNumber)){
-                jobNumbers.push(jobNumber)
-            }
-        }
-    
-        for (let i = 0; i < budLocations.length; i++){
-            
-            let tempData  ={}
+                let tempData = data; 
 
-            data.forEach((item) => {
-                if((typeof(item[budLocations[i]]) !== "undefined") && (typeof(item.__EMPTY_1) !== 'undefined')){
-                    //console.log(item.__EMPTY_1, item[budLocations[i]])
-                    tempData[item.__EMPTY_1] = item[budLocations[i]]
-                    //sort as object with location and amount 
-
+                if(i !== 0){
+                    let sliceStart = ((112 * i) + 10); 
+                    let sliceEnd = sliceStart + 112; 
+                    tempData = tempData.slice(sliceStart,sliceEnd)
+                }else {
+                    tempData = tempData.slice(9, (dataRows-1)-112)
                 }
-            })
 
-            sampleData[budNames[budLocations[i]]] = tempData
+                dataSections.push(tempData)
+                budHeader.push(tempData[2])
+                budNames.push(tempData[1])
+            }
 
+            //console.log('Phase 1')
+            //console.log(dataSections)
+            //console.log(budHeader)
+            //console.log(budNames)
+
+
+        }else {
+            data = data.slice(9, dataRows-1)
+            //console.log('data1')
+            //console.log(data) 
+            dataSections.push(data)
+            budHeader.push(data[2])
+            budNames.push(data[1])
+        }
+
+        //fs.writeFileSync('test.json',JSON.stringify(data))
+        //data = data.slice(0, dataRows-1)
+        
+    
+        for(let i = 0; i < budHeader.length; i++){
+            let tempLocations = []
+
+            for (var key in budHeader[i]) {
+                if(budHeader[i][key] === 'ng/g'){
+                    tempLocations.push(key)
+                }
+            }
+            budLocations.push(tempLocations)
+
+        }
+
+        for(let i = 0; i < budLocations.length; i++){
+
+            let tempJob = []
+            let tempJobNum = []
+
+            for(var key2 in budLocations[i]){
+                tempJob.push(budNames[i][budLocations[i][key2]])
+                let sampleNum = budNames[i][budLocations[i][key2]]
+
+                let jobNumber = budNames[i][budLocations[i][key2]].substring(0,6)
+    
+                if(!jobNumbers.includes(jobNumber)){
+                    jobNumbers.push(jobNumber)
+                    
+                }
+
+                if(!tempJobNum.includes(jobNumber)){
+                    tempJobNum.push(jobNumber)
+                }
+
+
+                if(!samples2.includes(sampleNum)){
+                    samples2.push(sampleNum)
+                }
+
+            }
+
+            samples.push(tempJob)
+            jobNumberSection.push(tempJobNum)
+
+
+        }
+        console.log("Phase 2")
+        console.log(budLocations)
+        console.log(samples)
+        console.log(samples2)
+        console.log(jobNumbers)
+        console.log(jobNumberSection)
+
+        for(i = 0; i < budHeader.length; i++ ){
+            for (let j = 0; j < budLocations[i].length; j++){        
+                let tempData  = {}
+    
+                dataSections[i].forEach((item) => {
+                   
+                    if((typeof(item[budLocations[i][j]]) !== "undefined") && (typeof(item.__EMPTY_1) !== 'undefined')){
+                        //console.log(item[budLocations2[i][j]])
+                        tempData[item.__EMPTY_1] = item[budLocations[i][j]]
+                    }
+                })
+
+                //console.log(tempData)
+                let objName = budNames[i][budLocations[i][j]]
+                //console.log(objName)
+                sampleData[objName] = tempData
+
+
+
+            }
         }
         
+        console.log('done')
+        console.log(sampleData)
+        console.log(jobNumbers)
+        console.log(samples)
+
         //fs.writeFileSync('test.json',JSON.stringify(data))
 
-        resolve({jobNumbers: jobNumbers, samples: samples, sampleData: sampleData})
+        resolve({jobNumbers: jobNumbers, samples: samples2, sampleData: sampleData})
+        
+        
     }) 
 }
 
@@ -172,18 +255,32 @@ const singleCopyPestData = async (headersWorksheet, dataWorksheet, fileLocations
 const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
 
     //console.log('Coping Pestcides/Toxic Data')
+    //console.log(sampleName)
+    //console.log(sampleData)
+    //console.log(sampleNames)
+    //console.log(sampleOptions)
+
     let headerSampleName = ''; 
     let headerRow, dataRow;
     let processed = [] 
     let counter = 1; 
+    //console.log('Phase 2')
+    //console.log(clientInfo[sampleName.substring(0,6)]['sampleNames'])
 
-    for(let [key, value ] of Object.entries(clientInfo[sampleName.substring(0,6)]['sampleNames'])){
-        if(sampleOptions[key].amount === 'mult'){
-            processed.push(key)
-            headerSampleName += `${counter}) ${value}`  
-            counter++; 
+    for(let [key, value] of Object.entries(clientInfo[sampleName.substring(0,6)]['sampleNames'])){
+        try{
+            if(sampleOptions[key.toString()].amount === 'mult'){
+                processed.push(key)
+                headerSampleName += `${counter}) ${value}`  
+                counter++; 
+            } 
+        } catch (error){
+            console.log('Error with ', key)
+            console.log(error)
         }
     }
+    
+    //console.log(processed)
     
     headerRow = headersWorksheet.getRow(27) 
     headerRow.getCell(2).value = headerSampleName
@@ -204,9 +301,14 @@ const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, 
             headerRow.getCell(2).value = 'bud'
     } 
 
-    if(processed.length === 2){
+    if(processed.length > 1){
         dataRow = dataWorksheet.getRow(1)
-        dataRow.getCell(8).value = 'Sample 2'
+
+        for(let i = 1; i < processed.length; i++){
+            
+            dataRow.getCell(7 + i).value = `Sample ${1+i}`
+        }
+       
     }
     //console.log('Matching Samples:', processed)
 
@@ -220,7 +322,7 @@ const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, 
                 dataRow =  dataWorksheet.getRow(locaiton)
                 
                 dataRow.getCell((7 + j)).value = parseInt(value2)
-                dataRow.commit()
+                //dataRow.commit()
                
             }
         }
@@ -237,14 +339,18 @@ const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, 
 const genereatePestReport = async (fileLocations, clientInfo, sampleNames, sampleData, sampleOptions) => { 
 
     console.log('Copying Pesticides Data')
+    console.log(sampleOptions)
 
     let completedReports = [] 
 
     for(let [key, value] of Object.entries(sampleOptions)){
+        //console.log('Phase 1')
         //console.log(key,value)
         //console.log('completed Reports:' , completedReports)
         //if hasn't looped yet 
         if(!completedReports.includes(key)){
+
+
 
             key = String(key)
             //if single of multi 

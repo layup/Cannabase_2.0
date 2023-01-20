@@ -78,7 +78,7 @@ const Clients = () => {
                 />
             </div>
 
-            <div className='bg-zinc-200 p-2 py-5 capitalize flex space-x-2'>
+            <div className='bg-zinc-200 p-4 capitalize flex space-x-2'>
                 <p>total clients: { totalClients && totalClients.length} </p>
                 <p>Filter: {filter === "All" ? "None": filter}</p>
             

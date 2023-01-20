@@ -1,6 +1,7 @@
 const {shell } = require('electron')
 const Store = require('electron-store');
 const fs = require('fs');
+const url = require('url');
 const path = require('path')
 var readline = require('readline');
 
@@ -42,6 +43,13 @@ exports.scanReportsFolder = (jobNum) => {
     })
 }
 
+exports.scanGoodCopies = (jobNumber, clientName) => {
+
+    let reportDir = store.get('goodReportsPath'); 
+    
+
+}
+
 
 /** 
  * Opens the PDF on the local machines default .pdf reader 
@@ -65,6 +73,32 @@ exports.editFile = (jobNum, report) => {
 
     shell.openExternal('file://' + path.join(currentPath, report))
 }
+
+
+
+exports.scanImages = (jobNum) => {
+
+    return new Promise((resolve, reject) => {
+        let imageDir = store.get('imagePath')    
+
+        fs.readdir(path.normalize(imageDir),  (err, files) => {
+            let images = files.filter(item => item.includes(jobNum))
+
+            let imagesPath = []
+
+            images.forEach((image) => {
+                imagesPath.push('file://' + path.join(imageDir, image))
+            })
+
+            resolve(imagesPath)
+           
+           
+        });
+
+
+    })
+}
+
 
 /**
  * Generate the folder and excel file from existing excel template 
@@ -109,7 +143,7 @@ const copyTemplate = async (jobNumberSample, reportType, option) => {
 
     const templateNames = {
         thc: 'cannabis_template.xlsx', 
-        pest: 'particles_template.xlsx', 
+        pest: 'pesticides_template.xlsx', 
         toxic: 'toxins_template.xlsx'
     }
 
@@ -166,6 +200,8 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
         }
 
         if(reportType === 'pesticides'){
+            //do something checky here so if it has multiple of the document we will create 2 
+            
             await genereatePestReport(fileLocations, clientInfo, sampleNames, sampleData, sampleOptions)
             
         }
@@ -204,7 +240,7 @@ exports.processExcelFile = (reportType, filePath) => {
  */
 exports.processTxt = async (jobNumbers) => {
     console.log("-----------Processing Text-------------")
-
+    console.log(jobNumbers)
     const txtPath = path.normalize(store.get('txtPath'))
     
     let txtNames = []

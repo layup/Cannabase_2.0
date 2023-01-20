@@ -32,11 +32,12 @@ const CreateReports = (props) => {
         async function processExcelFile(){
             await window.api.processExcelFile(location.state.selectReport, location.state.filePath).then(({jobNumbers, samples, sampleData}) => {
                 
-                console.log('Processing Excel File')
+                console.log('Processing Excel File 1')
                 console.log(jobNumbers)
                 console.log(samples)
                 console.log(sampleData)
                 console.log('---------Done--------')
+
                 
                 setJobNumbers(jobNumbers)
                 setSamples(samples)
@@ -83,8 +84,8 @@ const CreateReports = (props) => {
                         setSampleOptions((prevState) => ({
                             ...prevState, 
                             [sample]:{
-                                unitType:'moisture',
-                                reportType: 'deluxe',
+                                unitType:'unitMass',
+                                reportType: 'basic',
                                 unit: '', 
                                 unitValue: '', 
                                 amount: 'mult', 

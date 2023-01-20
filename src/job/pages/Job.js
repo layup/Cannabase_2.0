@@ -19,11 +19,12 @@ const Job = () => {
     let id = useParams()
     const navigate = useNavigate(); 
 
-
     //const [loading, setLoading] = useState(true)
     const [jobInfo, setJobInfo] = useState(); 
     const [jobNotes, setJobNotes] = useState(); 
     const [jobTests, setjobTests] = useState();     
+    const [jobImages, setJobImages] = useState();
+    const [jobImagePath, setJobImagePath] = useState(); 
     const [statusModal, setStatusModal] = useState(false); 
     const [editJobModal, setEditJobModal] = useState(false); 
     const [deleteJobModal, setDeleteJobModal] = useState(false); 
@@ -53,18 +54,47 @@ const Job = () => {
             })
         }
 
-        async function temp(){
-            await window.api.temp().then(() => {
-                console.log('done')
-            }); 
+        async function scanForImges(){
+            await window.api.scanImages(id.jobNum).then((data) => {
+                console.log(data)
+                setJobImages(data); 
+              
+            })
         }
-        
+
         getJobInfoData()
         getTestData();
         scanReportsFolder(); 
         getJobNotes();
-        temp();
+        scanForImges();
+
     }, [id])
+
+    useEffect(() => {
+        async function getJobInfoData(){
+            await window.api.getJobInfo(id.jobNum).then((data) => {
+                setJobInfo(data);
+            }); 
+        }
+        async function getTestData(){
+            await window.api.getTests(id.jobNum).then((tests) =>{
+                setjobTests(tests)       
+            })
+        } 
+                async function getJobNotes(){
+            await window.api.getJobNotes(id.jobNum).then((notes) => {
+                if(notes){
+                    setJobNotes(notes.note)
+                }
+            })
+        }
+
+
+        getJobInfoData()
+        getTestData();
+        getJobNotes();
+
+    }, [editJobModal])
 
     const openPDF = async (report) => {
         await window.api.openPDF(id.jobNum, report)
@@ -178,19 +208,24 @@ const Job = () => {
                         <h1 className='images w-full text-center p-3 bg-white'>
                             Images
                         </h1> 
-                        <div className='overflow-y-auto w-full p-2'>                        
-                            <div className='bg-white my-2 p-1'>
-                                <img src={test_image} classname='object-none h-48 w-96'  alt='weed'/>
-                                <p className='text-center p-2'>W12913</p>
-                            </div>
-                            <div className='bg-white my-2'>
-                                <img src={test_image} classname='' alt='weed'/>
-                                <p className='text-center py-2'>W12913</p>
-                            </div>
-                            <div className='bg-white my-2'>
-                                <img src={test_image} classname='' alt='weed'/>
-                                <p className='text-center py-2'>W12913</p>
-                            </div>
+                        <div className='overflow-y-auto space-y-4'>
+                            {(jobImages && jobImages.length !== 0) ? (jobImages.map((image, index) => {
+                                return (
+                                    <div className=''>
+                                        <img src={image} alt={"cannabis " + index} className='object-cover h-80 w-60'/> 
+                                        <div className='text-white text-center p-4 bg-emerald-800'>
+                                            <p>{id.jobNum + "-" + (index+1) + ".jpg"}</p>
+                                        
+                                        </div>
+                                    </div>
+                                )}))
+                                : 
+                                <div className='p-10'>
+                                    <p>No Images Scanned </p>
+                                </div>
+
+                            }
+
                         </div>
 
                         
