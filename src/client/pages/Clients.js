@@ -4,6 +4,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Link } from 'react-router-dom';
 
 import {useNavigate} from 'react-router-dom';
+import Search from '../../shared/components/Navigation/Search';
+import ClientSearch from '../components/ClientSearch';
 
 const Clients = () => {
     const alphabet = ['All', "#","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
@@ -66,17 +68,7 @@ const Clients = () => {
         <div 
             className=' flex flex-col h-screen max-w-screen  lg:w-screen mt-16 md:mt-0 md:ml-16 lg:ml-56'
         >  
-            <div className='bg-emerald-700 p-4 flex'>
-                <div className='p-2 bg-emerald-800'>
-                    <SearchIcon className='text-white bg-emerald-800'/>
-                </div>
-
-                <input 
-                    type='search' 
-                    placeholder='Search Client Name' 
-                    className='w-full p-1 bg-emerald-800 text-white border-transparent focus:border-transparent focus:ring-0 outline-none'
-                />
-            </div>
+            <ClientSearch />
 
             <div className='bg-zinc-200 p-4 capitalize flex space-x-2'>
                 <p>total clients: { totalClients && totalClients.length} </p>

@@ -1,26 +1,26 @@
 import React, { useState } from 'react'
 
 import SearchIcon from '@mui/icons-material/Search';
-import SearchResults from './SearchResult';
+import SearchResults from '../../shared/components/Navigation/SearchResult';
+import ClientSearchResults from './ClientSearchResults';
 
-
-const Search = () => {
-
+const ClientSearch = () => {
     const [input, setInput] = useState("")
     const [bestMatches, setBestMatches] = useState([])
 
     const clear = () => {
         setInput("")
         setBestMatches([])
-     
+        
     }
 
     
     const updateBestMaches = async () => {       
         try {
             if(input) {
-                const searchResults = await window.api.searchJobs(input.replace(/[^0-9]/g, ''));
+                const searchResults = await window.api.clientSearch(input)
                 setBestMatches(searchResults)
+                console.log(searchResults)
                 //console.log(input);
                 //console.log(bestMatches)
 
@@ -41,35 +41,26 @@ const Search = () => {
             <input 
                 type='text' 
                 value={input}
-                placeholder='Search Job Number' 
+                placeholder='Search Client Name' 
                 className='w-full p-1 bg-emerald-800 text-white border-transparent focus:border-transparent focus:ring-0 outline-none'
                 onChange={(event) => {
                     setInput(event.target.value)
-
                 }}
-                /*
-                onKeyPress={(event) => {
-
-                    if(event.key === 'Enter') {
-                        updateBestMaches(); 
-                    }
-                }} 
-                */
                 onKeyUp={(event) => {
-
-                   
                     updateBestMaches(); 
                     
                 }}
             />
 
+            
             {(input && bestMatches.length > 0) ? 
                 (
-                    <SearchResults results={bestMatches} clear={clear}/>
+                    <ClientSearchResults results={bestMatches} clear={clear} />
                 ):  null
             }
     </div>
     )
+
 }
 
-export default Search
+export default ClientSearch

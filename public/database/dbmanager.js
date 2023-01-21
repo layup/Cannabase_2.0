@@ -26,8 +26,15 @@ const db = new sqlite3.Database(pathExists(dbPath), sqlite3.OPEN_READWRITE | sql
 
     }else {
       console.log('Connected to the in-memory SQLite database');
+      
 
     }
+});
+
+db.serialize(function () {
+  db.all("select name from sqlite_master where type='table'", function (err, tables) {
+      console.log(tables);
+  });
 });
 
 exports.db = db; 

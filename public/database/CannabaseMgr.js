@@ -402,6 +402,24 @@ exports.clientSearch = (clientName) => {
         })
     })
 }
+exports.searchClient = (clientName) => {
+
+    return new Promise((resolve, reject) => {
+        const sql = `SELECT * FROM cannabase_jobs WHERE client_name LIKE '${clientName}%' LIMIT 50;`  
+        console.log('Running searchJobs(): ', sql);
+        
+         db.all(sql, (err,row) => {
+            if(err) {
+                console.error(err.message)
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    }) 
+}
+
+
 //edit this 
 
 exports.clientExists = (clientName) => {
@@ -424,7 +442,7 @@ exports.clientExists = (clientName) => {
 
 exports.getClientJobs = (clientName) => {
     return new Promise((resolve, reject) => {
-        const SQL = `SELECT * FROM cannabase_jobs WHERE client_name = '${clientName}'`
+        const SQL = `SELECT * FROM cannabase_jobs WHERE client_name = '${clientName}' ORDER BY job_number DESC`
 
         db.all(SQL, (err,row) => {
             if(err) {

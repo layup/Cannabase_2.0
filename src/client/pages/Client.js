@@ -7,7 +7,6 @@ import JobsTableContent from '../../shared/components/Table/JobsTableContent';
 import Search from '../../shared/components/Navigation/Search';
 
 const Client = () => {
-
     let data = useLocation()
 
     const [jobs, setJobs] = useState(); 

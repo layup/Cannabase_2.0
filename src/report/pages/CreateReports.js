@@ -38,7 +38,6 @@ const CreateReports = (props) => {
                 console.log(sampleData)
                 console.log('---------Done--------')
 
-                
                 setJobNumbers(jobNumbers)
                 setSamples(samples)
                 setSampleData(sampleData)
@@ -167,12 +166,11 @@ const CreateReports = (props) => {
 
                     }
                 }
+
                 console.log(clientInfo[sample.substring(0,6)]['sampleNames'][sample])
                 if(clientInfo[sample.substring(0,6)]['sampleNames'][sample] === ''){
                     console.log(`${sample} Plese enter a job sample name`)
                 }
-
-
             })
 
         }
@@ -184,9 +182,8 @@ const CreateReports = (props) => {
         setTimeout(() => {
             console.log('reports are done ')
             setIsLoading(false)
-            //navigate('/reports')
+            navigate('/reports')
         }, 3000)
-           
         
     }
 

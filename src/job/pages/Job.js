@@ -34,7 +34,7 @@ const Job = () => {
         async function getJobInfoData(){
             await window.api.getJobInfo(id.jobNum).then((data) => {
                 setJobInfo(data);
-            }); 
+            })
         }
         async function getTestData(){
             await window.api.getTests(id.jobNum).then((tests) =>{
@@ -62,13 +62,25 @@ const Job = () => {
             })
         }
 
+        //not going to work without the 
+        async function scanGoodCopies(){
+            await window.api.scanGoodCopies(id.jobNum).then((data) => {
+                console.log(data)
+    
+            })
+        }
+
+
+
         getJobInfoData()
         getTestData();
         scanReportsFolder(); 
         getJobNotes();
+        scanGoodCopies(); 
         scanForImges();
 
     }, [id])
+    
 
     useEffect(() => {
         async function getJobInfoData(){

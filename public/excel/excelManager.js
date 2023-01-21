@@ -46,6 +46,20 @@ exports.scanReportsFolder = (jobNum) => {
 exports.scanGoodCopies = (jobNumber, clientName) => {
 
     let reportDir = store.get('goodReportsPath'); 
+    console.log('scanning for good copies')
+    console.log(jobNumber)
+
+    return new Promise((resolve, reject) => {
+        
+
+        fs.readdir(path.normalize(reportDir),  (err, files) => {
+            console.log(files)
+           
+           
+        });
+
+
+    })
     
 
 }

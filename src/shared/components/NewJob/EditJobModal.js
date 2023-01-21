@@ -177,6 +177,7 @@ const EditJobModal = ({show, setCreateNewJob, jobInfo, jobTests, notes}) => {
         </button>
       </div> 
     } 
+    
     <div className='p-4 flex w-full'>
 
         <div className='w-full p-2 space-y-1 [&>h2]:font-medium'>
