@@ -12,7 +12,7 @@ const PestSamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, 
             <th>Sample Name</th>
             <th>Sample Type</th>
             <th>Single/Multi</th>
-            <th>Toxins?</th>
+            <th>Toxins</th>
             <th>Sample Name</th>
           </tr>
         </thead>
@@ -33,7 +33,7 @@ const PestSamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, 
                   <option value="bud">Bud</option>
                   <option value="oil">Oil</option>
                   <option value="paper">Paper</option>
-                  <option value="other">Other</option>
+
                 </select>
               </td>
               <td>
@@ -52,7 +52,7 @@ const PestSamplesSection = ({clientInfo, updateSampleName, updateSampleOptions, 
                   className='w-5/6 p-1 bg-zinc-200 rounded-md'
                   onChange={(e) => updateSampleOptions(sampleName, 'reportType',e.target.value)}
                 >
-                  <option value="toxic">Toxic</option>
+                  <option value="toxins">Toxins</option>
                   <option value="pest">Pesticides</option>
                   <option value="both">Both</option>
                 </select>

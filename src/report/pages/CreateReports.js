@@ -83,8 +83,8 @@ const CreateReports = (props) => {
                         setSampleOptions((prevState) => ({
                             ...prevState, 
                             [sample]:{
-                                unitType:'unitMass',
-                                reportType: 'basic',
+                                unitType:'moisture',
+                                reportType: 'deluxe',
                                 unit: '', 
                                 unitValue: '', 
                                 amount: 'mult', 
@@ -182,7 +182,7 @@ const CreateReports = (props) => {
         setTimeout(() => {
             console.log('reports are done ')
             setIsLoading(false)
-            navigate('/reports')
+            //navigate('/reports')
         }, 3000)
         
     }

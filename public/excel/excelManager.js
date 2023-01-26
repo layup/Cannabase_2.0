@@ -158,18 +158,18 @@ const copyTemplate = async (jobNumberSample, reportType, option) => {
     const templateNames = {
         thc: 'cannabis_template.xlsx', 
         pest: 'pesticides_template.xlsx', 
-        toxic: 'toxins_template.xlsx'
+        toxins: 'toxins_template.xlsx'
     }
 
     let pestTemplate = path.join(templatesPath, templateNames['pest']) 
-    let toxicTemplate = path.join(templatesPath, templateNames['toxic']) 
+    let toxinsTemplate = path.join(templatesPath, templateNames['toxins']) 
     let thcTemplate = path.join(templatesPath, templateNames['thc']) 
 
     if(reportType === 'both'){
-        let toxicFileLocations = await generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate, option) 
+        let toxinsFileLocations = await generateFileNames(jobNumberSample, '_Toxins_report.xlsx', toxinsTemplate, option) 
         let pestFileLocations =  await generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate, option )
 
-        return ( ({[jobNumberSample]: [toxicFileLocations, pestFileLocations]}))
+        return ( ({[jobNumberSample]: [toxinsFileLocations, pestFileLocations]}))
             
     }
 
@@ -178,8 +178,8 @@ const copyTemplate = async (jobNumberSample, reportType, option) => {
         return (generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate, option))
     }
 
-    if(reportType === 'toxic'){
-            return ((generateFileNames(jobNumberSample, '_Toxic_report.xlsx', toxicTemplate, option)))
+    if(reportType === 'toxins'){
+            return ((generateFileNames(jobNumberSample, '_Toxins_report.xlsx', toxinsTemplate, option)))
     }
 
     if(reportType === 'basic' || reportType === 'deluxe'){
@@ -205,8 +205,17 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
 
         let fileLocations ={}
 
+        //if there are mutluple pest files we generate 
+        //check client info if there are two things 
+        
+
+
         for(let key in sampleOptions){
+            console.log('test:', key)
             if(sampleOptions.hasOwnProperty(key)){
+
+                //if there are multiple pest samples 
+
                 let tempObject =  await copyTemplate(key, sampleOptions[key]['reportType'], sampleOptions[key].amount)
                 fileLocations[key] = tempObject[key]
                 

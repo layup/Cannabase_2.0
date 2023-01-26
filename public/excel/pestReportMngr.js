@@ -11,9 +11,6 @@ const fs = require('fs')
 
 const copyClientInfo = async (worksheet, clientInfo, key) => {
 
-    //console.log('Copying Client Information: ', key)
-    //console.log(clientInfo[key] )
-
     var row = worksheet.getRow(2)
     row.getCell(2).value = clientInfo[key].clientName
     row = worksheet.getRow(3)
@@ -44,7 +41,6 @@ const copyClientInfo = async (worksheet, clientInfo, key) => {
     row.getCell(2).value = clientInfo[key].recvTemp
     row = worksheet.getRow(16)
     row.getCell(2).value = clientInfo[key].paymentInfo
-
     await row.commit(); 
 }
 
@@ -102,12 +98,6 @@ const processPestFile = (filePath) => {
                 budNames.push(tempData[1])
             }
 
-            //console.log('Phase 1')
-            //console.log(dataSections)
-            //console.log(budHeader)
-            //console.log(budNames)
-
-
         }else {
             data = data.slice(9, dataRows-1)
             //console.log('data1')
@@ -119,7 +109,6 @@ const processPestFile = (filePath) => {
 
         //fs.writeFileSync('test.json',JSON.stringify(data))
         //data = data.slice(0, dataRows-1)
-        
     
         for(let i = 0; i < budHeader.length; i++){
             let tempLocations = []
@@ -189,8 +178,6 @@ const processPestFile = (filePath) => {
                 //console.log(objName)
                 sampleData[objName] = tempData
 
-
-
             }
         }
         
@@ -208,12 +195,100 @@ const processPestFile = (filePath) => {
 }
 
 
+const copyFooter = (sheetName, reportType ) => {
+    let copyText = {}
+    let currentRow 
+
+    if(reportType === 'toxins'){
+  
+        for(let i = 0; i < 23; i++){
+
+            currentRow = 20 + i; 
+            let row = sheetName.getRow(currentRow)
+        
+            let temp = []
+    
+            //needto also add the rows into play playboy 
+            row.eachCell({includeEmpty: true}, (cell, colNum) => {
+                temp.push([
+                    cell.value, cell.style
+                ])                
+            })
+    
+            copyText[currentRow] = temp; 
+        }
+
+    }else{
+        for(let i = 0; i < 14; i++){
+
+            currentRow = 128 + i; 
+            let row = sheetName.getRow(currentRow)
+        
+            let temp = []
+    
+            //needto also add the rows into play playboy 
+            row.eachCell({includeEmpty: true}, (cell, colNum) => {
+                temp.push([
+                    cell.value, cell.style
+                ])                        
+            })
+    
+            copyText[currentRow] = temp; 
+        }
+        
+    } 
+
+    return copyText; 
+}
+
+const pasteFooter = (sheetName, copyText, currentRow) => {
+
+    for(let [key, value] of Object.entries(copyText)){
+
+        currentRow++ 
+
+        let row = sheetName.getRow(currentRow)
+
+        for(var l = 0; l < value.length; l++){
+            row.getCell(l+1).value = value[l][0] 
+            row.getCell(l+1).style = value[l][1] 
+        }
+    }
+}
+
+const processToxins = () => {
+
+    let continuedNextPage = {
+        'richText': [
+            {'font': {'bold':true, 'color':{'theme': 1}, 'size': 11, name: 'CMU Serif'}, 'text': 'Contiuned on next page...'} 
+        ]
+    }
 
 
 
-const singleCopyPestData = async (headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
+}
+
+const processPesticdes = () => {
+
+}
+
+
+const copyToxinTable = () => {
+
+}
+
+const pasteToxinTable = () => {
+
+}
+
+
+const singleCopyPestData = async (workbook, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
 
     //console.log('Coping Pestcides/Toxic Data')
+
+    let headersWorksheet = workbook.getWorksheet('Headers'); 
+    let dataWorksheet = workbook.getWorksheet('Data')
+    let report = workbook.getWorksheet(1)
 
     let headerRow, dataRow; 
     
@@ -252,21 +327,29 @@ const singleCopyPestData = async (headersWorksheet, dataWorksheet, fileLocations
 }
 
 //account for more then two, if more then that we can copy and paste into given file type 
-const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
+const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
 
-    //console.log('Coping Pestcides/Toxic Data')
-    //console.log(sampleName)
+    console.log('-----Multi Pest/Toxins Copy-----')
+    console.log(sampleName)
     //console.log(sampleData)
+    //console.log(fileLocations)
     //console.log(sampleNames)
     //console.log(sampleOptions)
+    //console.log(options)
+    console.log(clientInfo)
+    console.log('--------------------------------')
 
+    let reportType = options['reportType']
     let headerSampleName = ''; 
     let headerRow, dataRow;
     let processed = [] 
     let counter = 1; 
-    //console.log('Phase 2')
-    //console.log(clientInfo[sampleName.substring(0,6)]['sampleNames'])
 
+    let headersWorksheet = workbook.getWorksheet('Headers'); 
+    let dataWorksheet = workbook.getWorksheet('Data')
+    let reportSheet = workbook.getWorksheet(1)
+
+    //setting sample name
     for(let [key, value] of Object.entries(clientInfo[sampleName.substring(0,6)]['sampleNames'])){
         try{
             if(sampleOptions[key.toString()].amount === 'mult'){
@@ -280,14 +363,18 @@ const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, 
         }
     }
     
+    console.log('Sample Name: ', headerSampleName)
     //console.log(processed)
     
+    //sample Name 
     headerRow = headersWorksheet.getRow(27) 
     headerRow.getCell(2).value = headerSampleName
 
+    //SampleType 
     headerRow = headersWorksheet.getRow(28)
     headerRow.getCell(2).value = options.sampleType 
-
+    
+    //LOQ Tyupe 
     headerRow = headersWorksheet.getRow(30)
 
     switch(options.sampleType) {
@@ -301,38 +388,51 @@ const multiCopyPestData = async(headersWorksheet, dataWorksheet, fileLocations, 
             headerRow.getCell(2).value = 'bud'
     } 
 
+    //setting up sample name, will need to redo 
     if(processed.length > 1){
         dataRow = dataWorksheet.getRow(1)
-
         for(let i = 1; i < processed.length; i++){
-            
             dataRow.getCell(7 + i).value = `Sample ${1+i}`
         }
-       
     }
-    //console.log('Matching Samples:', processed)
 
+    console.log('Matching Samples:', processed)
+
+    //copying data 
     for(let j = 0; j < processed.length; j++){ 
-
         if(Object.keys(sampleData[processed[j]])){
-            
             for(const [key2, value2] of Object.entries(sampleData[processed[j]])){
                 let locaiton = (parseInt(key2) + 1)
                 
                 dataRow =  dataWorksheet.getRow(locaiton)
-                
                 dataRow.getCell((7 + j)).value = parseInt(value2)
-                //dataRow.commit()
-               
+
             }
         }
+    }
+
+
+    let copyText = copyFooter(reportSheet, reportType)
+    //pasteFooter(reportSheet, copyText, 149)
+
+
+    if(reportType === 'both'){
 
     }
+
+    if(reportType === 'pest'){
+        
+    }
+
+    if(reportType === 'toxins'){
+
+    }
+
+
     
     return processed
 
 }
-
 
 
 //void function, should probably try and split it out among different things 
@@ -340,60 +440,62 @@ const genereatePestReport = async (fileLocations, clientInfo, sampleNames, sampl
 
     console.log('Copying Pesticides Data')
     console.log(sampleOptions)
-
+    console.log(clientInfo)
+    console.log(fileLocations)
+    console.log(sampleNames)
+    console.log(sampleData)
+    console.log('----------------------')
     let completedReports = [] 
 
     for(let [key, value] of Object.entries(sampleOptions)){
         //console.log('Phase 1')
         //console.log(key,value)
-        //console.log('completed Reports:' , completedReports)
-        //if hasn't looped yet 
+        console.log('completed Reports:' , completedReports)
+
         if(!completedReports.includes(key)){
 
-
-
             key = String(key)
+            let jobNumber = key.substring(0,6)
+
             //if single of multi 
             if(value['amount'] === 'single'){
                 completedReports.push(key)
 
                 //if both isntead of toxic or pest 
-                if(value['toxins'] === 'both'){
+                if(value['reportType'] === 'both'){
 
                     //loop throught the pest and toxins 
                     for(let i = 0; i < fileLocations[key].length; i++){
                         const  currentPath = fileLocations[key][i][key] 
 
-                        let wb = new Excel.Workbook(); 
+                        let wb = new Excel.Workbook(); //shared in each of them 
                         await wb.xlsx.readFile(currentPath)
 
                         let headersWorksheet = wb.getWorksheet('Headers'); 
-                        let dataWorksheet = wb.getWorksheet('Data')
 
-                        await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
-                        await singleCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                        await copyClientInfo(headersWorksheet, clientInfo, jobNumber)
+                        await singleCopyPestData(wb, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
                         await wb.xlsx.writeFile(currentPath);
 
                     } 
 
+                //Toxins or Pests 
                 }else{
 
                     let wb = new Excel.Workbook(); 
                     await wb.xlsx.readFile(fileLocations[key])
 
                     let headersWorksheet = wb.getWorksheet('Headers'); 
-                    let dataWorksheet = wb.getWorksheet('Data')
 
-                    await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
-                    await singleCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                    await copyClientInfo(headersWorksheet, clientInfo, jobNumber)
+                    await singleCopyPestData(wb, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
                     await wb.xlsx.writeFile(fileLocations[key]);
 
                 }
 
             }else{ 
                 //while this can push multiple keys onto the complete reports page 
-                if(value['toxins'] === 'both'){
-
+                if(value['reportType'] === 'both'){
                     for(let i = 0; i < fileLocations[key].length; i++){
                         const  currentPath = fileLocations[key][i][key] 
 
@@ -401,27 +503,26 @@ const genereatePestReport = async (fileLocations, clientInfo, sampleNames, sampl
                         await wb.xlsx.readFile(currentPath)
 
                         let headersWorksheet = wb.getWorksheet('Headers'); 
-                        let dataWorksheet = wb.getWorksheet('Data')
 
-                        await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+                        await copyClientInfo(headersWorksheet, clientInfo, jobNumber)
 
-                        let completed = await multiCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                        let completed = await multiCopyPestData(wb, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
                         completedReports = completedReports.concat(completed) 
 
                         await wb.xlsx.writeFile(currentPath);
                     }
 
+                //Toxins or Pests 
                 }else {
                     
                     let wb = new Excel.Workbook(); 
                     await wb.xlsx.readFile(fileLocations[key])
 
                     let headersWorksheet = wb.getWorksheet('Headers'); 
-                    let dataWorksheet = wb.getWorksheet('Data')
 
-                    await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+                    await copyClientInfo(headersWorksheet, clientInfo, jobNumber)
 
-                    let completed = await multiCopyPestData(headersWorksheet, dataWorksheet, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                    let completed = await multiCopyPestData(wb, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
                     completedReports = completedReports.concat(completed) 
 
                     await wb.xlsx.writeFile(fileLocations[key]);

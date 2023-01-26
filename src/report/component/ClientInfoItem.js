@@ -1,12 +1,14 @@
 import React from 'react'
 
 const ClientInfoItem = ({title, clientInfo, keyName, onChange}) => {
+
     return (
         <tr className=' text-left border-y-1'>
         <th scope="row" className='font-medium p-2 text-xs'>
             {title}
         </th>
         {clientInfo && Object.keys(clientInfo).map((jobNum) => {
+
             return (
                 <td className=' p-1' key={jobNum}>
                     <input 

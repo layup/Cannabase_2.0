@@ -529,6 +529,7 @@ const pasteTables = (packageType, tableSize, runningCount, currentPage, reportTy
 
             let row = reportType.getRow(row1Value); 
             let row2 = reportType.getRow(row2Value); 
+           
             row2.height = row.height
 
             row.eachCell({includeEmpty: true},(cell, colNum) => {
@@ -702,7 +703,8 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
     //starting at E
     let currentTables = 4; 
 
-    let pageStart = [9,52, 92, 132, 172]
+    //let pageStart = [9,52, 92, 132, 172]
+    let pageStart = [9, 55, 98, 141, 184]
     //let pageStart2 = [9,48, 86, 123, 160, 197] //automatic 
     let sampleStyle = reportType.getRow(9).getCell(1).style; 
     
@@ -749,6 +751,7 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
             let row = reportType.getRow(currentPage); 
             row.getCell(1).style = sampleStyle 
             row.getCell(1).value = value2[0]
+            row.height = 16; 
         }                      
         //adds border and set height 
         if(parseInt(key2) > 0){
@@ -756,7 +759,7 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
             let temp = (currentPage+1); 
             let row3 = reportType.getRow(temp);
         
-            for(let i = 1; i< 8; i++){ 
+            for(let i = 1; i< 9; i++){ 
                 row3.getCell(i).border = {top: {style: 'thin'}}
             }
             reportType.getRow(temp).height = 8; 
@@ -857,10 +860,13 @@ const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, con
     let test = true; 
     let tableSize; 
 
+
     if(showExtraRow){
         tableSize = 22; 
+     
     }else{
         tableSize = 21; 
+    
     }
 
     let runningCount = 0;
@@ -869,8 +875,10 @@ const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, con
     let currentTables = 4; 
 
     //let pageStart = [9,50, 89, 128, 167, 206, 245, 284, 323, 362]
-    let pageStart = [9,50, 92, 133, 173, 212, 251, 290, 329, 368]
+    //let pageStart = [9,50, 92, 133, 173, 212, 251, 290, 329, 368]
+    let pageStart = [9,53, 97, 141, 185, 229, 273, 317, 361, 405, 449, 493]
     let sampleStyle = reportType.getRow(9).getCell(1).style; 
+    console.log('sampleStyle', sampleStyle)
     
     let totalPages = Math.floor(usedSamples/2)
     //let remainder = usedSamples % 2; 
@@ -908,9 +916,11 @@ const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, con
 
         }else{
             //normal just copies the information  
+            console.log('page secret: ', currentPage)
             let row = reportType.getRow(currentPage); 
             row.getCell(1).style = sampleStyle 
             row.getCell(1).value = value2[0]
+            row.height = 16; 
             
         }                      
         //adds border and set height 
@@ -918,7 +928,7 @@ const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, con
             let temp = (currentPage+1); 
             let row3 = reportType.getRow(temp);
         
-            for(let i = 1; i< 8; i++){ 
+            for(let i = 1; i< 9; i++){ 
                 row3.getCell(i).border = {top: {style: 'thin'}}
             }
             reportType.getRow(temp).height = 8; 
@@ -926,6 +936,7 @@ const deluxeReport = (reportType, usedSamples, reportSampleHeader, copyText, con
 
         currentPage++;
 
+        
         if(tableSize === 21 && parseInt(key2) === 0){
             reportType.getRow(32 + runningCount).hidden = true; 
             currentPage++; 
