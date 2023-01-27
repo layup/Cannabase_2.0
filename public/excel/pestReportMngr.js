@@ -256,7 +256,57 @@ const pasteFooter = (sheetName, copyText, currentRow) => {
     }
 }
 
-const processToxins = () => {
+
+//max total of 3 tables (6 samples a page)
+//include sample names with each section of the toxin reports 
+
+const processToxins = (workbook, samples, sampleNames) => {
+
+    let continuedNextPage = {
+        'richText': [
+            {'font': {'bold':true, 'color':{'theme': 1}, 'size': 11, name: 'CMU Serif'}, 'text': 'Contiuned on next page...'} 
+        ]
+    }
+
+    let tableSize = 8 
+    let pageStarts = [50,90,130]
+    let totalSamples = samples.length 
+
+    console.log("----- PROCESSING TOXINS ------")
+    console.log('samples: ', samples)
+    console.log('total samples: ', totalSamples)
+    console.log("sample names: ", sampleNames)
+    console.log("------------------------------")
+
+
+    //would have 8 if statements or if I can come up with a recursive method 
+    //longterm for up to an unlimtaed amount of things but am feeling kinda lazy 
+    if(totalSamples === 2){
+        return; 
+    }
+
+    //clear the page so it becomes empty for tables insertions 
+        
+
+
+    if(totalSamples === 3 || totalSamples === 4){
+
+    }
+    
+
+    //if there are 3-4 
+
+
+
+    //if there a 9-10 samples do a paste 
+
+
+
+
+
+}
+
+const processPesticdes = () => {
 
     let continuedNextPage = {
         'richText': [
@@ -265,10 +315,6 @@ const processToxins = () => {
     }
 
 
-
-}
-
-const processPesticdes = () => {
 
 }
 
@@ -327,14 +373,14 @@ const singleCopyPestData = async (workbook, fileLocations, clientInfo, sampleNam
 }
 
 //account for more then two, if more then that we can copy and paste into given file type 
-const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, sampleName, options) => {
+const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbers, sampleOptions, sampleData, sampleName, options) => {
 
     console.log('-----Multi Pest/Toxins Copy-----')
     console.log(sampleName)
     //console.log(sampleData)
     //console.log(fileLocations)
-    //console.log(sampleNames)
-    //console.log(sampleOptions)
+    console.log(sampleNumbers)
+    console.log(sampleOptions)
     //console.log(options)
     console.log(clientInfo)
     console.log('--------------------------------')
@@ -343,6 +389,7 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames
     let headerSampleName = ''; 
     let headerRow, dataRow;
     let processed = [] 
+    let sampleNames = {}
     let counter = 1; 
 
     let headersWorksheet = workbook.getWorksheet('Headers'); 
@@ -354,6 +401,7 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames
         try{
             if(sampleOptions[key.toString()].amount === 'mult'){
                 processed.push(key)
+                sampleNames[key] = {key: value} 
                 headerSampleName += `${counter}) ${value}`  
                 counter++; 
             } 
@@ -363,7 +411,8 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames
         }
     }
     
-    console.log('Sample Name: ', headerSampleName)
+    console.log('Sample Name: ', sampleNames)
+    console.log('Processed : ', processed)
     //console.log(processed)
     
     //sample Name 
@@ -396,7 +445,6 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames
         }
     }
 
-    console.log('Matching Samples:', processed)
 
     //copying data 
     for(let j = 0; j < processed.length; j++){ 
@@ -411,9 +459,20 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames
         }
     }
 
-
+    console.log('Copying Footer')
     let copyText = copyFooter(reportSheet, reportType)
     //pasteFooter(reportSheet, copyText, 149)
+
+
+    //determine for the multiples which ones would go 
+    //check which ones are multi vs single 
+
+    
+    //determine job
+
+    
+
+
 
 
     if(reportType === 'both'){
@@ -421,11 +480,11 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNames
     }
 
     if(reportType === 'pest'){
-        
+
     }
 
     if(reportType === 'toxins'){
-
+        processToxins(workbook, processed, sampleNames)
     }
 
 

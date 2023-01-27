@@ -10,6 +10,7 @@ import CompleteJobModal from '../components/modals/CompleteJobModal'
 import DeleteJobModal from '../components/modals/DeleteJobModal'
 import EditJobModal from '../../shared/components/NewJob/EditJobModal'
 
+
 import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -25,6 +26,8 @@ const Job = () => {
     const [jobTests, setjobTests] = useState();     
     const [jobImages, setJobImages] = useState();
     const [jobImagePath, setJobImagePath] = useState(); 
+    const [goodReport, setGoodReport] = useState(); 
+  
     const [statusModal, setStatusModal] = useState(false); 
     const [editJobModal, setEditJobModal] = useState(false); 
     const [deleteJobModal, setDeleteJobModal] = useState(false); 
@@ -56,7 +59,6 @@ const Job = () => {
 
         async function scanForImges(){
             await window.api.scanImages(id.jobNum).then((data) => {
-                console.log(data)
                 setJobImages(data); 
               
             })
@@ -65,7 +67,7 @@ const Job = () => {
         //not going to work without the 
         async function scanGoodCopies(){
             await window.api.scanGoodCopies(id.jobNum).then((data) => {
-                console.log(data)
+                setGoodReport(data)
     
             })
         }
@@ -80,6 +82,8 @@ const Job = () => {
         scanForImges();
 
     }, [id])
+
+
     
 
     useEffect(() => {
@@ -110,6 +114,9 @@ const Job = () => {
 
     const openPDF = async (report) => {
         await window.api.openPDF(id.jobNum, report)
+    }
+    const openGoodCopies = async (fileLocation) => {
+        await window.api.openGoodCopies(fileLocation)
     }
 
     const updateNotes = async (event) => {
@@ -256,21 +263,33 @@ const Job = () => {
                             {reports ? 
                                 reports.map((report) => {
                                     return (
-                                        <div className='flex justify-between space-x-2'>
-                                            <div className='text-blue-500 flex space-x-1'>
-                                                <DescriptionIcon />
-                                                <p className='font-2xl'>{report}</p> 
-                                            </div>
-                                            <div className='flex'>
-                                                <button className='text-sm text-gray-500 border-1  rounded-md flex px-2 items-center' onClick={() => openPDF(report)}>
-                                                    <VisibilityIcon className='p-1' /> 
-                                                    <p>View</p> 
-                                                </button>
-                                                <button className='text-sm text-gray-500 border-1 rounded-md flex px-2 items-center'>
-                                                    <EditIcon className='p-1' /> 
-                                                    <p>Edit</p> 
-                                                </button>    
-                                            </div>
+                                        <div className=''>
+                                            {report.includes('pdf') && 
+                                                <div className='flex justify-between w-full'>
+                                                    <div className='text-blue-500 flex space-x-1'>
+                                                        <DescriptionIcon />
+                                                        <p className='font-2xl'>{report}</p> 
+                                                    </div>
+                                                    <div className='flex'>
+                                                        <button className='text-sm text-gray-500 border-1  rounded-md flex px-2 items-center' onClick={() => openPDF(report)}>
+                                                            <VisibilityIcon className='p-1' /> 
+                                                            <p>View</p> 
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                            {report.includes('.xlsx') &&
+                                                <div className='flex justify-between  w-full'>
+                                                    <div className='text-green-600 flex space-x-1'>
+                                                        <DescriptionIcon />
+                                                        <p className='font-2xl'>{report}</p> 
+                                                    </div>
+                                                    <button className='text-sm text-gray-500 border-1 rounded-md flex px-2 items-center' onClick={() => openPDF(report)}>
+                                                        <EditIcon className='p-1' /> 
+                                                        <p>Edit</p> 
+                                                    </button>    
+                                                </div>
+                                            }
                                         </div>
                                     )
                                 }): <p>No scanned reports found.</p>
@@ -280,9 +299,23 @@ const Job = () => {
 
                         <div className='[&>*]:p-1 border-1 content-center'>
                             <h1 className='text-lg bg-emerald-700 text-white'>Client Good Copies</h1>
-                            <p>(Complete Jobs Only)</p>
-                            <p>No scanned copies found.</p>
-                            {/*.*1384.pdf regex example */}
+                            {goodReport ? 
+                                    <div className='flex justify-between'> 
+                                        <div className='text-blue-500 flex space-x-1'>
+                                            <DescriptionIcon />
+                                            <p className='font-2xl'>{goodReport.fileName}</p> 
+                                        </div>
+                                        <button className='text-sm text-gray-500 border-1  rounded-md flex px-2 items-center' onClick={() => openGoodCopies(goodReport.filePath)}>
+                                            <VisibilityIcon className='p-1' /> 
+                                            <p>View</p> 
+                                        </button>
+                                    </div>
+                                : 
+                                    <div>
+                                        <p>(Complete Jobs Only)</p>
+                                        <p>No scanned copies found.</p>
+                                    </div>
+                            }
                         </div>
 
                     </div>

@@ -619,8 +619,6 @@ const pasteTables = (packageType, tableSize, runningCount, currentPage, reportTy
                 row2.getCell(4).value = temp2[0]
             }
             
-        
-
         }
 
         currentPage+=tableSize

@@ -20,44 +20,98 @@ exports.scanReportsFolder = (jobNum) => {
 
     var reportsDir = store.get('reportsPath')
     var currentPath = path.normalize(path.join(reportsDir, jobNum))
-    const regex = /.*.pdf/
+
 
     return new Promise((resolve, reject) => {
 
-        let scanned_files = [] 
+        let scanned_pdf = [] 
+        let scanned_xlsx = []
+        
 
         if(fs.existsSync(currentPath)){
             fs.readdir(currentPath, (err, files) => {
                 files.forEach(file => {
-                
-                    if(scanned_files.includes(file) === false){
-                        if(regex.test(file)){
-                            scanned_files.push(file)
-                            resolve(scanned_files)
-                        } 
+
+                    if(file.includes('.pdf')){
+                        scanned_pdf.push(file)
+                    }
+                    if(file.includes('.xlsx')){
+                        //scanned_xlsx.push(file) 
+                        scanned_pdf.push(file)
                     }
        
                 });
+                console.log(scanned_pdf)
+                console.log(scanned_xlsx)
+                resolve(scanned_pdf)
             });
         }
+
+
     })
 }
 
-exports.scanGoodCopies = (jobNumber, clientName) => {
+
+/**
+ * 
+ * @typedef {Object} GoodCopies 
+ * @property {string} filePath - file path of the good copies 
+ * @property {string} fileName - the file name of good copies 
+ */
+
+/**
+ * Scans the good copies folder and looks for finished copies based on jobNumber 
+ * @param {string} jobNumber 
+ * @returns {GoodCopies} 
+ */
+exports.scanGoodCopies = (jobNumber) => {
 
     let reportDir = store.get('goodReportsPath'); 
+
     console.log('scanning for good copies')
     console.log(jobNumber)
+    console.log(reportDir)
+    
+    let jobLocation = jobNumber.substring(0,3)
+    let jobEnding = jobNumber.slice(-4)
 
     return new Promise((resolve, reject) => {
         
 
-        fs.readdir(path.normalize(reportDir),  (err, files) => {
-            console.log(files)
-           
-           
-        });
+        let scanned_paths = fs.readdir(path.normalize(reportDir),  (err, files) => {
+            files.forEach((yearFolder => {
+                if(yearFolder.includes("A-Z")){
 
+                    fs.readdir(path.join(reportDir, yearFolder), (err, file2) => {
+                        file2.forEach((jobFolder) => {
+
+                            if(jobFolder.includes(jobLocation)){
+                                let tempPath = path.join(reportDir, yearFolder, jobFolder)
+                                
+                                fs.readdir(tempPath, (err, file3) => {
+                                    
+                                    let fileName = file3.find(location => location.includes(jobEnding))
+                                    let filePath = path.join(tempPath, fileName)
+                                    resolve({
+                                        filePath, 
+                                        fileName
+                                    })
+
+                                    
+                                } )
+
+                            }
+                        } )
+                    })
+
+
+                }
+            }))
+        });
+        console.log('scanned path')
+        console.log(scanned_paths)
+     
+    
 
     })
     
@@ -78,6 +132,10 @@ exports.openPDF = (jobNum, report) => {
     shell.openExternal('file://' + path.join(currentPath, report))
 
 } 
+
+exports.openGoodCopies = (fileLocation) => {
+    shell.openExternal('file://' + fileLocation)
+}
 
 //edit the excel files from the thing
 //scan for .xlsx files 
@@ -208,7 +266,6 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
         //if there are mutluple pest files we generate 
         //check client info if there are two things 
         
-
 
         for(let key in sampleOptions){
             console.log('test:', key)
@@ -500,7 +557,7 @@ const  GenerateClientData = async (jobNum, jobPath) => {
                 let sampleMatch = line.match(/(?<=\s[1-9] ).*/)
                 if(sampleMatch){
                     sampleMatch  = sampleMatch[0].replace(/\s\s+/g, ' ');
-                    sampleNames[`${jobNum}-${sampleCounter+1}`] = sampleMatch
+                    sampleNames[`${jobNum}-${sampleCounter+1}`] = sampleMatch.trim()
                     sampleCounter++; 
                 }
             }
@@ -508,7 +565,7 @@ const  GenerateClientData = async (jobNum, jobPath) => {
 
     }
 
-
+    
     return {
         jobNum: jobNum, 
         clientName: clientName, 
