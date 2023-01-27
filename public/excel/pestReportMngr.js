@@ -253,14 +253,21 @@ const pasteFooter = (sheetName, copyText, currentRow) => {
             row.getCell(l+1).value = value[l][0] 
             row.getCell(l+1).style = value[l][1] 
         }
+
+        
+
+
     }
 }
+
+
+
 
 
 //max total of 3 tables (6 samples a page)
 //include sample names with each section of the toxin reports 
 
-const processToxins = (workbook, samples, sampleNames) => {
+const processToxins = (reportSheet, samples, sampleNames) => {
 
     let continuedNextPage = {
         'richText': [
@@ -270,7 +277,8 @@ const processToxins = (workbook, samples, sampleNames) => {
 
     let tableSize = 8 
     let pageStarts = [50,90,130]
-    let totalSamples = samples.length 
+    //let totalSamples = samples.length 
+    let totalSamples = 3 
 
     console.log("----- PROCESSING TOXINS ------")
     console.log('samples: ', samples)
@@ -286,11 +294,43 @@ const processToxins = (workbook, samples, sampleNames) => {
     }
 
     //clear the page so it becomes empty for tables insertions 
+    for(let i = 0; i < 23; i++){
+        console.log('i: ', i)
+        let row = reportSheet.getRow(20 +i ); 
+        let blankRow = reportSheet.getRow(45).getCell(1)
+
+        for(let j = 1; j < 8; j++ ){
+            row.getCell(j).style = blankRow.style
+            row.getCell(j).value = blankRow.value
+        }
+    }
+
+    let currentPostion = 20 
         
+    if(totalSamples === (3 || 4)){
 
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
 
-    if(totalSamples === 3 || totalSamples === 4){
+    }
 
+    if(totalSamples === (5 || 6)){
+
+    }
+
+    if(totalSamples === (7 || 8) ){
+
+    }
+
+    if(totalSamples === (9 || 10)){
+
+    }
+
+    if(totalSamples === (11 || 12)){
+
+    }
+
+    if(totalSamples === (13 || 14) ){
+        console.log('Checkmte')
     }
     
 
@@ -319,12 +359,88 @@ const processPesticdes = () => {
 }
 
 
-const copyToxinTable = () => {
+const toxinsExcelFormulas = (formalName, letter) => {
+    switch(formalName){
 
+        case 'sampleName': 
+            return {formula: `=IF(ISBLANK(Data!$${letter}$1),"EMPTY ",Data!$${letter}$1)`}
+        case 'unitValue': 
+            return {formula: `=IF(ISBLANK(Data!$${letter}$1),"","(ng/g)")`} 
+        case 'B1': 
+            return {formula: `=IF(Data!$${letter}99, Data!$${letter}99, "ND")`}
+        case 'B2': 
+            return {formula: `=IF(Data!$${letter}100, Data!$${letter}100, "ND")`}
+        case 'G1': 
+            return {formula: `=IF(Data!$${letter}101, Data!$${letter}101, "ND")`}
+        case 'G2':
+            return {formula: `=IF(Data!$${letter}102, Data!$${letter}102, "ND")`} 
+        case 'A': 
+            return {formula: `=IF(Data!$${letter}103, Data!$${letter}103, "ND")`}
+        case 'Z': 
+            return {formula: `=IF(Data!$${letter}104, Data!$${letter}104, "ND")`}
+
+        default:
+            return "invalid Statement"
+    }
 }
 
-const pasteToxinTable = () => {
+ const copyFormating = (row, formulaName, letter, letter2) => {
+    let temp = toxinsExcelFormulas(formulaName, letter)
+    let temp2 = toxinsExcelFormulas(formulaName, letter2)
+    
+    row.getCell(3).value = temp
+    row.getCell(4).value = temp2 
+}
 
+const pasteToxinTable = (sheet, startingLocation, runningCount,  dataLocation) => {
+
+    const letter = String.fromCharCode(dataLocation + 'A'.charCodeAt(0))
+    const letter2 = String.fromCharCode((dataLocation+1) + 'A'.charCodeAt(0))
+
+    console.log("Letter1: ", letter, " ", "Letter2: ", letter2)
+
+    let tableSize = 8; 
+    
+    for(let i = 0; i < tableSize; i++){
+        let row1Value = 11 + runningCount + i 
+        let row2Value = startingLocation + runningCount + i 
+
+        let row = sheet.getRow(row1Value); 
+        let row2 = sheet.getRow(row2Value); 
+
+        row.eachCell({includeEmpty: true},(cell, colNum) => {
+            row2.getCell(colNum).value = cell.value 
+            row2.getCell(colNum).style = cell.style
+        })
+
+        if(row1Value === 11 + runningCount){
+            copyFormating(row2, 'sampleName', letter, letter2)
+        }
+        if(row1Value === 12 + runningCount){
+            copyFormating(row2, 'unitValue', letter, letter2) 
+        } 
+        if(row1Value === 13 + runningCount){
+            copyFormating(row2, 'B1', letter, letter2) 
+        } 
+        if(row1Value === 14 + runningCount){
+            copyFormating(row2, 'B2', letter, letter2)  
+        } 
+        if(row1Value === 15 + runningCount){
+            copyFormating(row2, 'G1', letter, letter2) 
+        } 
+        if(row1Value === 16 + runningCount){
+            copyFormating(row2, 'B2', letter, letter2) 
+        } 
+        if(row1Value === 17 + runningCount){
+            copyFormating(row2, 'A', letter, letter2) 
+        } 
+        if(row1Value === 18 + runningCount){
+            copyFormating(row2, 'Z', letter, letter2) 
+        } 
+    }
+
+    return startingLocation + tableSize
+    
 }
 
 
@@ -470,9 +586,8 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbe
     
     //determine job
 
+
     
-
-
 
 
     if(reportType === 'both'){
@@ -484,7 +599,7 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbe
     }
 
     if(reportType === 'toxins'){
-        processToxins(workbook, processed, sampleNames)
+        processToxins(reportSheet, processed, sampleNames) 
     }
 
 

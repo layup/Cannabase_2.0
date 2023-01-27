@@ -19,15 +19,65 @@ const store = new Store()
 exports.scanReportsFolder = (jobNum) => {
 
     var reportsDir = store.get('reportsPath')
-    var currentPath = path.normalize(path.join(reportsDir, jobNum))
+    //var currentPath = path.normalize(path.join(reportsDir, jobNum))
+    let currentPath = path.normalize(reportsDir)
 
+
+    let jobLocation = jobNum.substring(0,3)
+    let jobEnding = jobNum.slice(-4)
 
     return new Promise((resolve, reject) => {
 
         let scanned_pdf = [] 
         let scanned_xlsx = []
+        let filePath
         
+        if(fs.existsSync(currentPath)){
+            //reports section 
+            fs.readdir(currentPath, (err, reportSections) => {
+                reportSections.forEach((reportSection) => {
+                    //job numbers within 
+                    fs.readdir(path.join(currentPath, reportSection), (err,reportNumbers) => {
 
+                        reportNumbers.forEach((reportNumber) => {
+
+                            if(reportNumber.includes(jobLocation)){
+                            //let temp = path.join(currentPath,reportSection)
+                                fs.readdir(path.join(currentPath,reportSection, reportNumber), (err, job) =>{
+                                    if(job.includes(jobNum)){
+                                        filePath = path.join(currentPath, reportSection, reportNumber, job)
+                                    }
+                                })                            
+                            
+                            }
+                        })
+                        
+                    })
+                })
+
+            })
+        }
+
+        if(filePath){
+            fs.readdir(filePath, (err, files) => {
+                files.forEach(file => {
+
+                    if(file.includes('.pdf')){
+                        scanned_pdf.push(file)
+                    }
+                    if(file.includes('.xlsx')){
+                        //scanned_xlsx.push(file) 
+                        scanned_pdf.push(file)
+                    }
+       
+                }); 
+                console.log(scanned_pdf)
+                console.log(scanned_xlsx)
+                resolve(scanned_pdf)
+            })
+        }
+
+        /*
         if(fs.existsSync(currentPath)){
             fs.readdir(currentPath, (err, files) => {
                 files.forEach(file => {
@@ -46,6 +96,7 @@ exports.scanReportsFolder = (jobNum) => {
                 resolve(scanned_pdf)
             });
         }
+        */ 
 
 
     })
@@ -77,12 +128,16 @@ exports.scanGoodCopies = (jobNumber) => {
 
     return new Promise((resolve, reject) => {
         
-
+        
         let scanned_paths = fs.readdir(path.normalize(reportDir),  (err, files) => {
+            
             files.forEach((yearFolder => {
-                if(yearFolder.includes("A-Z")){
+                
+                if(yearFolder.includes("Cannabis")){
 
                     fs.readdir(path.join(reportDir, yearFolder), (err, file2) => {
+
+                        
                         file2.forEach((jobFolder) => {
 
                             if(jobFolder.includes(jobLocation)){
@@ -105,6 +160,24 @@ exports.scanGoodCopies = (jobNumber) => {
                     })
 
 
+                }
+                if(yearFolder.includes("W")){
+                    if(yearFolder.includes(jobLocation)){
+                        let tempPath = path.join(reportDir, yearFolder)
+                        
+                        fs.readdir(tempPath, (err, file3) => {
+                            
+                            let fileName = file3.find(location => location.includes(jobEnding))
+                            let filePath = path.join(tempPath, fileName)
+                            resolve({
+                                filePath, 
+                                fileName
+                            })
+
+                            
+                        } )
+
+                    } 
                 }
             }))
         });
