@@ -1,11 +1,13 @@
-const { app, ipcMain, BrowserWindow, dialog, ipcRenderer } = require('electron');
+const { electron, app, ipcMain, BrowserWindow, dialog, ipcRenderer } = require('electron');
 const path = require('path');
 //const url = require('url');
 const Store = require('electron-store');
 const isDev = require('electron-is-dev');
+const fs = require('fs')
 
 
 const store = new Store()
+
 
 function createWindow() {   
 
@@ -101,6 +103,48 @@ async function openFileXlsx() {
     
 }
 
+function printer(url){
+    
+    
+    var options = {
+        silent: false,
+        printBackground: true,
+        color: false,
+        margin: {
+            marginType: 'printableArea'
+        },
+        landscape: false,
+        pagesPerSheet: 1,
+        collate: false,
+        copies: 1,
+        header: 'Header of the Page',
+        footer: 'Footer of the Page'
+    }
+
+    
+    console.log('Printer Backend Running')
+    //console.log('Files: ', data) 
+
+    
+    const win = new BrowserWindow({ 
+        width: 480, 
+        height: 640, 
+        webPreferences: {
+            nativeWindowOpen: true
+        }
+    })
+    
+    win.loadURL('www.google.com')
+
+    app.on('did-finish-load', () => {
+        win.webContents.print(options, (success, failureReason) => {
+            if (!success) console.log(failureReason);
+            console.log('Print Initiated');
+        });
+    });
+    
+}
+
 app.whenReady().then(() => {
 
     console.log('Your App Path:' +  app.getAppPath())
@@ -111,6 +155,10 @@ app.whenReady().then(() => {
         const results = await handleSetFilePath(...args)
         return results 
     })
+    ipcMain.handle('dialog:printer', async (event, ...args) => {
+        printer(...args)
+    })
+    
   
     const schema = {
         databaseLocation: {
@@ -146,9 +194,11 @@ app.on('window-all-closed', () => {
     }
 });
 app.on('activate', () => {    
+    // On macOS it's common to re-create a window in the 
+    // app when the dock icon is clicked and there are no 
+    // other windows open
     if (BrowserWindow.getAllWindows().length === 0) {        
         createWindow()    
     }
 });
-
 

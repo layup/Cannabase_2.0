@@ -245,7 +245,7 @@ const pasteFooter = (sheetName, copyText, currentRow) => {
 
     for(let [key, value] of Object.entries(copyText)){
 
-        currentRow++ 
+        //currentRow++ 
 
         let row = sheetName.getRow(currentRow)
 
@@ -254,12 +254,19 @@ const pasteFooter = (sheetName, copyText, currentRow) => {
             row.getCell(l+1).style = value[l][1] 
         }
 
-        
-
-
+        currentRow++; 
     }
 }
 
+
+const pasteName = (sheetName, postion, samplePostion, totalSamples, samples, samplesName) => {
+
+
+
+    let row = sheetName.getRow(postion)
+    //row.getCell(1).value = 
+
+}
 
 
 
@@ -267,7 +274,7 @@ const pasteFooter = (sheetName, copyText, currentRow) => {
 //max total of 3 tables (6 samples a page)
 //include sample names with each section of the toxin reports 
 
-const processToxins = (reportSheet, samples, sampleNames) => {
+const processToxins = (reportSheet, samples, sampleNames, copyText) => {
 
     let continuedNextPage = {
         'richText': [
@@ -276,9 +283,9 @@ const processToxins = (reportSheet, samples, sampleNames) => {
     }
 
     let tableSize = 8 
-    let pageStarts = [50,90,130]
+    let pageStarts = [50,91,130]
     //let totalSamples = samples.length 
-    let totalSamples = 3 
+    let totalSamples =samples.length; 
 
     console.log("----- PROCESSING TOXINS ------")
     console.log('samples: ', samples)
@@ -308,39 +315,141 @@ const processToxins = (reportSheet, samples, sampleNames) => {
     let currentPostion = 20 
         
     if(totalSamples === (3 || 4)){
+        let counter = 2; 
 
-        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
+        //continue to the next page         
+        let row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+        
+        //insert sample names 
+        currentPostion = pasteName(reportSheet, pageStarts[0], counter, totalSamples, samples, sampleNames)
 
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 8) 
+        currentPostion++; 
+
+        pasteFooter(reportSheet, copyText, currentPostion)
+        
     }
 
     if(totalSamples === (5 || 6)){
 
+
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
+        currentPostion++; 
+
+        //continue to the next page         
+        let row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        
+        //insert sample names 
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 10) 
+        currentPostion++; 
+
+        pasteFooter(reportSheet, copyText, currentPostion)
     }
 
     if(totalSamples === (7 || 8) ){
 
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
+        currentPostion++; 
+
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 10) 
+        currentPostion++; 
+
+        //continue to the next page         
+        let row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        
+        //insert sample names 
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 12) 
+        currentPostion++; 
+
+        pasteFooter(reportSheet, copyText, currentPostion)
     }
 
     if(totalSamples === (9 || 10)){
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
+        currentPostion++; 
 
+        //continue to the next page         
+        let row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 10) 
+        currentPostion++; 
+        
+        //insert sample names 
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 12) 
+        currentPostion++; 
+       
+        row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[1], 0, 14) 
+        currentPostion++; 
+
+        pasteFooter(reportSheet, copyText, currentPostion)
     }
 
     if(totalSamples === (11 || 12)){
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
+        currentPostion++; 
 
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 10) 
+        currentPostion++; 
+
+        //continue to the next page         
+        let row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 12) 
+        currentPostion++; 
+        
+        //insert sample names 
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 14) 
+        currentPostion++; 
+       
+        row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[1], 0, 16) 
+        currentPostion++; 
+
+        pasteFooter(reportSheet, copyText, currentPostion)
     }
 
     if(totalSamples === (13 || 14) ){
-        console.log('Checkmte')
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
+        currentPostion++; 
+
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 10) 
+        currentPostion++; 
+
+        //continue to the next page         
+        let row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 12) 
+        currentPostion++; 
+        
+        //insert sample names 
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 14) 
+        currentPostion++; 
+        
+        currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 16) 
+        currentPostion++; 
+       
+        row = reportSheet.getRow(currentPostion); 
+        row.getCell(1).value = continuedNextPage; 
+
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[1], 0, 18) 
+        currentPostion++; 
+
+        pasteFooter(reportSheet, copyText, currentPostion) 
     }
     
-
-    //if there are 3-4 
-
-
-
-    //if there a 9-10 samples do a paste 
-
-
 
 
 
@@ -599,7 +708,7 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbe
     }
 
     if(reportType === 'toxins'){
-        processToxins(reportSheet, processed, sampleNames) 
+        processToxins(reportSheet, processed, sampleNames, copyText) 
     }
 
 

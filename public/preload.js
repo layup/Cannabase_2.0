@@ -79,6 +79,10 @@ const setFilePath = (filePath) => {
     return ipcRenderer.invoke('dialog:setPath', filePath)
 } 
 
+const printer = (files) => {
+    return ipcRenderer.invoke('dialog:printer', files);
+}
+
 const scanReportsFolder = (jobNum) => {
     return excelManager.scanReportsFolder(jobNum)
 }
@@ -133,7 +137,7 @@ contextBridge.exposeInMainWorld("api", {
     getJobNotes: getJobNotes, 
     updateNotes: updateNotes, 
     clientSearch: clientSearch,
-    
+    printer:printer, 
     getStorePathLocations: getStorePathLocations, 
    
     setFilePath: setFilePath, 

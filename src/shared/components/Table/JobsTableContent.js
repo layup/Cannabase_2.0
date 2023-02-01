@@ -16,9 +16,9 @@ const TableContent = (props) => {
             <td className='text-left'>
                 {props.company}
             </td>
-            <td className='flex justify-center items-center '>
+            <td className='flex justify-center items-center'>
                 {props.status === 0 && 
-                    <div className='w-32 md:px-3  bg-red-200 rounded-lg '>
+                    <div className='w-32 md:px-3  bg-red-200 rounded-lg'>
                         <p className=' rounded-lg text-red-800 font-medium uppercase text-xs md:text-sm'>Incomplete</p>
                     </div>
                 }
