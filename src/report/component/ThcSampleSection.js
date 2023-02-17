@@ -23,6 +23,10 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
                 <tbody className='text-sm'>
                 {samples && sampleOptions && samples.map((sampleName) => {
                   let jobNum = sampleName.substr(0,6)
+
+                  if(!clientInfo[jobNum]['sampleNames'][sampleName]){
+                    updateSampleName(jobNum, "sampleNames", sampleName, sampleName)
+                  }
                  
                   return (
                     <tr key={sampleName} className='border-b-1 border-zinc-200'>
@@ -85,7 +89,7 @@ const ThcSampleSection = ({clientInfo, updateSampleName, updateSampleOptions, sa
                       <td>
                         <input 
                           value={
-                            clientInfo[jobNum]['sampleNames'][sampleName] ? clientInfo[jobNum]['sampleNames'][sampleName]: ""
+                            clientInfo[jobNum]['sampleNames'][sampleName] ? clientInfo[jobNum]['sampleNames'][sampleName]: ''
                           } 
                           className="bg-zinc-200 w-11/12 h-full p-1 rounded-md" 
                           onChange={(e) => updateSampleName(jobNum, "sampleNames", e.target.value, sampleName)}

@@ -86,9 +86,9 @@ const processThcFile = (filePath) => {
             //let concentration = ws.getColumn()
             
             descCol.eachCell(function(cell, rowNumber) {
-                //console.log(rowNumber, cell.text)
+
                
-                if(cell.text.match(/(\d+)-[0-9]$/)){    
+                if(cell.text.match(/(\d+)-[0-9]{1,2}$/)){    
                     desc[rowNumber] = cell.text
                     name[rowNumber] = nameCol.values[rowNumber]
 
@@ -295,8 +295,8 @@ const thcExcelFormuals = (formulaName, letter, unitType) => {
 
 const copyFormating = (row, formulaName, dataLocation, unitType) => {
 
-    const letter = String.fromCharCode(dataLocation + 'A'.charCodeAt(0))
-    const letter2 = String.fromCharCode((dataLocation+1) + 'A'.charCodeAt(0))
+    const letter = getColumnDescription(dataLocation)
+    const letter2 = getColumnDescription(dataLocation + 1 )
 
     let temp = thcExcelFormuals(formulaName, letter)
     let temp2 = thcExcelFormuals(formulaName, letter2)
@@ -317,6 +317,7 @@ const replaceFirstTableInformation = (packageType, showExtraRow, reportType) => 
     
     const letter = String.fromCharCode(2+ 'A'.charCodeAt(0))
     const letter2 = String.fromCharCode(3 + 'A'.charCodeAt(0))
+
 
     console.log(letter, letter2)
 
@@ -427,13 +428,25 @@ const replaceFirstTableInformation = (packageType, showExtraRow, reportType) => 
 
 }
 
+const getColumnDescription = (i) => {
+    const m = i % 26;
+    const c = String.fromCharCode(65 + m);
+    const r = i - m;
+    return r > 0
+        ? `${getColumnDescription((r - 1) / 26)}${c}`
+        : `${c}`
+}
+
+
 const pasteTables = (packageType, tableSize, runningCount, currentPage, reportType, dataLocation, unitType) => {
     
-    const letter = String.fromCharCode(dataLocation + 'A'.charCodeAt(0))
-    const letter2 = String.fromCharCode((dataLocation+1) + 'A'.charCodeAt(0))
+
+    const letter = getColumnDescription(dataLocation)
+    const letter2 = getColumnDescription(dataLocation + 1 )
 
     console.log('letter1: ', letter, ' letter2: ', letter2)
     console.log(packageType)
+    //console.log('test column value: ', getColumnDescription(dataLocation))
 
     if(packageType === 'Basic'){
         for(var k = 0; k < tableSize; k++){
@@ -688,6 +701,9 @@ const copyAdditonalInfo = (sheetName, reportType) => {
 
 const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, continuedNextPage, showExtraRow, unitType) => {
     
+    console.log('BASIC REPORT')
+    console.log(reportSampleHeader)
+
     let test = true; 
     let tableSize; 
 
@@ -702,7 +718,13 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
     let currentTables = 4; 
 
     //let pageStart = [9,52, 92, 132, 172]
-    let pageStart = [9, 55, 98, 141, 184]
+    let pageStart = [9, 55, 98, 141, 184] 
+
+    //selet the page shift amount after the first couple of pages 
+    for(let i = 1; i < 15; i++){
+        pageStart.push(141 + i * 40)
+    }
+    console.log("Page Start: ", pageStart)
     //let pageStart2 = [9,48, 86, 123, 160, 197] //automatic 
     let sampleStyle = reportType.getRow(9).getCell(1).style; 
     
@@ -779,7 +801,8 @@ const basicReport = (reportType, usedSamples, reportSampleHeader, copyText, cont
         if(parseInt(key2) === 0){
 
             //if has more then 2 items or is only page 
-            if((totalPages === 0 && remainder > 2) || (totalPages === 1)){
+            if((totalPages === 0 && remainder > 2) || (totalPages === 1) || totalPages > 2){
+       
                 //top and bottom spacing 
                 currentPage++; 
                 currentPage += tableSize; 
@@ -1014,6 +1037,12 @@ const generateThcReport = async(fileLocations, clientInfo, sampleNames, sampleDa
         ]
     }
 
+    //if there is name for the samples upon processing will assign a name 
+    console.log('doing thing')
+    let usedSamples = Object.keys(clientInfo[sampleNames[0].substring(0,6)]['sampleNames'])
+    let difference = sampleNames.filter(x => !usedSamples.includes(x));
+
+
     for(let [key, value] of Object.entries(sampleOptions)){
     
         //console.log(key, value)
@@ -1039,6 +1068,7 @@ const generateThcReport = async(fileLocations, clientInfo, sampleNames, sampleDa
             }
              
             await copyClientInfo(headersWorksheet, clientInfo, key.substring(0,6))
+
 
 
             //single or multi report sort of deal 
@@ -1120,6 +1150,8 @@ const generateThcReport = async(fileLocations, clientInfo, sampleNames, sampleDa
 
             //add something for Unit Mass 
             let showExtraRow = false; 
+            console.log(jobSamplesNumber)
+
             jobSamplesNumber.forEach((job,index) => {
 
                 console.log(index, job)

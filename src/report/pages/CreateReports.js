@@ -72,14 +72,15 @@ const CreateReports = (props) => {
                                 [samples[i]]:{
                                     sampleType:'bud', 
                                     amount:'mult', 
-                                    'reportType':'pest'
+                                    'reportType':'both'
                                 }
                             }))
                         }
                     }     
                 }
                 if(location.state.selectReport === 'cannabis'){
-                    samples.forEach((sample, index) => {
+                    if(samples){
+                        samples.forEach((sample, index) => {
                         setSampleOptions((prevState) => ({
                             ...prevState, 
                             [sample]:{
@@ -91,6 +92,8 @@ const CreateReports = (props) => {
                             }
                         }))
                     })
+                    }
+                    
                 }
                 
             })
@@ -146,12 +149,6 @@ const CreateReports = (props) => {
     const generateReports = async () => {
         console.log('generating reports [RENDER]')
 
-        /*
-        for(const [key, value] of Object.entries(clientInfo)){
-            console.log(key, value )
-        }
-        */ 
-
         if(location.state.selectReport === 'cannabis'){
             //console.log('samples: ', samples)
 
@@ -182,7 +179,7 @@ const CreateReports = (props) => {
         setTimeout(() => {
             console.log('reports are done ')
             setIsLoading(false)
-            //navigate('/reports')
+            navigate('/reports')
         }, 3000)
         
     }

@@ -259,14 +259,58 @@ const pasteFooter = (sheetName, copyText, currentRow) => {
 }
 
 
-const pasteName = (sheetName, postion, samplePostion, totalSamples, samples, samplesName) => {
-
-
-
+const pasteName = (sheetName, postion, samplePostion, totalSamples, samples, sampleNames) => {
+    sheetName.spliceRows((postion), 1, [], []);
     let row = sheetName.getRow(postion)
-    //row.getCell(1).value = 
+    row.height = 23; 
+    let name = 'Samples: '
 
+    
+    if(samplePostion === totalSamples){
+
+        let pos1 = samples[samplePostion-1]
+        let sampleName1 = sampleNames[pos1].key
+    
+
+        name += `${samplePostion}) ${sampleName1} `        
+        
+       //name += `${samplePostion})`
+
+    }else{
+
+        
+        let sampleName1 = sampleNames[samples[samplePostion-1]].key
+        let sampleName2 = sampleNames[samples[samplePostion]].key
+
+
+        name += `${samplePostion}) ${sampleName1} ${samplePostion+1}) ${sampleName2}`  
+        
+       
+        //name += `${samplePostion}) ${samplePostion+1})`
+    }
+    
+    console.log('Name:', name)
+    
+    row.getCell(1).font = {
+        name:'CMU Serif',
+        size:10,
+        bold:true
+    }
+    
+    row.getCell(1).alignment = {
+        vertical: 'middle'
+    }
+
+    row.getCell(1).value = name 
+
+    for(let i = 1; i< 8; i++){ 
+        let row2 = sheetName.getRow(postion)
+        row2.getCell(i).border = {bottom: {style: 'thin'}}
+    }
+    
+    
 }
+
 
 
 
@@ -274,57 +318,73 @@ const pasteName = (sheetName, postion, samplePostion, totalSamples, samples, sam
 //max total of 3 tables (6 samples a page)
 //include sample names with each section of the toxin reports 
 
-const processToxins = (reportSheet, samples, sampleNames, copyText) => {
+const processToxins = async (reportSheet, samples, sampleNames, copyText) => {
 
     let continuedNextPage = {
-        'richText': [
+        richText: [
             {'font': {'bold':true, 'color':{'theme': 1}, 'size': 11, name: 'CMU Serif'}, 'text': 'Contiuned on next page...'} 
         ]
     }
 
-    let tableSize = 8 
-    let pageStarts = [50,91,130]
-    //let totalSamples = samples.length 
-    let totalSamples =samples.length; 
-
+    let pageStarts = [50,90,130]
+    let totalSamples = samples.length; 
+   
     console.log("----- PROCESSING TOXINS ------")
-    console.log('samples: ', samples)
-    console.log('total samples: ', totalSamples)
-    console.log("sample names: ", sampleNames)
+    //console.log('samples: ', samples)
+    //console.log('total samples: ', totalSamples)
+    //console.log("sample names: ", sampleNames)
     console.log("------------------------------")
 
 
     //would have 8 if statements or if I can come up with a recursive method 
     //longterm for up to an unlimtaed amount of things but am feeling kinda lazy 
-    if(totalSamples === 2){
+    if(totalSamples === (1 || 2)){
         return; 
     }
 
     //clear the page so it becomes empty for tables insertions 
     for(let i = 0; i < 23; i++){
-        console.log('i: ', i)
-        let row = reportSheet.getRow(20 +i ); 
-        let blankRow = reportSheet.getRow(45).getCell(1)
-
+        //console.log('i: ', i)
+        let row = reportSheet.getRow(20 + i); 
+        //let blankRow = reportSheet.getRow(45).getCell(1)
+        
         for(let j = 1; j < 8; j++ ){
+            let blankRow = reportSheet.getRow(45).getCell(j)
             row.getCell(j).style = blankRow.style
             row.getCell(j).value = blankRow.value
         }
+        
+    }
+    
+    try {
+        //set first name 
+        let row = reportSheet.getRow(9)
+        let sampleName1 = sampleNames[samples[0]].key
+        let sampleName2 = sampleNames[samples[1]].key
+
+        console.log('sample1:', sampleName1)
+        console.log('sample2:', sampleName2)
+
+        let name = `Samples: ${1}) ${sampleName1} ${2}) ${sampleName2}`   
+
+        row.getCell(1).value = name 
+
+    } catch (err){
+        console.log(err)
+        
     }
 
-    let currentPostion = 20 
-        
-    if(totalSamples === (3 || 4)){
-        let counter = 2; 
+    let currentPostion = 21 
 
+
+    if(totalSamples === 3 || totalSamples === 4){
         //continue to the next page         
         let row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
         
         //insert sample names 
-        currentPostion = pasteName(reportSheet, pageStarts[0], counter, totalSamples, samples, sampleNames)
-
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 8) 
+        currentPostion = pasteName(reportSheet, pageStarts[0], 3, totalSamples, samples, sampleNames)
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0]+1, 0, 8) 
         currentPostion++; 
 
         pasteFooter(reportSheet, copyText, currentPostion)
@@ -333,17 +393,18 @@ const processToxins = (reportSheet, samples, sampleNames, copyText) => {
 
     if(totalSamples === (5 || 6)){
 
-
+        pasteName(reportSheet, currentPostion, 3, totalSamples, samples, sampleNames)
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
         currentPostion++; 
 
-        //continue to the next page         
+        //continue to the next page          
         let row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
 
-        
         //insert sample names 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 10) 
+        pasteName(reportSheet, pageStarts[0], 5, totalSamples, samples, sampleNames)        
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0]+1, 0, 10) 
         currentPostion++; 
 
         pasteFooter(reportSheet, copyText, currentPostion)
@@ -351,9 +412,13 @@ const processToxins = (reportSheet, samples, sampleNames, copyText) => {
 
     if(totalSamples === (7 || 8) ){
 
+        pasteName(reportSheet, currentPostion, 3, totalSamples, samples, sampleNames)
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
         currentPostion++; 
 
+        pasteName(reportSheet, currentPostion, 5, totalSamples, samples, sampleNames) 
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 10) 
         currentPostion++; 
 
@@ -363,13 +428,16 @@ const processToxins = (reportSheet, samples, sampleNames, copyText) => {
 
         
         //insert sample names 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 12) 
+        pasteName(reportSheet, pageStarts[0], 7, totalSamples, samples, sampleNames)        
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0]+1, 0, 12) 
         currentPostion++; 
 
         pasteFooter(reportSheet, copyText, currentPostion)
     }
 
     if(totalSamples === (9 || 10)){
+        pasteName(reportSheet, currentPostion, 3, totalSamples, samples, sampleNames)
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
         currentPostion++; 
 
@@ -377,26 +445,36 @@ const processToxins = (reportSheet, samples, sampleNames, copyText) => {
         let row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 10) 
+        pasteName(reportSheet, pageStarts[0], 5, totalSamples, samples, sampleNames) 
+        currentPostion++;  
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0]+1, 0, 10) 
         currentPostion++; 
         
         //insert sample names 
+        pasteName(reportSheet, currentPostion, 7, totalSamples, samples, sampleNames) 
+        currentPostion++;  
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 12) 
         currentPostion++; 
        
         row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[1], 0, 14) 
+        pasteName(reportSheet, pageStarts[1], 9, totalSamples, samples, sampleNames) 
+        currentPostion++;  
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[1]+1, 0, 14) 
         currentPostion++; 
 
         pasteFooter(reportSheet, copyText, currentPostion)
     }
 
     if(totalSamples === (11 || 12)){
+        pasteName(reportSheet, currentPostion, 3, totalSamples, samples, sampleNames)
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
         currentPostion++; 
 
+        pasteName(reportSheet, currentPostion, 5, totalSamples, samples, sampleNames) 
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 10) 
         currentPostion++; 
 
@@ -404,26 +482,34 @@ const processToxins = (reportSheet, samples, sampleNames, copyText) => {
         let row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 12) 
+        pasteName(reportSheet, pageStarts[0], 7, totalSamples, samples, sampleNames) 
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0]+1, 0, 12) 
         currentPostion++; 
         
         //insert sample names 
+        pasteName(reportSheet, currentPostion, 9, totalSamples, samples, sampleNames) 
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 14) 
         currentPostion++; 
        
         row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[1], 0, 16) 
+        pasteName(reportSheet, pageStarts[1], 11, totalSamples, samples, sampleNames) 
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[1]+1, 0, 16) 
         currentPostion++; 
 
         pasteFooter(reportSheet, copyText, currentPostion)
     }
 
     if(totalSamples === (13 || 14) ){
+        pasteName(reportSheet, currentPostion, 3, totalSamples, samples, sampleNames)
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 8) 
         currentPostion++; 
 
+        pasteName(reportSheet, currentPostion, 5, totalSamples, samples, sampleNames) 
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 10) 
         currentPostion++; 
 
@@ -431,28 +517,34 @@ const processToxins = (reportSheet, samples, sampleNames, copyText) => {
         let row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[0], 0, 12) 
+        pasteName(reportSheet, pageStarts[0], 7, totalSamples, samples, sampleNames) 
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[0]+1, 0, 12) 
         currentPostion++; 
         
         //insert sample names 
+        pasteName(reportSheet, currentPostion, 9, totalSamples, samples, sampleNames) 
+        currentPostion++; 
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 14) 
         currentPostion++; 
-        
+       
+        pasteName(reportSheet, currentPostion, 11, totalSamples, samples, sampleNames) 
+        currentPostion++;  
         currentPostion = pasteToxinTable(reportSheet, currentPostion, 0, 16) 
         currentPostion++; 
        
         row = reportSheet.getRow(currentPostion); 
         row.getCell(1).value = continuedNextPage; 
 
-        currentPostion = pasteToxinTable(reportSheet, pageStarts[1], 0, 18) 
+        pasteName(reportSheet, pageStarts[1], 13, totalSamples, samples, sampleNames) 
+        currentPostion++;  
+        currentPostion = pasteToxinTable(reportSheet, pageStarts[1]+1, 0, 18) 
         currentPostion++; 
 
         pasteFooter(reportSheet, copyText, currentPostion) 
     }
+
+
     
-
-
-
 }
 
 const processPesticdes = () => {
@@ -463,10 +555,7 @@ const processPesticdes = () => {
         ]
     }
 
-
-
 }
-
 
 const toxinsExcelFormulas = (formalName, letter) => {
     switch(formalName){
@@ -598,16 +687,16 @@ const singleCopyPestData = async (workbook, fileLocations, clientInfo, sampleNam
 }
 
 //account for more then two, if more then that we can copy and paste into given file type 
-const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbers, sampleOptions, sampleData, sampleName, options) => {
+const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbers, sampleOptions, sampleData, sampleName, options, selectedPath) => {
 
     console.log('-----Multi Pest/Toxins Copy-----')
     console.log(sampleName)
     //console.log(sampleData)
     //console.log(fileLocations)
-    console.log(sampleNumbers)
-    console.log(sampleOptions)
+    //console.log(sampleNumbers)
+    //console.log(sampleOptions)
     //console.log(options)
-    console.log(clientInfo)
+    //console.log(clientInfo)
     console.log('--------------------------------')
 
     let reportType = options['reportType']
@@ -685,7 +774,7 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbe
     }
 
     console.log('Copying Footer')
-    let copyText = copyFooter(reportSheet, reportType)
+    
     //pasteFooter(reportSheet, copyText, 149)
 
 
@@ -696,10 +785,19 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbe
     //determine job
 
 
-    
-
-
     if(reportType === 'both'){
+
+        if(selectedPath === 0){
+            let copyText = copyFooter(reportSheet, 'toxins')
+            await processToxins(reportSheet, processed, sampleNames, copyText) 
+        }else{
+   
+
+
+        }
+
+
+        
 
     }
 
@@ -708,7 +806,9 @@ const multiCopyPestData = async(workbook, fileLocations, clientInfo, sampleNumbe
     }
 
     if(reportType === 'toxins'){
-        processToxins(reportSheet, processed, sampleNames, copyText) 
+        let copyText = copyFooter(reportSheet, reportType)
+        await processToxins(reportSheet, processed, sampleNames, copyText) 
+        
     }
 
 
@@ -781,6 +881,7 @@ const genereatePestReport = async (fileLocations, clientInfo, sampleNames, sampl
                 if(value['reportType'] === 'both'){
                     for(let i = 0; i < fileLocations[key].length; i++){
                         const  currentPath = fileLocations[key][i][key] 
+                        //console.log('currentPath: ', currentPath)
 
                         let wb = new Excel.Workbook(); 
                         await wb.xlsx.readFile(currentPath)
@@ -789,7 +890,7 @@ const genereatePestReport = async (fileLocations, clientInfo, sampleNames, sampl
 
                         await copyClientInfo(headersWorksheet, clientInfo, jobNumber)
 
-                        let completed = await multiCopyPestData(wb, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value)
+                        let completed = await multiCopyPestData(wb, fileLocations, clientInfo, sampleNames, sampleOptions, sampleData, key, value, i)
                         completedReports = completedReports.concat(completed) 
 
                         await wb.xlsx.writeFile(currentPath);

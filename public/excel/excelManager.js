@@ -305,7 +305,6 @@ const copyTemplate = async (jobNumberSample, reportType, option) => {
     }
 
     if(reportType === 'pest'){
-        
         return (generateFileNames(jobNumberSample, '_Pesticides_report.xlsx', pestTemplate, option))
     }
 
@@ -343,10 +342,21 @@ exports.generateReports =  async (clientInfo, sampleNames, sampleData , jobNumbe
         for(let key in sampleOptions){
             console.log('test:', key)
             if(sampleOptions.hasOwnProperty(key)){
+                console.log('test2')
 
-                //if there are multiple pest samples 
+                //if there are multiple pest samples
+                //console.log(key)
+                //console.log(sampleOptions[key]['reportType'])
+                //console.log(sampleOptions[key]['amount'])
+                let jobNumber = key.substring(0,6)
 
-                let tempObject =  await copyTemplate(key, sampleOptions[key]['reportType'], sampleOptions[key].amount)
+                for (const [key, value] of Object.entries(sampleOptions)) {
+                    
+                }
+                
+
+
+                let tempObject =  await copyTemplate(key, sampleOptions[key]['reportType'], sampleOptions[key]['amount'])
                 fileLocations[key] = tempObject[key]
                 
             }
